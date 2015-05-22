@@ -9,12 +9,16 @@ from sfa.rspecs.elements.hardware_type import HardwareType
 from sfa.rspecs.elements.lease import Lease
 from sfa.rspecs.elements.granularity import Granularity
 from sfa.rspecs.version_manager import VersionManager
+from sfa.rspecs.elements.services import ServicesElement
+from sfa.rspecs.elements.login import Login
+from sfa.rspecs.elements.sliver import Sliver
 from sfa.rspecs.elements.versions.iotlabv1Node import IotlabPosition
 from sfa.rspecs.elements.versions.iotlabv1Node import IotlabNode
 from sfa.rspecs.elements.versions.iotlabv1Node import IotlabLocation
 from sfa.iotlab.iotlablease import LeaseTable
 import time
 import datetime
+
 
 class IotLABAggregate(object):
     """
@@ -24,7 +28,6 @@ class IotLABAggregate(object):
     def __init__(self, driver):
         self.driver = driver
 
-
     def leases_to_rspec_leases(self, leases):
         """ Get leases attributes list"""
         rspec_leases = []
@@ -33,16 +36,16 @@ class IotLABAggregate(object):
                 rspec_lease = Lease()
                 rspec_lease['lease_id'] = lease['id']
                 iotlab_xrn = Xrn('.'.join([self.driver.root_auth,
-                              Xrn.escape(node)]),
-                              type='node')
+                                 Xrn.escape(node)]),
+                                 type='node')
                 rspec_lease['component_id'] = iotlab_xrn.urn
                 rspec_lease['start_time'] = str(lease['date'])
-                duration = int(lease['duration'])/60 # duration in minutes
+                # duration in minutes
+                duration = int(lease['duration'])/60
                 rspec_lease['duration'] = duration
                 rspec_lease['slice_id'] = lease['slice_id']
                 rspec_leases.append(rspec_lease)
         return rspec_leases
-
 
     def node_to_rspec_node(self, node):
         """ Get node attributes """
@@ -51,20 +54,25 @@ class IotLABAggregate(object):
         rspec_node['archi'] = node['archi']
         rspec_node['radio'] = (node['archi'].split(':'))[1]
         iotlab_xrn = Xrn('.'.join([self.driver.root_auth,
-                              Xrn.escape(node['network_address'])]),
-                              type='node')
-        rspec_node['boot_state'] = 'true'
+                         Xrn.escape(node['network_address'])]),
+                         type='node')
+        # rspec_node['boot_state'] = 'true'
+        if node['state'] == 'Absent' or \
+           node['state'] == 'Suspected' or \
+           node['state'] == 'Busy':
+            rspec_node['available'] = 'false'
+        else:
+            rspec_node['available'] = 'true'
         rspec_node['component_id'] = iotlab_xrn.urn
         rspec_node['component_name'] = node['network_address']
-        rspec_node['component_manager_id'] = \
-                        hrn_to_urn(self.driver.root_auth,
-                        'authority+sa')
+        rspec_node['component_manager_id'] = hrn_to_urn(self.driver.root_auth,
+                                                        'authority+sa')
         rspec_node['authority_id'] = rspec_node['component_manager_id']
         rspec_node['exclusive'] = 'true'
-        rspec_node['hardware_types'] = [HardwareType({'name': \
-                                        'iotlab-node'})]
-        location = IotlabLocation({'country':'France', 'site': \
-                                    node['site']})
+        rspec_node['hardware_types'] = \
+            [HardwareType({'name': node['archi']})]
+        location = IotlabLocation({'country': 'France',
+                                   'site': node['site']})
         rspec_node['location'] = location
         position = IotlabPosition()
         for field in position:
@@ -74,26 +82,37 @@ class IotLABAggregate(object):
         rspec_node['tags'] = []
         return rspec_node
 
-
     def sliver_to_rspec_node(self, sliver):
         """ Get node and sliver attributes """
         rspec_node = self.node_to_rspec_node(sliver)
         rspec_node['expires'] = datetime_to_string(utcparse(sliver['expires']))
         rspec_node['sliver_id'] = sliver['sliver_id']
+        rspec_sliver = Sliver({'sliver_id': sliver['sliver_id'],
+                               'name': sliver['name'],
+                               'type': sliver['archi'],
+                               'tags': []})
+        rspec_node['slivers'] = [rspec_sliver]
+        # slivers always provide the ssh service
+        login = Login({'authentication': 'ssh-keys',
+                       'hostname': sliver['hostname'],
+                       'port': '22',
+                       'username': sliver['name'],
+                       'login': sliver['name']
+                       })
+        service = ServicesElement({'login': login})
+        rspec_node['services'] = [service]
         return rspec_node
-
 
     @classmethod
     def rspec_node_to_geni_sliver(cls, rspec_node):
         """ Get sliver status """
         geni_sliver = {'geni_sliver_urn': rspec_node['sliver_id'],
                        'geni_expires': rspec_node['expires'],
-                       'geni_allocation_status' : 'geni_allocated',
+                       'geni_allocation_status': 'geni_allocated',
                        'geni_operational_status': 'geni_pending_allocation',
                        'geni_error': '',
                        }
         return geni_sliver
-
 
     def list_resources(self, version=None, options=None):
         """
@@ -139,7 +158,7 @@ class IotLABAggregate(object):
 
         nodes = self.driver.shell.get_nodes()
         reserved_nodes = self.driver.shell.get_reserved_nodes()
-        if not 'error' in nodes and not 'error' in reserved_nodes:
+        if 'error' not in nodes and 'error' not in reserved_nodes:
             # convert nodes to rspec nodes
             rspec_nodes = []
             for node in nodes:
@@ -162,7 +181,7 @@ class IotLABAggregate(object):
                 # iotlab slice = job submission from Iot-LAB
                 else:
                     reserved_nodes[lease_id]['slice_id'] = \
-                        hrn_to_urn(self.driver.root_auth+'.'+
+                        hrn_to_urn(self.driver.root_auth + '.' +
                                    reserved_nodes[lease_id]['owner']+"_slice",
                                    'slice')
                 leases.append(reserved_nodes[lease_id])
@@ -173,7 +192,6 @@ class IotLABAggregate(object):
             rspec.version.add_leases(rspec_leases)
         return rspec.toxml()
 
-
     def get_slivers(self, urns, leases, nodes):
         """ Get slivers attributes list """
         logger.warning("iotlabaggregate get_slivers")
@@ -181,17 +199,22 @@ class IotLABAggregate(object):
         slivers = []
         for lease in leases:
             for node in lease['resources']:
+                network_address = node.split(".")
                 sliver_node = nodes[node]
                 sliver_hrn = '%s.%s-%s' % (self.driver.hrn,
-                             lease['id'], node.split(".")[0])
+                                           lease['id'],
+                                           network_address[0])
                 start_time = datetime.datetime.fromtimestamp(lease['date'])
                 duration = datetime.timedelta(seconds=int(lease['duration']))
                 sliver_node['expires'] = start_time + duration
                 sliver_node['sliver_id'] = Xrn(sliver_hrn,
                                                type='sliver').urn
+                # frontend SSH hostname
+                sliver_node['hostname'] = '.'.join(network_address[1:])
+                # user login
+                sliver_node['name'] = lease['owner']
                 slivers.append(sliver_node)
         return slivers
-
 
     def _delete_db_lease(self, job_id):
         """ Delete lease table row in SFA database """
@@ -201,15 +224,14 @@ class IotLABAggregate(object):
             LeaseTable.job_id == job_id).delete()
         self.driver.api.dbsession().commit()
 
-
     def describe(self, urns, version=None, options=None):
         """
         describe method returns slice slivers (allocated resources) and leases
         (OAR job submission). We search in lease table of SFA database all OAR
-        jobs id for this slice and match OAR jobs with state Waiting or Running.
-        If OAR job id doesn't exist the experiment is terminated and we delete
-        the database table entry. Otherwise we add slivers and leases in the
-        response
+        jobs id for this slice and match OAR jobs with state Waiting or
+        Running. If OAR job id doesn't exist the experiment is terminated and
+        we delete the database table entry. Otherwise we add slivers and leases
+        in the response
 
         :returns:
             geni_slivers : a list of allocated slivers with information about
@@ -258,7 +280,7 @@ class IotLABAggregate(object):
 
         nodes = self.driver.shell.get_nodes()
         reserved_nodes = self.driver.shell.get_reserved_nodes()
-        if not 'error' in nodes and not 'error' in reserved_nodes:
+        if 'error' not in nodes and 'error' not in reserved_nodes:
             # find OAR jobs id for one slice in SFA database
             db_leases = [(lease.job_id, lease.slice_hrn)
                          for lease in self.driver.api.dbsession()
@@ -268,7 +290,7 @@ class IotLABAggregate(object):
             leases = []
             for job_id, slice_hrn in db_leases:
                 # OAR job terminated, we delete entry in database
-                if not job_id in reserved_nodes:
+                if job_id not in reserved_nodes:
                     self._delete_db_lease(job_id)
                 else:
                     # onelab slice = job submission from OneLAB
@@ -304,4 +326,3 @@ class IotLABAggregate(object):
         return {'geni_urn': urns[0],
                 'geni_rspec': rspec.toxml(),
                 'geni_slivers': geni_slivers}
-

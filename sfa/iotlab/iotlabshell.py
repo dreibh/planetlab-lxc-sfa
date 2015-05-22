@@ -18,7 +18,6 @@ class IotLABShell(object):
         user, passwd = auth.get_user_credentials()
         self.api = rest.Api(user, passwd)
 
-
     def get_nodes(self):
         """
         Get all OAR nodes
@@ -48,11 +47,10 @@ class IotLABShell(object):
             nodes = experiment.info_experiment(self.api)
         except HTTPError as err:
             logger.warning("iotlashell get_nodes error %s" % err.reason)
-            return {'error' : err.reason}
+            return {'error': err.reason}
         for node in nodes['items']:
             nodes_dict[node['network_address']] = node
         return nodes_dict
-
 
     def get_users(self):
         """
@@ -84,11 +82,10 @@ class IotLABShell(object):
             users = self.api.method('admin/users')
         except HTTPError as err:
             logger.warning("iotlashell get_users error %s" % err.reason)
-            return {'error' : err.reason}
+            return {'error': err.reason}
         for user in users:
             users_dict[user['email']] = user
         return users_dict
-
 
     def reserve_nodes(self, login, exp_name,
                       nodes_list, start_time, duration):
@@ -108,8 +105,7 @@ class IotLABShell(object):
                                    files=exp_file)
         except HTTPError as err:
             logger.warning("iotlashell reserve_nodes error %s" % err.reason)
-            return {'error' : err.reason}
-
+            return {'error': err.reason}
 
     def get_reserved_nodes(self):
         """
@@ -138,7 +134,7 @@ class IotLABShell(object):
         except HTTPError as err:
             logger.warning("iotlashell get_reserved_nodes error %s" %
                            err.reason)
-            return {'error' : err.reason}
+            return {'error': err.reason}
         for exp in experiments['items']:
             # BUG IN OAR REST API : job with reservation didn't return
             # resources attribute list
@@ -148,17 +144,17 @@ class IotLABShell(object):
             reserved_nodes_dict[exp['id']] = exp
         return reserved_nodes_dict
 
-
     def add_user(self, slice_user):
         """
         Add LDAP user
         """
         # pylint:disable=E1123
         logger.warning("iotlashell add_user")
-        user = {"type" : "SA", # single account creation
-                "city" : "To be defined",
-                "country" : "To be defined",
-                "motivations" : "SFA federation"}
+        # single account creation
+        user = {"type": "SA",
+                "city": "To be defined",
+                "country": "To be defined",
+                "motivations": "SFA federation"}
         email = slice_user['email']
         user['email'] = email
         user['sshPublicKey'] = slice_user['keys'][0]
@@ -172,7 +168,6 @@ class IotLABShell(object):
             user['lastName'] = email.split('.')[0]
         try:
             self.api.method('admin/users', 'post',
-                        json=user)
+                            json=user)
         except HTTPError as err:
             logger.warning("iotlashell add_user error %s" % err.reason)
-    
