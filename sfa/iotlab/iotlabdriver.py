@@ -10,6 +10,7 @@ from sfa.iotlab.iotlabshell import IotLABShell
 from sfa.iotlab.iotlabaggregate import IotLABAggregate
 from sfa.iotlab.iotlablease import LeaseTable
 
+
 class IotLabDriver(Driver):
     """
     SFA driver for Iot-LAB testbed
@@ -28,31 +29,26 @@ class IotLabDriver(Driver):
         """ Not used and need by SFA """
         pass
 
-    ########################################
-    ########## registry oriented
-    ########################################
+    # #######################################
+    # ######### registry oriented
+    # #######################################
 
     ##########
     def register(self, sfa_record, hrn, pub_key):
         logger.warning("iotlabdriver register : not implemented")
         return -1
 
-
-    ##########
     def update(self, old_sfa_record, new_sfa_record, hrn, new_key):
         logger.warning("iotlabdriver update : not implemented")
         return True
 
-
-    ##########
     def remove(self, sfa_record):
         logger.warning("iotlabdriver remove : not implemented")
         return True
 
-
-    ########################################
-    ########## aggregate oriented
-    ########################################
+    # #######################################
+    # ######### aggregate oriented
+    # #######################################
 
     def provision(self, urns, options=None):
         logger.warning("iotlabdriver provision : not implemented")
@@ -61,12 +57,10 @@ class IotLabDriver(Driver):
         rspec_version = version_manager.get_version(opt)
         return self.describe(urns, rspec_version, options=options)
 
-
     def delete(self, urns, options=None):
         logger.warning("iotlabdriver delete : not implemented")
         geni_slivers = []
         return geni_slivers
-
 
     def aggregate_version(self):
         logger.warning("iotlabdriver aggregate_version")
@@ -83,7 +77,6 @@ class IotLabDriver(Driver):
             'geni_request_rspec_versions': request_rspec_versions,
             'geni_ad_rspec_versions': ad_rspec_versions}
 
-
     def list_resources(self, version=None, options=None):
         logger.warning("iotlabdriver list_resources")
         if not options:
@@ -92,14 +85,12 @@ class IotLabDriver(Driver):
         rspec = aggregate.list_resources(version=version, options=options)
         return rspec
 
-
     def describe(self, urns, version, options=None):
         logger.warning("iotlabdriver describe")
         if not options:
             options = {}
         aggregate = IotLABAggregate(self)
         return aggregate.describe(urns, version=version, options=options)
-
 
     def status(self, urns, options=None):
         logger.warning("iotlabdriver status")
@@ -109,7 +100,6 @@ class IotLabDriver(Driver):
                   'geni_slivers': desc['geni_slivers']}
         return status
 
-
     def _get_users(self):
         """ Get all users """
         ret = self.shell.get_users()
@@ -117,13 +107,12 @@ class IotLabDriver(Driver):
             return None
         return ret
 
-
     def _get_user_login(self, caller_user):
         """ Get user login with email """
         email = caller_user['email']
         # ensure user exist in LDAP tree
         users = self._get_users()
-        if users and not email in users:
+        if users and email not in users:
             self.shell.add_user(caller_user)
             users = self._get_users()
         if users and email in users:
@@ -131,11 +120,11 @@ class IotLabDriver(Driver):
         else:
             return None
 
-
     @classmethod
     def _get_experiment(cls, rspec):
         """
-        Find in RSpec leases the experiment start time, duration and nodes list.
+        Find in RSpec leases the experiment start time, duration and nodes
+        list.
 
         :Example:
         <rspec>
@@ -165,9 +154,9 @@ class IotLabDriver(Driver):
         # uniq hostnames
         nodes_list = list(set(nodes_list))
         from math import floor
-        duration = floor((end_time - start_time)/60) # minutes
+        # minutes
+        duration = floor((end_time - start_time)/60)
         return nodes_list, start_time, duration
-
 
     def _save_db_lease(self, job_id, slice_hrn):
         """ Save lease table row in SFA database """
@@ -177,7 +166,6 @@ class IotLabDriver(Driver):
                        lease_row)
         self.api.dbsession().add(lease_row)
         self.api.dbsession().commit()
-
 
     def allocate(self, urn, rspec_string, expiration, options=None):
         """
