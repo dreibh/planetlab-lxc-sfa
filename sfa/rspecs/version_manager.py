@@ -76,23 +76,24 @@ class VersionManager:
             raise InvalidRSpec("Unkwnown RSpec schema: %s" % schema)
         return retval
 
-def show_by_string(string):
-    try:
-        print v.get_version(string)
-    except Exception,e:
-        print e
-def show_by_schema(string):
-    try:
-        print v.get_version_by_schema(string)
-    except Exception,e:
-        print e
+    def show_by_string(self, string):
+        try:
+            print self.get_version(string)
+        except Exception as e:
+            print e
+
+    def show_by_schema(self, string):
+        try:
+            print self.get_version_by_schema(string)
+        except Exception as e:
+            print e
 
 if __name__ == '__main__':
-    v = VersionManager()
-    print v.versions
-    show_by_string('sfa 1') 
-    show_by_string('protogeni 2') 
-    show_by_string('protogeni 2 advertisement') 
-    show_by_schema('http://www.protogeni.net/resources/rspec/2/ad.xsd') 
-    show_by_schema('http://sorch.netmode.ntua.gr/ws/RSpec/ad.xsd')
+    manager = VersionManager()
+    print manager
+    manager.show_by_string('sfa 1') 
+    manager.show_by_string('protogeni 2') 
+    manager.show_by_string('protogeni 2 advertisement') 
+    manager.show_by_schema('http://www.protogeni.net/resources/rspec/2/ad.xsd') 
+    manager.show_by_schema('http://sorch.netmode.ntua.gr/ws/RSpec/ad.xsd')
 
