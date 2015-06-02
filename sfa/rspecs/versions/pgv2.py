@@ -6,7 +6,8 @@ from sfa.rspecs.elements.versions.pgv2Link import PGv2Link
 from sfa.rspecs.elements.versions.pgv2Node import PGv2Node
 from sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
 from sfa.rspecs.elements.versions.pgv2Lease import PGv2Lease
- 
+from sfa.util.sfalogging import logger
+
 class PGv2(RSpecVersion):
     type = 'ProtoGENI'
     content_type = 'ad'
@@ -54,16 +55,18 @@ class PGv2(RSpecVersion):
 
     # Slivers
     
-    def get_sliver_attributes(self, hostname, network=None):
-        nodes = self.get_nodes({'component_id': '*%s*' %hostname})
-        attribs = []
-        if nodes is not None and isinstance(nodes, list) and len(nodes) > 0:
+    def get_sliver_attributes(self, component_id, network=None):
+        nodes = self.get_nodes({'component_id': '*%s*' %component_id})
+        try:
             node = nodes[0]
             sliver = node.xpath('./default:sliver_type', namespaces=self.namespaces)
             if sliver is not None and isinstance(sliver, list) and len(sliver) > 0:
                 sliver = sliver[0]
-                #attribs = self.attributes_list(sliver)
-        return attribs
+                return self.attributes_list(sliver)
+            else:
+                return []
+        except:
+            return []
 
     def get_slice_attributes(self, network=None):
         slice_attributes = []
@@ -71,7 +74,7 @@ class PGv2(RSpecVersion):
         # TODO: default sliver attributes in the PG rspec?
         default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers:
-            sliver_attributes = self.get_sliver_attributes(node, network)
+            sliver_attributes = self.get_sliver_attributes(node['component_id'], network)
             for sliver_attribute in sliver_attributes:
                 name=str(sliver_attribute[0])
                 text =str(sliver_attribute[1])
