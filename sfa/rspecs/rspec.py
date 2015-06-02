@@ -129,10 +129,13 @@ class RSpec:
         return self.xml.save(filename)
          
 if __name__ == '__main__':
-    rspec = RSpec('/tmp/resources.rspec')
+    import sys
+    input = sys.argv[1]
+    with open(input) as f:
+        rspec = RSpec(f.read())
     print rspec
-    rspec.register_rspec_element(RSpecElements.NETWORK, 'network', '//network')
-    rspec.register_rspec_element(RSpecElements.NODE, 'node', '//node')
-    print rspec.get(RSpecElements.NODE)[0]
-    print rspec.get(RSpecElements.NODE, depth=1)[0]
+#    rspec.register_rspec_element(RSpecElements.NETWORK, 'network', '//network')
+#    rspec.register_rspec_element(RSpecElements.NODE, 'node', '//node')
+#    print rspec.get(RSpecElements.NODE)[0]
+#    print rspec.get(RSpecElements.NODE, depth=1)[0]
 
