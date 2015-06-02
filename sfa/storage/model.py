@@ -174,6 +174,8 @@ class RegAuthority (RegRecord):
     __mapper_args__     = { 'polymorphic_identity' : 'authority' }
     record_id           = Column (Integer, ForeignKey ("records.record_id"), primary_key=True)
     #### extensions come here
+    name                = Column ('name', String)
+    #### extensions come here
     reg_pis             = relationship \
         ('RegUser',
          secondary=authority_pi_table,
@@ -182,6 +184,9 @@ class RegAuthority (RegRecord):
          backref='reg_authorities_as_pi')
     
     def __init__ (self, **kwds):
+        # handle local settings
+        if 'name' in kwds:
+            self.name = kwds.pop('name')
         # fill in type if not previously set
         if 'type' not in kwds: kwds['type']='authority'
         # base class constructor
@@ -189,7 +194,9 @@ class RegAuthority (RegRecord):
 
     # no proper data yet, just hack the typename
     def __repr__ (self):
-        return RegRecord.__repr__(self).replace("Record","Authority")
+        result = RegRecord.__repr__(self).replace("Record", "Authority")
+        result.replace(">", " name={}>".format(self.name))
+        return result
 
     def update_pis (self, pi_hrns, dbsession):
         # strip that in case we have <researcher> words </researcher>

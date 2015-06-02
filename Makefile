@@ -226,6 +226,8 @@ synclib: synccheck
 	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/lib\*/python2.\*/site-packages/
 synclibdeb: synccheck
 	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/share/pyshared/
+syncmigrations:
+	+$(RSYNC) ./sfa/storage/migrations/versions/*.py $(SSHURL)/usr/share/sfa/migrations/versions/
 syncbin: synccheck
 	+$(RSYNC)  $(BINS) $(SSHURL)/usr/bin/
 syncinit: synccheck

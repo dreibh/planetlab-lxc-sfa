@@ -208,6 +208,9 @@ def load_record_from_opts(options):
         record_dict['reg-researchers'] = options.reg_researchers
     if hasattr(options, 'email') and options.email:
         record_dict['email'] = options.email
+    # authorities can have a name for standalone deployment
+    if hasattr(options, 'name') and options.name:
+        record_dict['name'] = options.name
     if hasattr(options, 'reg_pis') and options.reg_pis:
         record_dict['reg-pis'] = options.reg_pis
 
@@ -423,6 +426,7 @@ class Sfi:
             parser.add_option('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
             parser.add_option('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
             parser.add_option('-e', '--email', dest='email', default="",  help="email (mandatory for users)") 
+            parser.add_option('-n', '--name', dest='name', default="",  help="name (optional for authorities)") 
             parser.add_option('-k', '--key', dest='key', metavar='<key>', help='public key string or file', 
                               default=None)
             parser.add_option('-s', '--slices', dest='slices', metavar='<slices>', help='Set/replace slice xrns',
