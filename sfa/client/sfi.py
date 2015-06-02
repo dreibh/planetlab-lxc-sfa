@@ -184,8 +184,22 @@ def check_ssh_key (key):
     return re.match(good_ssh_key, key, re.IGNORECASE)
 
 # load methods
+def normalize_type (type):
+    if type.startswith('au'):
+        return 'authority'
+    elif type.startswith('us'):
+        return 'user'
+    elif type.startswith('sl'):
+        return 'slice'
+    elif type.startswith('no'):
+        return 'node'
+    else:
+        return None
+
 def load_record_from_opts(options):
     record_dict = {}
+    if hasattr(options, 'type'):
+        options.type = normalize_type(options.type)
     if hasattr(options, 'xrn') and options.xrn:
         if hasattr(options, 'type') and options.type:
             xrn = Xrn(options.xrn, options.type)
@@ -1060,7 +1074,7 @@ use this if you mean an authority instead""")
         if options:
             record_dict.update(load_record_from_opts(options).todict())
         # at the very least we need 'type' here
-        if 'type' not in record_dict:
+        if 'type' not in record_dict or record_dict['type'] is None:
             self.print_help()
             sys.exit(1)
 
@@ -1086,7 +1100,7 @@ use this if you mean an authority instead""")
         elif record_dict['type'] in ['node']:
             cred = self.my_authority_credential_string()
         else:
-            raise "unknown record type" + record_dict['type']
+            raise Exception("unknown record type {}".format(record_dict['type']))
         if options.show_credential:
             show_credentials(cred)
         update = self.registry().Update(record_dict, cred)
