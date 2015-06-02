@@ -44,8 +44,12 @@ def terminal_render_default (record,options):
     print "%s (%s)" % (record['hrn'], record['type'])
 def terminal_render_user (record, options):
     print "%s (User)"%record['hrn'],
-    if record.get('reg-pi-authorities',None): print " [PI at %s]"%(" and ".join(record['reg-pi-authorities'])),
-    if record.get('reg-slices',None): print " [IN slices %s]"%(" and ".join(record['reg-slices'])),
+    if options.verbose and record.get('email', None):
+        print "email='{}'".format(record['email']),
+    if record.get('reg-pi-authorities', None):
+        print " [PI at %s]"%(" and ".join(record['reg-pi-authorities'])),
+    if record.get('reg-slices', None):
+        print " [IN slices %s]"%(" and ".join(record['reg-slices'])),
     user_keys=record.get('reg-keys',[])
     if not options.verbose:
         print " [has %s]"%(terminal_render_plural(len(user_keys),"key"))
@@ -55,12 +59,16 @@ def terminal_render_user (record, options):
         
 def terminal_render_slice (record, options):
     print "%s (Slice)"%record['hrn'],
-    if record.get('reg-researchers',None): print " [USERS %s]"%(" and ".join(record['reg-researchers'])),
+    if record.get('reg-researchers', None):
+        print " [USERS %s]"%(" and ".join(record['reg-researchers'])),
 #    print record.keys()
     print ""
 def terminal_render_authority (record, options):
     print "%s (Authority)"%record['hrn'],
-    if record.get('reg-pis',None): print " [PIS %s]"%(" and ".join(record['reg-pis'])),
+    if options.verbose and record.get('name'):
+        print "name='{}'".format(record['name'])
+    if record.get('reg-pis', None):
+        print " [PIS %s]"%(" and ".join(record['reg-pis'])),
     print ""
 def terminal_render_node (record, options):
     print "%s (Node)"%record['hrn']
