@@ -647,6 +647,17 @@ class PlDriver (Driver):
         return status
 
     def allocate (self, urn, rspec_string, expiration, options=None):
+        """
+        Allocate a PL slice
+
+        Supported options:
+        (*) geni_users
+        (*) append : if set to True, provided attributes are appended 
+            to the current list of tags for the slice
+            otherwise, the set of provided attributes are meant to be the 
+            the exact set of tags at the end of the call, meaning pre-existing tags
+            are deleted if not repeated in the incoming request
+        """
         if options is None: options={}
         xrn = Xrn(urn)
         aggregate = PlAggregate(self)
