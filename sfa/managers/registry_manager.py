@@ -467,13 +467,23 @@ class RegistryManager:
         # not too big a deal with planetlab as the driver is authoritative, but...
 
         # update native relations
-        if isinstance (record, RegSlice):
-            researcher_hrns = getattr(new_record,'reg-researchers',None)
-            if researcher_hrns is not None: record.update_researchers (researcher_hrns, dbsession)
+        if isinstance(record, RegSlice):
+            researcher_hrns = getattr(new_record, 'reg-researchers', None)
+            if researcher_hrns is not None:
+                record.update_researchers (researcher_hrns, dbsession)
 
-        elif isinstance (record, RegAuthority):
-            pi_hrns = getattr(new_record,'reg-pis',None)
-            if pi_hrns is not None: record.update_pis (pi_hrns, dbsession)
+        elif isinstance(record, RegAuthority):
+            pi_hrns = getattr(new_record, 'reg-pis', None)
+            if pi_hrns is not None:
+                record.update_pis(pi_hrns, dbsession)
+            name = getattr(new_record, 'name', None)
+            if name is not None:
+                record.name = name
+
+        elif isinstance(record, RegUser):
+            email = getattr(new_record, 'email', None)
+            if email is not None:
+                record.email = email
         
         # update the PLC information that was specified with the record
         # xxx oddly enough, without this useless statement, 
