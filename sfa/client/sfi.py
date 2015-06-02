@@ -46,7 +46,8 @@ from sfa.client.return_value import ReturnValue
 from sfa.client.candidates import Candidates
 from sfa.client.manifolduploader import ManifoldUploader
 
-CM_PORT=12346
+CM_PORT = 12346
+DEFAULT_RSPEC_VERSION = "GENI 3"
 
 from sfa.client.common import optparse_listvalue_callback, optparse_dictvalue_callback, \
     terminal_render, filter_records 
@@ -482,8 +483,8 @@ class Sfi:
                               help="call Resolve without the 'details' option")
         if canonical in ("resources", "describe"):
             # rspec version
-            parser.add_option("-r", "--rspec-version", dest="rspec_version", default="GENI 3",
-                              help="schema type and version of resulting RSpec")
+            parser.add_option("-r", "--rspec-version", dest="rspec_version", default=DEFAULT_RSPEC_VERSION,
+                              help="schema type and version of resulting RSpec (default:{})".format(DEFAULT_RSPEC_VERSION))
             # disable/enable cached rspecs
             parser.add_option("-c", "--current", dest="current", default=False,
                               action="store_true",  
@@ -1133,7 +1134,7 @@ use this if you mean an authority instead""")
     # ==================================================================
 
     # show rspec for named slice
-    @declare_command("","")
+    @declare_command("","",['discover'])
     def resources(self, options, args):
         """
         discover available resources (ListResources)
