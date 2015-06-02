@@ -49,11 +49,11 @@ def _normalize_input (record, reg_key, driver_key):
         # as we're overwriting some user data here
         if driver_key in record:
             logger.warning ("normalize_input: incoming record has both values, using %s"%reg_key)
-        record[driver_key]=record[reg_key]
+        record[driver_key] = record[reg_key]
     # we only have one key set, duplicate for the other one
     elif driver_key in record:
         logger.warning ("normalize_input: you should use '%s' instead of '%s'"%(reg_key,driver_key))
-        record[reg_key]=record[driver_key]
+        record[reg_key] = record[driver_key]
 
 def normalize_input_record (record):
     _normalize_input (record, 'reg-researchers','researcher')
@@ -62,7 +62,8 @@ def normalize_input_record (record):
     # xxx the keys thing could use a little bit more attention:
     # some parts of the code are using 'keys' while they should use 'reg-keys' 
     # but I run out of time for now
-    if 'reg-keys' in record: record['keys']=record['reg-keys']
+    if 'reg-keys' in record:
+        record['keys'] = record['reg-keys']
     return record
 
 class RegistryManager:
@@ -243,7 +244,7 @@ class RegistryManager:
     
     def List (self, api, xrn, origin_hrn=None, options=None):
         if options is None: options={}
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         # load all know registry names into a prefix tree and attempt to find
         # the longest matching prefix
         hrn, type = urn_to_hrn(xrn)
@@ -305,11 +306,11 @@ class RegistryManager:
         # Add the email of the user to SubjectAltName in the GID
         email = None
         hrn = Xrn(xrn).get_hrn()
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         record=dbsession.query(RegUser).filter_by(hrn=hrn).first()
         if record:
-            email=getattr(record,'email',None)
-        gid = api.auth.hierarchy.create_gid(xrn, create_uuid(), pkey, email = email)
+            email = getattr(record,'email',None)
+        gid = api.auth.hierarchy.create_gid(xrn, create_uuid(), pkey, email=email)
         return gid.save_to_string(save_parents=True)
     
     ####################
@@ -330,7 +331,7 @@ class RegistryManager:
     # hrns is the list of hrns that should be linked to the subject from now on
     # target_type would be e.g. 'user' in the 'slice' x 'researcher' example
     def update_driver_relation (self, api, record_obj, hrns, target_type, relation_name):
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         # locate the linked objects in our db
         subject_type=record_obj.type
         subject_id=record_obj.pointer
@@ -346,7 +347,7 @@ class RegistryManager:
         normalize_input_record (record_dict)
         logger.debug("Register: normalized record_dict=%s"%printable(record_dict))
 
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         hrn, type = record_dict['hrn'], record_dict['type']
         urn = hrn_to_urn(hrn,type)
         # validate the type
@@ -375,7 +376,7 @@ class RegistryManager:
                 if pub_key and isinstance(pub_key, types.ListType): pub_key = pub_key[0]
                 pkey = convert_public_key(pub_key)
     
-            email=getattr(record,'email',None)
+            email = getattr(record,'email',None)
             gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey, email = email)
             gid = gid_object.save_to_string(save_parents=True)
             record.gid = gid
@@ -425,15 +426,15 @@ class RegistryManager:
         normalize_input_record (record_dict)
         logger.debug("Update: normalized record_dict=%s"%printable(record_dict))
 
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         assert ('type' in record_dict)
-        new_record=make_record(dict=record_dict)
-        (type,hrn) = (new_record.type, new_record.hrn)
+        new_record = make_record(dict=record_dict)
+        (type, hrn) = (new_record.type, new_record.hrn)
         
         # make sure the record exists
-        record = dbsession.query(RegRecord).filter_by(type=type,hrn=hrn).first()
+        record = dbsession.query(RegRecord).filter_by(type=type, hrn=hrn).first()
         if not record:
-            raise RecordNotFound("hrn=%s, type=%s"%(hrn,type))
+            raise RecordNotFound("hrn={}, type={}".format(hrn, type))
         record.just_updated()
     
         # Use the pointer from the existing record, not the one that the user
@@ -441,12 +442,12 @@ class RegistryManager:
         pointer = record.pointer
 
         # is there a change in keys ?
-        new_key=None
-        if type=='user':
-            if getattr(new_record,'keys',None):
-                new_key=new_record.keys
-                if isinstance (new_key,types.ListType):
-                    new_key=new_key[0]
+        new_key = None
+        if type == 'user':
+            if getattr(new_record, 'keys', None):
+                new_key = new_record.keys
+                if isinstance (new_key, types.ListType):
+                    new_key = new_key[0]
 
         # take new_key into account
         if new_key:
@@ -455,9 +456,9 @@ class RegistryManager:
             uuid = create_uuid()
             urn = hrn_to_urn(hrn,type)
 
-            email=getattr(new_record,'email',None)
+            email = getattr(new_record, 'email', None)
             if email is None:
-                email=getattr(record,'email',None)
+                email = getattr(record, 'email', None)
             gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey, email = email)
             gid = gid_object.save_to_string(save_parents=True)
         
@@ -486,18 +487,18 @@ class RegistryManager:
         except:
            pass
         if new_key and new_key_pointer:
-            record.reg_keys=[ RegKey (new_key, new_key_pointer)]
+            record.reg_keys = [ RegKey (new_key, new_key_pointer)]
             record.gid = gid
 
         dbsession.commit()
         # update membership for researchers, pis, owners, operators
-        self.update_driver_relations (api, record, new_record)
+        self.update_driver_relations(api, record, new_record)
         
         return 1 
     
     # expecting an Xrn instance
     def Remove(self, api, xrn, origin_hrn=None):
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         hrn=xrn.get_hrn()
         type=xrn.get_type()
         request=dbsession.query(RegRecord).filter_by(hrn=hrn)
@@ -540,7 +541,7 @@ class RegistryManager:
 
     # This is a PLC-specific thing, won't work with other platforms
     def get_key_from_incoming_ip (self, api):
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         # verify that the callers's ip address exist in the db and is an interface
         # for a node in the db
         (ip, port) = api.remote_addr
@@ -562,7 +563,7 @@ class RegistryManager:
         pkey = Keypair(create=True)
         urn = hrn_to_urn(record.hrn, record.type)
 
-        email=getattr(record,'email',None)
+        email = getattr(record, 'email', None)
         gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey, email)
         gid = gid_object.save_to_string(save_parents=True)
         record.gid = gid

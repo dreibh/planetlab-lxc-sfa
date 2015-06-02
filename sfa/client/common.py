@@ -67,22 +67,23 @@ def terminal_render_node (record, options):
 
 
 ### used in sfi list
-def terminal_render (records,options):
+def terminal_render (records, options):
     # sort records by type
-    grouped_by_type={}
+    grouped_by_type = {}
     for record in records:
-        type=record['type']
-        if type not in grouped_by_type: grouped_by_type[type]=[]
+        type = record['type']
+        if type not in grouped_by_type:
+            grouped_by_type[type]=[]
         grouped_by_type[type].append(record)
-    group_types=grouped_by_type.keys()
+    group_types = grouped_by_type.keys()
     group_types.sort()
     for type in group_types:
-        group=grouped_by_type[type]
+        group = grouped_by_type[type]
 #        print 20 * '-', type
-        try:    renderer=eval('terminal_render_'+type)
-        except: renderer=terminal_render_default
-        for record in group: renderer(record,options)
-
+        try:    renderer = eval('terminal_render_' + type)
+        except: renderer = terminal_render_default
+        for record in group:
+            renderer(record, options)
 
 ####################
 def filter_records(type, records):
