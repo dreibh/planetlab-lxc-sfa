@@ -312,7 +312,7 @@ class PlDriver (Driver):
 
         elif type == "authority":
             pl_record["login_base"] = PlXrn(xrn=hrn,type='authority').pl_login_base()
-            if "name" not in sfa_record:
+            if "name" not in sfa_record or not sfa_record['name']:
                 pl_record["name"] = hrn
             if "abbreviated_name" not in sfa_record:
                 pl_record["abbreviated_name"] = hrn
