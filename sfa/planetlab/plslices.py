@@ -557,71 +557,81 @@ class PlSlices:
                   self.driver.shell.AddPersonKey(int(person_id), key)
 
 
+    # incoming data (attributes) have a (name, value) pair
+    # while PLC data (tags) have a (tagname, value) pair
+    # we must be careful not to mix these up
     def verify_slice_attributes(self, slice, requested_slice_attributes, options=None, admin=False):
         if options is None: options={}
         append = options.get('append', True)
-        # get list of attributes users ar able to manage
+        logger.debug("verify_slice_attributes, append mode: {}".format(append))
+        # get list of tags users are able to manage - based on category
         filter = {'category': '*slice*'}
         if not admin:
             filter['|roles'] = ['user']
-        slice_attributes = self.driver.shell.GetTagTypes(filter)
-        valid_slice_attribute_names = [attribute['tagname'] for attribute in slice_attributes]
+        valid_tag_types = self.driver.shell.GetTagTypes(filter)
+        valid_tag_names = [ tag_type['tagname'] for tag_type in valid_tag_types ]
+        logger.debug("verify_slice_attributes: valid names={}".format(valid_tag_names))
 
-        # get sliver attributes
-        added_slice_attributes = []
-        removed_slice_attributes = []
+        # get slice tags
+        slice_attributes_to_add = []
+        slice_tags_to_remove = []
         # we need to keep the slice hrn anyway
-        ignored_slice_attribute_names = ['hrn']
-        existing_slice_attributes = self.driver.shell.GetSliceTags({'slice_id': slice['slice_id']})
+        ignored_slice_tag_names = ['hrn']
+        existing_slice_tags = self.driver.shell.GetSliceTags({'slice_id': slice['slice_id']})
 
-        # get attributes that should be removed
-        for slice_tag in existing_slice_attributes:
-            if slice_tag['tagname'] in ignored_slice_attribute_names:
+        # get tags that should be removed
+        for slice_tag in existing_slice_tags:
+            if slice_tag['tagname'] in ignored_slice_tag_names:
                 # If a slice already has a admin only role it was probably given to them by an
                 # admin, so we should ignore it.
-                ignored_slice_attribute_names.append(slice_tag['tagname'])
-                attribute_found=True
+                ignored_slice_tag_names.append(slice_tag['tagname'])
+                tag_found = True
             else:
-                # If an existing slice attribute was not found in the request it should
+                # If an existing slice tag was not found in the request it should
                 # be removed
-                attribute_found=False
+                tag_found = False
                 for requested_attribute in requested_slice_attributes:
                     if requested_attribute['name'] == slice_tag['tagname'] and \
                        requested_attribute['value'] == slice_tag['value']:
-                        attribute_found=True
+                        tag_found = True
                         break
+            # preserve missing tags in append mode
+            if not tag_found and not append:
+                slice_tags_to_remove.append(slice_tag)
 
-            if not attribute_found and not append:
-                removed_slice_attributes.append(slice_tag)
-
-        # get attributes that should be added:
+        # get tags that should be added:
         for requested_attribute in requested_slice_attributes:
             # if the requested attribute wasn't found  we should add it
-            if requested_attribute['name'] in valid_slice_attribute_names:
-                attribute_found = False
-                for existing_attribute in existing_slice_attributes:
+            if requested_attribute['name'] in valid_tag_names:
+                tag_found = False
+                for existing_attribute in existing_slice_tags:
                     if requested_attribute['name'] == existing_attribute['tagname'] and \
                        requested_attribute['value'] == existing_attribute['value']:
-                        attribute_found=True
+                        tag_found=True
                         break
-                if not attribute_found:
-                    added_slice_attributes.append(requested_attribute)
+                if not tag_found:
+                    slice_attributes_to_add.append(requested_attribute)
 
-
-        # remove stale attributes
-        for attribute in removed_slice_attributes:
+        def friendly_message (tag_or_att):
+            name = tag_or_att['tagname'] if 'tagname' in tag_or_att else tag_or_att['name']
+            return "SliceTag slice={}, tagname={} value={}, node_id={}"\
+                .format(slice['name'], tag_or_att['name'], tag_or_att['value'], tag_or_att.get('node_id'))
+                    
+        # remove stale tags
+        for tag in slice_tags_to_remove:
             try:
-                self.driver.shell.DeleteSliceTag(attribute['slice_tag_id'])
-            except Exception, e:
-                logger.warn('Failed to remove sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
-                                % (slice['name'], attribute['value'],  attribute.get('node_id'), str(e)))
+                logger.info("Removing Slice Tag {}".format(friendly_message(tag)))
+                self.driver.shell.DeleteSliceTag(tag['slice_tag_id'])
+            except Exception as e:
+                logger.warn("Failed to remove slice tag {}\nCause:{}"\
+                            .format(friendly_message(tag), e))
 
-        # add requested_attributes
-        for attribute in added_slice_attributes:
+        # add requested_tags
+        for attribute in slice_attributes_to_add:
             try:
+                logger.info("Adding Slice Tag {}".format(friendly_message(attribute)))
                 self.driver.shell.AddSliceTag(slice['name'], attribute['name'], 
                                               attribute['value'], attribute.get('node_id', None))
-            except Exception, e:
-                logger.warn('Failed to add sliver attribute. name: %s, value: %s, node_id: %s\nCause:%s'\
-                                % (slice['name'], attribute['value'],  attribute.get('node_id'), str(e)))
-
+            except Exception as e:
+                logger.warn("Failed to add slice tag {}\nCause:{}"\
+                            .format(friendly_message(attribute), e))
