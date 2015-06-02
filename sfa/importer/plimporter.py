@@ -193,7 +193,7 @@ class PlImporter:
         self.create_special_vini_record (interface_hrn)
 
         # Get top authority record
-        top_auth_record=self.locate_by_type_hrn ('authority', root_auth)
+        top_auth_record = self.locate_by_type_hrn ('authority', root_auth)
         admins = []
 
         # start importing 
@@ -209,7 +209,7 @@ class PlImporter:
             site_hrn = site['hrn']
             # import if hrn is not in list of existing hrns or if the hrn exists
             # but its not a site record
-            site_record=self.locate_by_type_hrn ('authority', site_hrn)
+            site_record = self.locate_by_type_hrn ('authority', site_hrn)
             if not site_record:
                 try:
                     urn = hrn_to_urn(site_hrn, 'authority')

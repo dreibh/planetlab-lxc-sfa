@@ -112,7 +112,8 @@ class PlSlices:
 
             # XXX Sanity check; though technically this should be a system invariant
             # checked with an assertion
-            if slice['expires'] > MAXINT:  slice['expires']= MAXINT
+            if slice['expires'] > MAXINT:
+                slice['expires'] = MAXINT
             
             slivers.append({
                 'hrn': hrn,

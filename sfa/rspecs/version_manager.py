@@ -8,6 +8,11 @@ class VersionManager:
         self.versions = []
         self.load_versions()
 
+    def __repr__(self):
+        return "<VersionManager with {} flavours: [{}]>"\
+            .format(len(self.versions),
+                    ", ".join( [ str(x) for x in self.versions ]))
+        
     def load_versions(self):
         path = os.path.dirname(os.path.abspath( __file__ ))
         versions_path = path + os.sep + 'versions'

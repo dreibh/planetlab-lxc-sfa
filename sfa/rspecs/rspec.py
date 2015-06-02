@@ -61,7 +61,7 @@ class RSpec:
             if self.xml.schema:
                 self.version = self.version_manager.get_version_by_schema(self.xml.schema)
             else:
-                #raise InvalidRSpec('unknown rspec schema: %s' % schema)
+                #raise InvalidRSpec('unknown rspec schema: {}'.format(schema))
                 # TODO: Should start raising an exception once SFA defines a schema.
                 # for now we just  default to sfa 
                 self.version = self.version_manager.get_version({'type':'sfa','version': '1'})
@@ -76,12 +76,13 @@ class RSpec:
 
     def register_rspec_element(self, element_type, element_name, element_path):
         if element_type not in RSpecElements:
-            raise InvalidRSpecElement(element_type, extra="no such element type: %s. Must specify a valid RSpecElement" % element_type)
+            raise InvalidRSpecElement(element_type,
+                                      extra="no such element type: {}. Must specify a valid RSpecElement".format(element_type))
         self.elements[element_type] = RSpecElement(element_type, element_name, element_path)
 
     def get_rspec_element(self, element_type):
         if element_type not in self.elements:
-            msg = "ElementType %s not registerd for this rspec" % element_type
+            msg = "ElementType {} not registered for this rspec".format(element_type)
             raise InvalidRSpecElement(element_type, extra=msg)
         return self.elements[element_type]
 
@@ -97,8 +98,8 @@ class RSpec:
         """
         if filter is None: filter={}
         if element_type not in self.elements:
-            msg = "Unable to search for element %s in rspec, expath expression not found." % \
-                   element_type
+            msg = "Unable to search for element {} in rspec, expath expression not found."\
+                  .format(element_type)
             raise InvalidRSpecElement(element_type, extra=msg)
         rspec_element = self.get_rspec_element(element_type)
         xpath = rspec_element.path + XpathFilter.xpath(filter)
