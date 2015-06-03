@@ -496,9 +496,9 @@ class Sfi:
             #panos: a new option to define the type of information about resources a user is interested in
             parser.add_option("-i", "--info", dest="info",
                                 help="optional component information", default=None)
-            # a new option to retreive or not reservation-oriented RSpecs (leases)
+            # a new option to retrieve or not reservation-oriented RSpecs (leases)
             parser.add_option("-l", "--list_leases", dest="list_leases", type="choice",
-                                help="Retreive or not reservation-oriented RSpecs ([resources]|leases|all )",
+                                help="Retrieve or not reservation-oriented RSpecs ([resources]|leases|all)",
                                 choices=("all", "resources", "leases"), default="resources")
 
 

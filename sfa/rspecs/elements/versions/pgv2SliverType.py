@@ -38,7 +38,7 @@ class PGv2SliverType:
                     attrib_elem = xml.add_element('{%s}info' % self.namespaces['flack'])
                     attrib_dict = eval(tag['value'])
                     for (key, value) in attrib_dict.items():
-                        attrib_elem.set(key, value)                
+                        attrib_elem.set(key, value)
     @staticmethod
     def get_slivers(xml, filter=None):
         if filter is None: filter={}

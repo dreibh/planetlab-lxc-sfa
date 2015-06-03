@@ -280,16 +280,16 @@ class PlAggregate:
         rspec_node['slivers'] = [rspec_sliver]
 
         # slivers always provide the ssh service
-        login = Login({'authentication': 'ssh-keys', 
-                       'hostname': sliver['hostname'], 
+        login = Login({'authentication': 'ssh-keys',
+                       'hostname': sliver['hostname'],
                        'port':'22', 
                        'username': sliver['name'],
                        'login': sliver['name']
                       })
         service = ServicesElement({'login': login,
-                            'services_user': sliver['services_user']})
-        rspec_node['services'] = [service]    
-        return rspec_node      
+                                   'services_user': sliver['services_user']})
+        rspec_node['services'] = [service]
+        return rspec_node
 
     def get_slice_tags(self, slice):
         slice_tag_ids = []

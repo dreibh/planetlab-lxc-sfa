@@ -24,7 +24,8 @@ class PGv2(RSpecVersion):
     # Networks
     def get_networks(self):
         network_names = set()
-        nodes = self.xml.xpath('//default:node[@component_manager_id] | //node[@component_manager_id]', namespaces=self.namespaces)
+        nodes = self.xml.xpath('//default:node[@component_manager_id] | //node[@component_manager_id]',
+                               namespaces=self.namespaces)
         for node in nodes:
             if 'component_manager_id' in node.attrib:
                 network_urn = node.get('component_manager_id')

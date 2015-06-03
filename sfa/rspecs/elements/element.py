@@ -19,4 +19,5 @@ class Element(dict):
         elif hasattr(self.element, name):
             return getattr(self.element, name)
         else:
-            raise AttributeError, "class Element has no attribute %s" % name
+            raise AttributeError("class Element of type {} has no attribute {}"
+                                  .format(self.__class__.__name__, name))
