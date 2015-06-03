@@ -23,7 +23,16 @@ class Allocate(Method):
     @param slice_urn (string) URN of slice to allocate to
     @param credentials (dict) of credentials
     @param rspec (string) rspec to allocate
-    
+    @param options (dict)
+
+    The PL driver implements here an important option named
+    'append' that affects the management of slice tags. 
+    It is recommended to set this option to True, and to not pass
+    any slice tag in the incoming rspec, in which case
+    you are guaranteed to leave slice tags alone.
+
+    See also http://svn.planet-lab.org/wiki/SFASliceTags
+
     """
     interfaces = ['aggregate', 'slicemgr']
     accepts = [
