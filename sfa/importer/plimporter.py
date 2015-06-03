@@ -232,6 +232,7 @@ class PlImporter:
                     continue 
             else:
                 # xxx update the record ...
+                site_record.name = site['name']
                 pass
             site_record.stale=False
              
