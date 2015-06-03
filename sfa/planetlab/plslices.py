@@ -15,7 +15,7 @@ MAXINT =  2L**31-1
 
 class PlSlices:
 
-    rspec_to_slice_tag = {'max_rate':'net_max_rate'}
+    rspec_to_slice_tag = {'max_rate' : 'net_max_rate'}
 
     def __init__(self, driver):
         self.driver = driver
@@ -243,7 +243,7 @@ class PlSlices:
         for node in resulting_nodes:
             client_id = slivers[node['hostname']]['client_id']
             component_id = slivers[node['hostname']]['component_id']
-            sliver_hrn = '%s.%s-%s' % (self.driver.hrn, slice['slice_id'], node['node_id'])
+            sliver_hrn = '{}.{}-{}'.format(self.driver.hrn, slice['slice_id'], node['node_id'])
             sliver_id = Xrn(sliver_hrn, type='sliver').urn
             record = SliverAllocation(sliver_id=sliver_id, client_id=client_id, 
                                       component_id=component_id,
@@ -345,7 +345,7 @@ class PlSlices:
             site = sites[0]
         else:
             # create new site record
-            site = {'name': 'sfa:%s' % site_hrn,
+            site = {'name': 'sfa:{}'.format(site_hrn),
                     'abbreviated_name': site_hrn,
                     'login_base': login_base,
                     'max_slices': 100,
@@ -425,7 +425,7 @@ class PlSlices:
         ( auth_hrn, _ , leaf ) = user_hrn.rpartition('.')
         # somehow this has backslashes, get rid of them
         auth_hrn = auth_hrn.replace('\\','')
-        default_email = "%s@%s.stub"%(leaf,auth_hrn)
+        default_email = "{}@{}.stub".format(leaf, auth_hrn)
 
         person_record = { 
             # required
@@ -438,7 +438,7 @@ class PlSlices:
             'hrn': user_hrn,
         }
 
-        logger.debug ("about to attempt to AddPerson with %s"%person_record)
+        logger.debug ("about to attempt to AddPerson with {}".format(person_record))
         try:
             # the thing is, the PLE db has a limitation on re-using the same e-mail
             # in the case where people have an account on ple.upmc and then then come 
@@ -449,7 +449,7 @@ class PlSlices:
             logger.log_exc("caught during first attempt at AddPerson")
             # and if that fails we start again with the email based on the hrn, which this time is unique..
             person_record['email']=default_email
-            logger.debug ("second chance with email=%s"%person_record['email'])
+            logger.debug ("second chance with email={}".format(person_record['email']))
             person_id = int (self.driver.shell.AddPerson(person_record))
         self.driver.shell.AddRoleToPerson('user', person_id)
         self.driver.shell.AddPersonToSite(person_id, site_id)
@@ -469,7 +469,7 @@ class PlSlices:
         # this is for retrieving users from a hrn
         users_by_hrn = { user['hrn'] : user for user in users }
 
-        for user in users: logger.debug("incoming user %s"%user)
+        for user in users: logger.debug("incoming user {}".format(user))
 
         # compute the hrn's for the authority and site
         top_auth_hrn = top_auth(slice_hrn)
