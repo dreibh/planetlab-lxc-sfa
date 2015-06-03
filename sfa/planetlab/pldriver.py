@@ -199,6 +199,7 @@ class PlDriver (Driver):
             raise UnknownSfaType(type)
 
         if (type == "authority"):
+            logger.debug("pldriver.update: calling UpdateSite with {}".format(new_sfa_record))
             self.shell.UpdateSite(pointer, new_sfa_record)
             self.shell.SetSiteHrn(pointer, hrn)
     

@@ -564,6 +564,8 @@ class PlSlices:
         if options is None: options={}
         append = options.get('append', True)
         logger.debug("verify_slice_attributes, append mode: {}".format(append))
+        for requested_slice_attribute in requested_slice_attributes:
+            logger.debug("verify_slice_attributes, incoming req : {}".format(requested_slice_attribute))
         # get list of tags users are able to manage - based on category
         filter = {'category': '*slice*'}
         if not admin:
