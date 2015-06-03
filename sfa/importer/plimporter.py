@@ -47,7 +47,7 @@ class PlImporter:
 
     def __init__ (self, auth_hierarchy, logger):
         self.auth_hierarchy = auth_hierarchy
-        self.logger=logger
+        self.logger = logger
 
     def add_options (self, parser):
         # we don't have any options for now
@@ -141,7 +141,8 @@ class PlImporter:
                      if record.pointer != -1] )
 
         # initialize record.stale to True by default, then mark stale=False on the ones that are in use
-        for record in all_records: record.stale=True
+        for record in all_records:
+            record.stale = True
 
         ######## retrieve PLC data
         # Get all plc sites
@@ -235,7 +236,7 @@ class PlImporter:
                 # xxx update the record ...
                 site_record.name = site['name']
                 pass
-            site_record.stale=False
+            site_record.stale = False
              
             # import node records
             for node_id in site['node_ids']:
@@ -270,15 +271,15 @@ class PlImporter:
                 else:
                     # xxx update the record ...
                     pass
-                node_record.stale=False
+                node_record.stale = False
 
-            site_pis=[]
+            site_pis = []
             # import persons
             for person_id in site['person_ids']:
-                proceed=False
+                proceed = False
                 if person_id in persons_by_id:
-                    person=persons_by_id[person_id]
-                    proceed=True
+                    person = persons_by_id[person_id]
+                    proceed = True
                 elif person_id in disabled_person_ids:
                     pass
                 else:
@@ -301,7 +302,7 @@ class PlImporter:
 
                 # return a tuple pubkey (a plc key object) and pkey (a Keypair object)
                 def init_person_key (person, plc_keys):
-                    pubkey=None
+                    pubkey = None
                     if  person['key_ids']:
                         # randomly pick first key in set
                         pubkey = plc_keys[0]
@@ -323,7 +324,8 @@ class PlImporter:
                     plc_keys = keys_by_person_id.get(person['person_id'],[])
                     if not user_record:
                         (pubkey, pkey) = init_person_key (person, plc_keys )
-                        person_gid = self.auth_hierarchy.create_gid(person_urn, create_uuid(), pkey, email=person['email'])
+                        person_gid = self.auth_hierarchy.create_gid(person_urn, create_uuid(), pkey,
+                                                                    email=person['email'])
                         user_record = RegUser (hrn=person_hrn, gid=person_gid, 
                                                pointer=person['person_id'], 
                                                authority=get_authority(person_hrn),
@@ -359,13 +361,13 @@ class PlImporter:
                         sfa_keys = user_record.reg_keys
                         def sfa_key_in_list (sfa_key,plc_keys):
                             for plc_key in plc_keys:
-                                if plc_key['key']==sfa_key.key:
+                                if plc_key['key'] == sfa_key.key:
                                     return True
                             return False
                         # are all the SFA keys known to PLC ?
-                        new_keys=False
+                        new_keys = False
                         if not sfa_keys and plc_keys:
-                            new_keys=True
+                            new_keys = True
                         else: 
                             for sfa_key in sfa_keys:
                                  if not sfa_key_in_list (sfa_key,plc_keys):
@@ -375,18 +377,18 @@ class PlImporter:
                             person_gid = self.auth_hierarchy.create_gid(person_urn, create_uuid(), pkey)
                             person_gid.set_email(person['email'])
                             if not pubkey:
-                                user_record.reg_keys=[]
+                                user_record.reg_keys = []
                             else:
-                                user_record.reg_keys=[ RegKey (pubkey['key'], pubkey['key_id'])]
+                                user_record.reg_keys = [ RegKey (pubkey['key'], pubkey['key_id'])]
                             user_record.gid = person_gid
                             user_record.just_updated()
                             self.logger.info("PlImporter: updated person: {}".format(user_record))
                     user_record.email = person['email']
                     global_dbsession.commit()
-                    user_record.stale=False
+                    user_record.stale = False
                     # accumulate PIs - PLCAPI has a limitation that when someone has PI role
                     # this is valid for all sites she is in..
-                    # PI is coded with role_id==20
+                    # PI is coded with role_id == 20
                     if 20 in person['role_ids']:
                         site_pis.append (user_record)
 
@@ -449,7 +451,7 @@ class PlImporter:
                 slice_record.reg_researchers = \
                     [ self.locate_by_type_pointer ('user',user_id) for user_id in slice['person_ids'] ]
                 global_dbsession.commit()
-                slice_record.stale=False
+                slice_record.stale = False
 
         # Set PL Admins as PI's of the top authority
         if admins:
@@ -463,17 +465,17 @@ class PlImporter:
         system_hrns = [interface_hrn, root_auth, interface_hrn + '.slicemanager']
         for record in all_records: 
             if record.hrn in system_hrns: 
-                record.stale=False
+                record.stale = False
             if record.peer_authority:
-                record.stale=False
+                record.stale = False
             if ".vini" in interface_hrn and interface_hrn.endswith('vini') and \
                 record.hrn.endswith("internet2"):
-                record.stale=False
+                record.stale = False
 
         for record in all_records:
-            try:        stale=record.stale
+            try:        stale = record.stale
             except:     
-                stale=True
+                stale = True
                 self.logger.warning("stale not found with {}".format(record))
             if stale:
                 self.logger.info("PlImporter: deleting stale record: {}".format(record))

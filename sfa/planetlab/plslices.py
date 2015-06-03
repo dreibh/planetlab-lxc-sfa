@@ -448,7 +448,7 @@ class PlSlices:
         except:
             logger.log_exc("caught during first attempt at AddPerson")
             # and if that fails we start again with the email based on the hrn, which this time is unique..
-            person_record['email']=default_email
+            person_record['email'] = default_email
             logger.debug ("second chance with email={}".format(person_record['email']))
             person_id = int (self.driver.shell.AddPerson(person_record))
         self.driver.shell.AddRoleToPerson('user', person_id)
@@ -609,7 +609,7 @@ class PlSlices:
                 for existing_attribute in existing_slice_tags:
                     if requested_attribute['name'] == existing_attribute['tagname'] and \
                        requested_attribute['value'] == existing_attribute['value']:
-                        tag_found=True
+                        tag_found = True
                         break
                 if not tag_found:
                     slice_attributes_to_add.append(requested_attribute)
