@@ -218,7 +218,8 @@ class PlImporter:
                     auth_info = self.auth_hierarchy.get_auth_info(urn)
                     site_record = RegAuthority(hrn=site_hrn, gid=auth_info.get_gid_object(),
                                                pointer=site['site_id'],
-                                               authority=get_authority(site_hrn))
+                                               authority=get_authority(site_hrn),
+                                               name=site['name'])
                     site_record.just_created()
                     global_dbsession.add(site_record)
                     global_dbsession.commit()
