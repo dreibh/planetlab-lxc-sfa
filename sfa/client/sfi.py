@@ -556,6 +556,10 @@ use this if you mean an authority instead""")
         if not method:
             print "sfi: unknown command {}".format(command)
             raise SystemExit("Unknown command {}".format(command))
+        for arg in command_args:
+            if 'help' in arg or arg == '-h':
+                self.print_help()
+                sys.exit(1)
         return method(command_options, command_args)
 
     def main(self):
