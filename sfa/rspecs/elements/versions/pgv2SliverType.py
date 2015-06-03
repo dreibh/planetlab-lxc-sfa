@@ -3,6 +3,8 @@ from sfa.rspecs.elements.sliver import Sliver
 from sfa.rspecs.elements.versions.pgv2DiskImage import PGv2DiskImage
 from sfa.rspecs.elements.versions.plosv1FWRule import PLOSv1FWRule
 
+from sfa.util.sfalogging import logger
+
 class PGv2SliverType:
 
     @staticmethod
@@ -29,16 +31,29 @@ class PGv2SliverType:
             PGv2SliverType.add_sliver_attributes(sliver_elem, sliver.get('tags', []))
     
     @staticmethod
-    def add_sliver_attributes(xml, attributes):
-        if attributes: 
-            for attribute in attributes:
-                if attribute['name'] == 'initscript':
-                    xml.add_element('{%s}initscript' % xml.namespaces['planetlab'], name=attribute['value'])
-                elif attribute['tagname'] == 'flack_info':
-                    attrib_elem = xml.add_element('{%s}info' % self.namespaces['flack'])
+    def add_sliver_attributes(xml, tags):
+        if tags is None:
+            return
+        for tag in tags:
+            tagname = tag['tagname'] if 'tagname' in tag else tag['name']
+            if tagname == 'flack_info':
+                attrib_elem = xml.add_element('{%s}info' % self.namespaces['flack'])
+                try:
                     attrib_dict = eval(tag['value'])
                     for (key, value) in attrib_dict.items():
                         attrib_elem.set(key, value)
+                except Exception as e:
+                    logger.warning("Could not parse dictionary in flack tag -- {}".format(e))
+            elif tagname == 'initscript':
+                xml.add_element('{%s}initscript' % xml.namespaces['planetlab'],
+                                name=tag['value'])
+            else:
+                xml.add_element('{%s}attribute' % (xml.namespaces['planetlab']),
+                                name = tagname,
+                                value = tag['value'],
+                                scope = tag.get('scope', 'unknown'),
+                )
+                        
     @staticmethod
     def get_slivers(xml, filter=None):
         if filter is None: filter={}

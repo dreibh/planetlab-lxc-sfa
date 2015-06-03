@@ -104,7 +104,7 @@ class PlAggregate:
     def get_node_tags(self, filter=None):
         if filter is None: filter={}
         node_tags = {}
-        for node_tag in self.driver.shell.GetNodeTags(filter):
+        for node_tag in self.driver.shell.GetNodeTags(filter, ['tagname', 'value', 'node_id', 'node_tag_id'] ):
             node_tags[node_tag['node_tag_id']] = node_tag
         return node_tags
 
@@ -191,12 +191,19 @@ class PlAggregate:
         if node_ids:
             node_ids = [node_id for node_id in node_ids if node_id in slice['node_ids']]
             slice['node_ids'] = node_ids
-        tags_dict = self.get_slice_tags(slice)
+        pltags_dict = self.get_pltags_by_node_id(slice)
         nodes_dict = self.get_slice_nodes(slice, options)
         slivers = []
         for node in nodes_dict.values():
             node.update(slice) 
-            node['tags'] = tags_dict[node['node_id']]
+            # slice-global tags
+            node['slice-tags'] = pltags_dict['slice-global']
+            # xxx
+            # this is where we chould maybe add the nodegroup slice tags,
+            # but it's tedious...
+            # xxx
+            # sliver tags
+            node['slice-tags'] += pltags_dict[node['node_id']]
             sliver_hrn = '%s.%s-%s' % (self.driver.hrn, slice['slice_id'], node['node_id'])
             node['sliver_id'] = Xrn(sliver_hrn, type='sliver').urn
             node['urn'] = node['sliver_id'] 
@@ -254,24 +261,28 @@ class PlAggregate:
                 interface['client_id'] = "%s:%s" % (node['node_id'], if_id)
             rspec_node['interfaces'].append(interface)
             if_count+=1
-        tags = [PLTag(node_tags[tag_id]) for tag_id in node['node_tag_ids'] if tag_id in node_tags]
-        rspec_node['tags'] = tags
+        # this is what describes a particular node
+        node_level_tags = [PLTag(node_tags[tag_id]) for tag_id in node['node_tag_ids'] if tag_id in node_tags]
+        rspec_node['tags'] = node_level_tags
         return rspec_node
 
-    def sliver_to_rspec_node(self, sliver, sites, interfaces, node_tags, \
+    def sliver_to_rspec_node(self, sliver, sites, interfaces, node_tags, sliver_pltags, \
                              pl_initscripts, sliver_allocations):
         # get the granularity in second for the reservation system
         grain = self.driver.shell.GetLeaseGranularity()
         rspec_node = self.node_to_rspec_node(sliver, sites, interfaces, node_tags, pl_initscripts, grain)
+        for pltag in sliver_pltags:
+            logger.debug("Need to expose {}".format(pltag))
         # xxx how to retrieve site['login_base']
         rspec_node['expires'] = datetime_to_string(utcparse(sliver['expires']))
         # remove interfaces from manifest
         rspec_node['interfaces'] = []
         # add sliver info
         rspec_sliver = Sliver({'sliver_id': sliver['urn'],
-                         'name': sliver['name'],
-                         'type': 'plab-vserver',
-                         'tags': []})
+                               'name': sliver['name'],
+                               'type': 'plab-vserver',
+                               'tags': sliver_pltags,
+                           })
         rspec_node['sliver_id'] = rspec_sliver['sliver_id']
         if sliver['urn'] in sliver_allocations:
             rspec_node['client_id'] = sliver_allocations[sliver['urn']].client_id
@@ -291,15 +302,29 @@ class PlAggregate:
         rspec_node['services'] = [service]
         return rspec_node
 
-    def get_slice_tags(self, slice):
+    def get_pltags_by_node_id(self, slice):
         slice_tag_ids = []
         slice_tag_ids.extend(slice['slice_tag_ids'])
-        tags = self.driver.shell.GetSliceTags({'slice_tag_id': slice_tag_ids})
+        tags = self.driver.shell.GetSliceTags({'slice_tag_id': slice_tag_ids},
+                                              ['tagname', 'value', 'node_id', 'nodegroup_id'])
         # sorted by node_id
-        tags_dict = defaultdict(list)
+        pltags_dict = defaultdict(list)
         for tag in tags:
-            tags_dict[tag['node_id']] = tag
-        return tags_dict
+            # specific to a node
+            if tag['node_id']:
+                tag['scope'] = 'sliver'
+                pltags_dict[tag['node_id']].append(PLTag(tag))
+            # restricted to a nodegroup
+            # for now such tags are not exposed to describe
+            # xxx we should also expose the nodegroup name in this case to be complete..
+            elif tag['nodegroup_id']:
+                tag['scope'] = 'nodegroup'
+                pltags_dict['nodegroup'].append(PLTag(tag))
+            # this tag is global to the slice
+            else:
+                tag['scope'] = 'slice'
+                pltags_dict['slice-global'].append(PLTag(tag))
+        return pltags_dict
 
     def get_slice_nodes(self, slice, options=None):
         if options is None: options={}
@@ -474,8 +499,10 @@ class PlAggregate:
             for sliver in slivers:
                 if sliver['slice_ids_whitelist'] and sliver['slice_id'] not in sliver['slice_ids_whitelist']:
                     continue
-                rspec_node = self.sliver_to_rspec_node(sliver, sites, interfaces, node_tags, 
+                sliver_pltags = sliver['slice-tags']
+                rspec_node = self.sliver_to_rspec_node(sliver, sites, interfaces, node_tags, sliver_pltags, 
                                                        pl_initscripts, sliver_allocation_dict)
+                logger.debug('rspec of type {}'.format(rspec_node.__class__.__name__))
                 # manifest node element shouldn't contain available attribute
                 rspec_node.pop('available')
                 rspec_nodes.append(rspec_node) 
