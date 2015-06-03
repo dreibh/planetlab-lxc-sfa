@@ -680,7 +680,7 @@ class PlDriver (Driver):
         # ensure person records exists
         persons = slices.verify_persons(xrn.hrn, slice, users, sfa_peer, options=options)
         # ensure slice attributes exists
-        slices.verify_slice_attributes(slice, requested_attributes, options=options)
+        slices.verify_slice_tags(slice, requested_attributes, options=options)
        
         # add/remove slice from nodes
         request_nodes = rspec.version.get_nodes_with_slivers()

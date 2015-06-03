@@ -321,8 +321,7 @@ class PlSlices:
                 slice_tags.append({'name': 'vini_topo', 'value': 'manual', 'node_id': node_id})
                 #self.driver.shell.AddSliceTag(slice['name'], 'topo_rspec', str([topo_rspec]), node_id) 
 
-        self.verify_slice_attributes(slice, slice_tags, {'append': True}, admin=True)
-                        
+        self.verify_slice_tags(slice, slice_tags, {'pltags':'append'}, admin=True)
         
 
     def verify_site(self, slice_xrn, slice_record=None, sfa_peer=None, options=None):
@@ -557,15 +556,29 @@ class PlSlices:
                   self.driver.shell.AddPersonKey(int(person_id), key)
 
 
-    # incoming data (attributes) have a (name, value) pair
-    # while PLC data (tags) have a (tagname, value) pair
-    # we must be careful not to mix these up
-    def verify_slice_attributes(self, slice, requested_slice_attributes, options=None, admin=False):
+    def verify_slice_tags(self, slice, requested_slice_attributes, options=None, admin=False):
+        """
+        This function deals with slice tags, and supports 3 modes described
+        in the 'pltags' option that can be either
+        (*) 'ignore' (default) - do nothing
+        (*) 'append' - only add incoming tags, that do not match an existing tag
+        (*) anything else - tries to do the plain wholesale thing, 
+            i.e. to leave the db in sync with incoming tags
+        """
         if options is None: options={}
-        append = options.get('append', True)
-        logger.debug("verify_slice_attributes, append mode: {}".format(append))
-        for requested_slice_attribute in requested_slice_attributes:
-            logger.debug("verify_slice_attributes, incoming req : {}".format(requested_slice_attribute))
+
+        # lookup 'pltags' in options to find out which mode is requested here
+        # make sure the default is 'ignore' 
+        pltags = options.get('pltags', 'ignore') or 'ignore'
+
+        if pltags == 'ignore':
+            logger.info('verify_slice_tags in ignore mode - leaving slice tags as-is')
+            return
+        
+        # incoming data (attributes) have a (name, value) pair
+        # while PLC data (tags) have a (tagname, value) pair
+        # we must be careful not to mix these up
+
         # get list of tags users are able to manage - based on category
         filter = {'category': '*slice*'}
         if not admin:
@@ -597,8 +610,8 @@ class PlSlices:
                        requested_attribute['value'] == slice_tag['value']:
                         tag_found = True
                         break
-            # preserve missing tags in append mode
-            if not tag_found and not append:
+            # remove tags only if not in append mode
+            if not tag_found and pltags != 'append':
                 slice_tags_to_remove.append(slice_tag)
 
         # get tags that should be added:
