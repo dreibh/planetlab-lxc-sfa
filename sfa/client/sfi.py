@@ -1280,7 +1280,12 @@ use this if you mean an authority instead""")
         """
         server = self.sliceapi()
         server_version = self.get_cached_server_version(server)
+        if len(args) != 2:
+            self.print_help()
+            sys.exit(1)
         slice_hrn = args[0]
+        rspec_file = self.get_rspec_file(args[1])
+
         slice_urn = Xrn(slice_hrn, type='slice').get_urn()
 
         # credentials
@@ -1300,8 +1305,6 @@ use this if you mean an authority instead""")
             show_credentials(creds)
 
         # rspec
-        rspec_file = self.get_rspec_file(args[1])
-        rspec = open(rspec_file).read()
         api_options = {}
         api_options ['call_id'] = unique_call_id()
         # users
@@ -1320,7 +1323,9 @@ use this if you mean an authority instead""")
         api_options['sfa_users'] = sfa_users
         api_options['geni_users'] = geni_users
 
-        allocate = server.Allocate(slice_urn, creds, rspec, api_options)
+        with open(rspec_file) as rspec:
+            rspec_xml = rspec.read()
+            allocate = server.Allocate(slice_urn, creds, rspec_xml, api_options)
         value = ReturnValue.get_value(allocate)
         if self.options.raw:
             save_raw_to_file(allocate, self.options.raw, self.options.rawformat, self.options.rawbanner)
