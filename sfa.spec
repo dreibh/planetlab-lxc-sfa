@@ -1,6 +1,6 @@
 %define name sfa
 %define version 3.1
-%define taglevel 15
+%define taglevel 16
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -253,6 +253,23 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Thu Jun 04 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-16
+- added a new builtin column 'name' for authorities in the sfa registry
+- this is kept in sync with MyPLC's site names when relevant
+- sfa update -t authority thus now has a new -n/--name option
+- sfi register or update can specify record type on only 2 characters (au, us, no, or sl)
+- reviewed Describe and Allocate wrt slice tags for a PL AM:
+- Describe now exposes all slice tags with a 'scope' being 'sliver' or 'slice'
+- Allocate now by default ignores incoming slice tags
+- Allocate's options can mention 'pltags' among 'ignore', 'append', 'sync'
+- default being 'ignore'
+- in 'ignore' mode, slice tags are unchanged in the PL db
+- in 'append' mode, slice tags from the rspec are added to the db unless
+- they are already present
+- in 'sync' mode, the code attempts to leave the PL db in sync with the tags
+- provided in rspec; this can be dangerous and is thus no longer the default
+- behaviour
+
 * Thu Apr 23 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-15
 - major rework of the iotlab driver, that uses an IoT-lab REST API
 - and so does not need to interact with LDAP and OAR directly
