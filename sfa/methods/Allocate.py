@@ -37,9 +37,9 @@ class Allocate(Method):
       (*) options['pltags'] == 'append'
           All incoming slice tags are added to corresponding slivers, 
           unless an exact match can be found in the PLC db
-      (*) options['pltags'] == 'match'
+      (*) options['pltags'] == 'sync'
           The historical mode, that attempts to leave the PLC db in a state
-          that matches the ones specified in incoming rspec.
+          in sync with the ones specified in incoming rspec.
 
     See also http://svn.planet-lab.org/wiki/SFASliceTags
 

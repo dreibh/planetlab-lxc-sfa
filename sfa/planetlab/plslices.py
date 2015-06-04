@@ -562,14 +562,16 @@ class PlSlices:
         in the 'pltags' option that can be either
         (*) 'ignore' (default) - do nothing
         (*) 'append' - only add incoming tags, that do not match an existing tag
-        (*) anything else - tries to do the plain wholesale thing, 
+        (*) 'sync' - tries to do the plain wholesale thing, 
             i.e. to leave the db in sync with incoming tags
         """
         if options is None: options={}
 
         # lookup 'pltags' in options to find out which mode is requested here
+        pltags = options.get('pltags', 'ignore') 
         # make sure the default is 'ignore' 
-        pltags = options.get('pltags', 'ignore') or 'ignore'
+        if pltags not in ('ignore', 'append', 'sync'):
+            pltags = 'ignore'
 
         if pltags == 'ignore':
             logger.info('verify_slice_tags in ignore mode - leaving slice tags as-is')
