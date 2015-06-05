@@ -234,11 +234,9 @@ def load_record_from_opts(options):
     return Record(dict=record_dict)
 
 def load_record_from_file(filename):
-    f=codecs.open(filename, encoding="utf-8", mode="r")
-    xml_string = f.read()
-    f.close()
-    return Record(xml=xml_string)
-
+    with codecs.open(filename, encoding="utf-8", mode="r") as f:
+        xml_str = f.read()
+    return Record(xml=xml_str)
 
 import uuid
 def unique_call_id(): return uuid.uuid4().urn
