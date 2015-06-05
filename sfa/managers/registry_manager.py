@@ -288,8 +288,15 @@ class RegistryManager:
                 records = dbsession.query(RegRecord).filter_by(authority=hrn).all()
 #                logger.debug("non recursive mode, found %d local records"%(len(records)))
             # so that sfi list can show more than plain names...
-            for record in records: augment_with_sfa_builtins (record)
-            record_dicts=[ record.todict(exclude_types=[InstrumentedList]) for record in records ]
+            for record in records:
+                # xxx mystery - again this useless statement is key here so that
+                # resulting records have their __dict__ field actually in line with the
+                # object's contents; was first observed with authorities' 'name' column
+                # that would be missing from result as received by client
+                # record.todict() is the place where __dict__ is used
+                print "DO NOT REMOVE ME before augment_with_sfa_builtins, record=%s"%record
+                augment_with_sfa_builtins(record)
+            record_dicts = [ record.todict(exclude_types=(InstrumentedList,)) for record in records ]
     
         return record_dicts
     
@@ -486,7 +493,7 @@ class RegistryManager:
                 record.email = email
         
         # update the PLC information that was specified with the record
-        # xxx oddly enough, without this useless statement, 
+        # xxx mystery: oddly enough, without this useless statement, 
         # record.__dict__ as received by the driver seems to be off
         # anyway the driver should receive an object 
         # (and then extract __dict__ itself if needed)

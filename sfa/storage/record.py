@@ -4,6 +4,8 @@ from datetime import datetime
 from sfa.util.xml import XML
 from sfa.trust.gid import GID
 
+from sfa.util.sfalogging import logger
+
 class Record:
 
     def __init__(self, dict=None, xml=None):
@@ -33,19 +35,18 @@ class Record:
         # fallback
         return "** undef_datetime **"
     
-    # it may be important to exclude relationships, which fortunately
+    #
+    # need to filter out results, esp. wrt relationships
+    # exclude_types must be a tuple so we can use isinstance
     # 
     def todict (self, exclude_types=None):
-        if exclude_types is None: exclude_types=[]
-        d=self.__dict__
-        def exclude (k,v):
-            if k.startswith('_'): return True
-            if exclude_types:
-                for exclude_type in exclude_types:
-                    if isinstance (v,exclude_type): return True
-            return False
-        keys=[k for (k,v) in d.items() if not exclude(k,v)]
-        return dict ( [ (k,d[k]) for k in keys ] )
+        if exclude_types is None:
+            exclude_types = ()
+        d = self.__dict__
+        def exclude (k, v):
+            return k.startswith('_') or isinstance (v, exclude_types)
+        keys = [ k for k, v in d.items() if not exclude(k, v) ]
+        return { k : d[k] for k in keys }
     
     def toxml(self):
         return self.save_as_xml()
