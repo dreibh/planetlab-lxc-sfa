@@ -489,15 +489,35 @@ augment_map = {'authority': {'reg-pis' : 'reg_pis',},
            }
 
 
+# xxx mystery
+# the way we use sqlalchemy might be a little wrong
+# in any case what has been observed is that (Reg)Records as returned by an sqlalchemy
+# query not always have their __dict__ properly adjusted
+# typically a RegAuthority object would have its object.name set properly, but
+# object.__dict__ has no 'name' key
+# which is an issue because we rely on __dict__ for many things, in particular this
+# is what gets exposed to the drivers (this is historical and dates back before sqlalchemy)
+# so it is recommended to always run this function that will make sure
+# that such built-in fields are properly set in __dict__ too
+# 
 def augment_with_sfa_builtins(local_record):
     # don't ruin the import of that file in a client world
     from sfa.util.xrn import Xrn
     # add a 'urn' field
     setattr(local_record, 'reg-urn', Xrn(xrn=local_record.hrn, type=local_record.type).urn)
     # users have keys and this is needed to synthesize 'users' sent over to CreateSliver
+    fields_to_check = []
     if local_record.type == 'user':
         user_keys = [ key.key for key in local_record.reg_keys ]
         setattr(local_record, 'reg-keys', user_keys)
+        fields_to_check = ['email']
+    elif local_record.type == 'authority':
+        fields_to_check = ['name']
+    for field in fields_to_check:
+        if not field in local_record.__dict__:
+            logger.debug("augment_with_sfa_builtins: hotfixing missing '{}' in {}"
+                         .format(field, local_record.hrn))
+            local_record.__dict__[field] = getattr(local_record, field)
     # search in map according to record type
     type_map = augment_map.get(local_record.type, {})
     # use type-dep. map to do the job

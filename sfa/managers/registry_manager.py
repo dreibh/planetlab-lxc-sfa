@@ -295,12 +295,11 @@ class RegistryManager:
 #                logger.debug("non recursive mode, found {} local records".format(len(records)))
             # so that sfi list can show more than plain names...
             for record in records:
-                # xxx mystery - again this useless statement is key here so that
-                # resulting records have their __dict__ field actually in line with the
-                # object's contents; was first observed with authorities' 'name' column
+                # xxx mystery - see also the bottom of model.py
+                # resulting records have been observed to not always have
+                # their __dict__ actually in line with the object's contents;
+                # was first observed with authorities' 'name' column
                 # that would be missing from result as received by client
-                # record.todict() is the place where __dict__ is used
-                print "DO NOT REMOVE ME before augment_with_sfa_builtins, record={}".format(record)
                 augment_with_sfa_builtins(record)
             record_dicts = [ record.record_to_dict(exclude_types=(InstrumentedList,)) for record in records ]
     
@@ -499,11 +498,16 @@ class RegistryManager:
                 record.email = email
         
         # update the PLC information that was specified with the record
-        # xxx mystery: oddly enough, without this useless statement, 
+        # xxx mystery -- see also the bottom of model.py,
+        # oddly enough, without this useless statement, 
         # record.__dict__ as received by the driver seems to be off
-        # anyway the driver should receive an object 
+        # anyway the driver should receive an object
         # (and then extract __dict__ itself if needed)
         print "DO NOT REMOVE ME before driver.update, record={}".format(record)
+        # as of June 2015: I suspect we could remove that print line above and replace it with
+        # augment_with_sfa_builtins(record)
+        # instead, that checks for these fields, like it is done above in List()
+        # but that would need to be confirmed by more extensive tests
         new_key_pointer = -1
         try:
            (pointer, new_key_pointer) = api.driver.update (record.__dict__, new_record.__dict__, hrn, new_key)
