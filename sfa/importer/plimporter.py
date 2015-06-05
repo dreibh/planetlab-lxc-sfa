@@ -449,7 +449,9 @@ class PlImporter:
                     pass
                 # record current users affiliated with the slice
                 slice_record.reg_researchers = \
-                    [ self.locate_by_type_pointer ('user',user_id) for user_id in slice['person_ids'] ]
+                    [ self.locate_by_type_pointer ('user', user_id) for user_id in slice['person_ids'] ]
+                # remove any weird value (looks like we can get 'None' here
+                slice_record.reg_researchers = [ x for x in slice_record.reg_researchers if x ]
                 global_dbsession.commit()
                 slice_record.stale = False
 
