@@ -211,7 +211,7 @@ class RegistryManager:
         local_records=local_records.all()
         
         for local_record in local_records:
-            augment_with_sfa_builtins (local_record)
+            augment_with_sfa_builtins(local_record)
 
         logger.info("Resolve, (details=%s,type=%s) local_records=%s "%(details,type,local_records))
         local_dicts = [ record.__dict__ for record in local_records ]
@@ -235,7 +235,7 @@ class RegistryManager:
         # xxx somehow here calling dict(record) issues a weird error
         # however record.todict() seems to work fine
         # records.extend( [ dict(record) for record in local_records ] )
-        records.extend( [ record.todict(exclude_types=[InstrumentedList]) for record in local_records ] )
+        records.extend( [ record.todict(exclude_types=(InstrumentedList,)) for record in local_records ] )
 
         if not records:
             raise RecordNotFound(str(hrns))

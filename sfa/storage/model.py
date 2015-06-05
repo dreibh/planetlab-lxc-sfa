@@ -210,7 +210,7 @@ class RegAuthority (RegRecord):
     def update_pis (self, pi_hrns, dbsession):
         # strip that in case we have <researcher> words </researcher>
         pi_hrns = [ x.strip() for x in pi_hrns ]
-        request = dbsession.query (RegUser).filter(RegUser.hrn.in_(pi_hrns))
+        request = dbsession.query(RegUser).filter(RegUser.hrn.in_(pi_hrns))
         logger.info("RegAuthority.update_pis: %d incoming pis, %d matches found"\
                     % (len(pi_hrns), request.count()))
         pis = dbsession.query(RegUser).filter(RegUser.hrn.in_(pi_hrns)).all()
@@ -475,23 +475,24 @@ def make_record_xml (xml):
 # were the relationships data came from the testbed side
 # for each type, a dict of the form {<field-name-exposed-in-record>:<alchemy_accessor_name>}
 # so after that, an 'authority' record will e.g. have a 'reg-pis' field with the hrns of its pi-users
-augment_map={'authority': {'reg-pis' : 'reg_pis',},
-             'slice': {'reg-researchers' : 'reg_researchers',},
-             'user': {'reg-pi-authorities' : 'reg_authorities_as_pi',
-                      'reg-slices' : 'reg_slices_as_researcher',},
-             }
+augment_map = {'authority': {'reg-pis' : 'reg_pis',},
+               'slice': {'reg-researchers' : 'reg_researchers',},
+               'user': {'reg-pi-authorities' : 'reg_authorities_as_pi',
+                        'reg-slices' : 'reg_slices_as_researcher',},
+           }
+
 
 def augment_with_sfa_builtins(local_record):
     # don't ruin the import of that file in a client world
     from sfa.util.xrn import Xrn
     # add a 'urn' field
-    setattr(local_record,'reg-urn',Xrn(xrn=local_record.hrn, type=local_record.type).urn)
+    setattr(local_record, 'reg-urn', Xrn(xrn=local_record.hrn, type=local_record.type).urn)
     # users have keys and this is needed to synthesize 'users' sent over to CreateSliver
     if local_record.type == 'user':
         user_keys = [ key.key for key in local_record.reg_keys ]
         setattr(local_record, 'reg-keys', user_keys)
     # search in map according to record type
-    type_map=augment_map.get(local_record.type, {})
+    type_map = augment_map.get(local_record.type, {})
     # use type-dep. map to do the job
     for (field_name, attribute) in type_map.items():
         # get related objects
