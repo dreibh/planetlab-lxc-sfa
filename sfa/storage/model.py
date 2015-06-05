@@ -75,7 +75,7 @@ class AlchemyObj(Record):
 # but we had to define another more internal column (classtype) so we 
 # accomodate variants in types like authority+am and the like
 
-class RegRecord (Base, AlchemyObj):
+class RegRecord(Base, AlchemyObj):
     __tablename__       = 'records'
     record_id           = Column (Integer, primary_key=True)
     # this is the discriminator that tells which class to use
@@ -182,7 +182,7 @@ slice_researcher_table = \
 # all subclasses define a convenience constructor with a default value for type, 
 # and when applicable a way to define local fields in a kwd=value argument
 ####################
-class RegAuthority (RegRecord):
+class RegAuthority(RegRecord):
     __tablename__       = 'authorities'
     __mapper_args__     = { 'polymorphic_identity' : 'authority' }
     record_id           = Column (Integer, ForeignKey ("records.record_id"), primary_key=True)
@@ -224,7 +224,7 @@ class RegAuthority (RegRecord):
         self.reg_pis = pis
 
 ####################
-class RegSlice (RegRecord):
+class RegSlice(RegRecord):
     __tablename__       = 'slices'
     __mapper_args__     = { 'polymorphic_identity' : 'slice' }
     record_id           = Column (Integer, ForeignKey ("records.record_id"), primary_key=True)
@@ -271,7 +271,7 @@ class RegSlice (RegRecord):
         return self.validate_datetime (key, incoming)
 
 ####################
-class RegNode (RegRecord):
+class RegNode(RegRecord):
     __tablename__       = 'nodes'
     __mapper_args__     = { 'polymorphic_identity' : 'node' }
     record_id           = Column (Integer, ForeignKey ("records.record_id"), primary_key=True)
@@ -285,7 +285,7 @@ class RegNode (RegRecord):
         return RegRecord.__repr__(self).replace("Record", "Node")
 
 ####################
-class RegUser (RegRecord):
+class RegUser(RegRecord):
     __tablename__       = 'users'
     # these objects will have type='user' in the records table
     __mapper_args__     = { 'polymorphic_identity' : 'user' }
@@ -324,7 +324,7 @@ class RegUser (RegRecord):
 # meaning, when querying the whole records, we expect there should
 # be a single query to fetch all the keys 
 # or, is it enough that we issue a single query to retrieve all the keys 
-class RegKey (Base):
+class RegKey(Base):
     __tablename__       = 'keys'
     key_id              = Column (Integer, primary_key=True)
     record_id           = Column (Integer, ForeignKey ("records.record_id"))
