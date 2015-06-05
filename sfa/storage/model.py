@@ -107,8 +107,12 @@ class RegRecord (Base, AlchemyObj):
         if dict:                                self.load_from_dict (dict)
 
     def __repr__(self):
-        result="<Record id=%s, type=%s, hrn=%s, authority=%s, pointer=%s" % \
-                (self.record_id, self.type, self.hrn, self.authority, self.pointer)
+        result="<Record id=%s, type=%s, hrn=%s, authority=%s" % \
+                (self.record_id, self.type, self.hrn, self.authority)
+#        for extra in ('pointer', 'email', 'name'):
+        for extra in ('email', 'name'):
+            if hasattr(self, extra):
+                result += " {}={},".format(extra, getattr(self, extra))
         # skip the uniform '--- BEGIN CERTIFICATE --' stuff
         if self.gid:
             result+=" gid=%s..."%self.gid[28:36]
