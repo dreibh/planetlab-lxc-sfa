@@ -469,9 +469,9 @@ def make_record_dict (record_dict):
     # register non-db attributes in an extensions field
     return result
         
-def make_record_xml (xml):
-    xml_record = XML(xml)
-    xml_dict = xml_record.todict()
+def make_record_xml (xml_str):
+    xml = XML(xml_str)
+    xml_dict = xml.todict()
     logger.info("load from xml, keys=%s"%xml_dict.keys())
     return make_record_dict (xml_dict)
 

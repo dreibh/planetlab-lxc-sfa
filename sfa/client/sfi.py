@@ -1054,12 +1054,12 @@ use this if you mean an authority instead""")
             try:
                 record_filepath = args[0]
                 rec_file = self.get_record_file(record_filepath)
-                record_dict.update(load_record_from_file(rec_file).todict())
+                record_dict.update(load_record_from_file(rec_file).record_to_dict())
             except:
                 print "Cannot load record file {}".format(record_filepath)
                 sys.exit(1)
         if options:
-            record_dict.update(load_record_from_opts(options).todict())
+            record_dict.update(load_record_from_opts(options).record_to_dict())
         # we should have a type by now
         if 'type' not in record_dict :
             self.print_help()
@@ -1086,9 +1086,9 @@ use this if you mean an authority instead""")
         if len(args) > 0:
             record_filepath = args[0]
             rec_file = self.get_record_file(record_filepath)
-            record_dict.update(load_record_from_file(rec_file).todict())
+            record_dict.update(load_record_from_file(rec_file).record_to_dict())
         if options:
-            record_dict.update(load_record_from_opts(options).todict())
+            record_dict.update(load_record_from_opts(options).record_to_dict())
         # at the very least we need 'type' here
         if 'type' not in record_dict or record_dict['type'] is None:
             self.print_help()

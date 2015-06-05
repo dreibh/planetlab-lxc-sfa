@@ -8,12 +8,12 @@ from sfa.util.sfalogging import logger
 
 class Record:
 
-    def __init__(self, dict=None, xml=None):
+    def __init__(self, dict=None, xml_str=None):
         if dict:
             self.load_from_dict(dict)
-        elif xml:
-            xml_record = XML(xml)
-            xml_dict = xml_record.todict()
+        elif xml_str:
+            xml = XML(xml_str)
+            xml_dict = xml.todict()
             self.load_from_dict(xml_dict)  
 
 
@@ -39,7 +39,7 @@ class Record:
     # need to filter out results, esp. wrt relationships
     # exclude_types must be a tuple so we can use isinstance
     # 
-    def todict (self, exclude_types=None):
+    def record_to_dict (self, exclude_types=None):
         if exclude_types is None:
             exclude_types = ()
         d = self.__dict__

@@ -235,7 +235,7 @@ class RegistryManager:
         # xxx somehow here calling dict(record) issues a weird error
         # however record.todict() seems to work fine
         # records.extend( [ dict(record) for record in local_records ] )
-        records.extend( [ record.todict(exclude_types=(InstrumentedList,)) for record in local_records ] )
+        records.extend( [ record.record_to_dict(exclude_types=(InstrumentedList,)) for record in local_records ] )
 
         if not records:
             raise RecordNotFound(str(hrns))
@@ -296,7 +296,7 @@ class RegistryManager:
                 # record.todict() is the place where __dict__ is used
                 print "DO NOT REMOVE ME before augment_with_sfa_builtins, record=%s"%record
                 augment_with_sfa_builtins(record)
-            record_dicts = [ record.todict(exclude_types=(InstrumentedList,)) for record in records ]
+            record_dicts = [ record.record_to_dict(exclude_types=(InstrumentedList,)) for record in records ]
     
         return record_dicts
     
