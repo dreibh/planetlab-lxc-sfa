@@ -112,71 +112,68 @@ def show_credentials (cred_s):
     for cred in cred_s:
         print "Using Credential {}".format(credential_printable(cred))
 
-# save methods
-def save_raw_to_file(var, filename, format="text", banner=None):
-    if filename == "-":
-        # if filename is "-", send it to stdout
-        f = sys.stdout
+########## save methods
+
+### raw
+def save_raw_to_file(var, filename, format='text', banner=None):
+    if filename == '-':
+        _save_raw_to_file(var, sys.stdout, format, banner)
     else:
-        f = open(filename, "w")
-    if banner:
-        f.write(banner+"\n")
+        with open(filename, w) as fileobj:
+            _save_raw_to_file(var, fileobj, format, banner)
+        print "(Over)wrote {}".format(filename)
+
+def _save_raw_to_file(var, f, format, banner):
     if format == "text":
-        f.write(str(var))
+        if banner: f.write(banner+"\n")
+        f.write("{}".format(var))
+        if banner: f.write('\n'+banner+"\n")
     elif format == "pickled":
         f.write(pickle.dumps(var))
     elif format == "json":
-        if hasattr(json, "dumps"):
-            f.write(json.dumps(var))   # python 2.6
-        else:
-            f.write(json.write(var))   # python 2.5
+        f.write(json.dumps(var))   # python 2.6
     else:
         # this should never happen
         print "unknown output format", format
-    if banner:
-        f.write('\n'+banner+"\n")
 
+### 
 def save_rspec_to_file(rspec, filename):
     if not filename.endswith(".rspec"):
         filename = filename + ".rspec"
     with open(filename, 'w') as f:
         f.write("{}".format(rspec))
-    return
-
-def save_records_to_file(filename, record_dicts, format="xml"):
-    if format == "xml":
-        index = 0
-        for record_dict in record_dicts:
-            if index > 0:
-                save_record_to_file(filename + "." + str(index), record_dict)
-            else:
-                save_record_to_file(filename, record_dict)
-            index = index + 1
-    elif format == "xmllist":
-        f = open(filename, "w")
-        f.write("<recordlist>\n")
-        for record_dict in record_dicts:
-            record_obj=Record(dict=record_dict)
-            f.write('<record hrn="' + record_obj.hrn + '" type="' + record_obj.type + '" />\n')
-        f.write("</recordlist>\n")
-        f.close()
-    elif format == "hrnlist":
-        f = open(filename, "w")
-        for record_dict in record_dicts:
-            record_obj=Record(dict=record_dict)
-            f.write(record_obj.hrn + "\n")
-        f.close()
-    else:
-        # this should never happen
-        print "unknown output format", format
+    print "(Over)wrote {}".format(filename)
 
 def save_record_to_file(filename, record_dict):
     record = Record(dict=record_dict)
     xml = record.save_as_xml()
-    f=codecs.open(filename, encoding='utf-8',mode="w")
-    f.write(xml)
-    f.close()
-    return
+    with codecs.open(filename, encoding='utf-8',mode="w") as f:
+        f.write(xml)
+    print "(Over)wrote {}".format(filename)
+
+def save_records_to_file(filename, record_dicts, format="xml"):
+    if format == "xml":
+        for index, record_dict in enumerate(record_dicts):
+            save_record_to_file(filename + "." + str(index), record_dict)
+    elif format == "xmllist":
+        with open(filename, "w") as f:
+            f.write("<recordlist>\n")
+            for record_dict in record_dicts:
+                record_obj = Record(dict=record_dict)
+                f.write('<record hrn="' + record_obj.hrn + '" type="' + record_obj.type + '" />\n')
+            f.write("</recordlist>\n")
+            print "(Over)wrote {}".format(filename)
+
+    elif format == "hrnlist":
+        with open(filename, "w") as f:
+            for record_dict in record_dicts:
+                record_obj = Record(dict=record_dict)
+                f.write(record_obj.hrn + "\n")
+            print "(Over)wrote {}".format(filename)
+
+    else:
+        # this should never happen
+        print "unknown output format", format
 
 # minimally check a key argument
 def check_ssh_key (key):
