@@ -42,7 +42,7 @@ from sqlalchemy.orm.collections import InstrumentedList
 # e.g. registry calls this 'reg-researchers'
 # while some drivers call this 'researcher'
 # we need to make sure that both keys appear and are the same
-def _normalize_input (record, reg_key, driver_key):
+def _normalize_input(record, reg_key, driver_key):
     # this looks right, use this for both keys
     if reg_key in record:
         # and issue a warning if they were both set and different
@@ -229,7 +229,7 @@ class RegistryManager:
             # used to be in the driver code, sounds like a poorman thing though
             def solve_neighbour_url (record):
                 if not record.type.startswith('authority'): return 
-                hrn=record.hrn
+                hrn = record.hrn
                 for neighbour_dict in [ api.aggregates, api.registries ]:
                     if hrn in neighbour_dict:
                         record.url=neighbour_dict[hrn].get_url()
