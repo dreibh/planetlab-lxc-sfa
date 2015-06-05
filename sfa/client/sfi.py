@@ -193,13 +193,16 @@ def normalize_type (type):
         return 'slice'
     elif type.startswith('no'):
         return 'node'
+    elif type.startswith('ag'):
+        return 'aggregate'
+    elif type.startswith('al'):
+        return 'all'
     else:
+        print 'unknown type {} - should start with one of au|us|sl|no|ag|al'.format(type)
         return None
 
 def load_record_from_opts(options):
     record_dict = {}
-    if hasattr(options, 'type'):
-        options.type = normalize_type(options.type)
     if hasattr(options, 'xrn') and options.xrn:
         if hasattr(options, 'type') and options.type:
             xrn = Xrn(options.xrn, options.type)
@@ -439,7 +442,7 @@ class Sfi:
 
         if canonical in ("register", "update"):
             parser.add_option('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-            parser.add_option('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
+            parser.add_option('-t', '--type', dest='type', metavar='<type>', help='object type (2 first chars is enough)', default=None)
             parser.add_option('-e', '--email', dest='email', default="",  help="email (mandatory for users)") 
             parser.add_option('-n', '--name', dest='name', default="",  help="name (optional for authorities)") 
             parser.add_option('-k', '--key', dest='key', metavar='<key>', help='public key string or file', 
@@ -472,10 +475,9 @@ class Sfi:
                               help="renew as long as possible")
         # registy filter option
         if canonical in ("list", "show", "remove"):
-            parser.add_option("-t", "--type", dest="type", type="choice",
-                            help="type filter ([all]|user|slice|authority|node|aggregate)",
-                            choices=("all", "user", "slice", "authority", "node", "aggregate"),
-                            default="all")
+            parser.add_option("-t", "--type", dest="type", metavar="<type>",
+                              default="all",
+                              help="type filter - 2 first chars is enough ([all]|user|slice|authority|node|aggregate)")
         if canonical in ("show"):
             parser.add_option("-k","--key",dest="keys",action="append",default=[],
                               help="specify specific keys to be displayed from record")
@@ -593,6 +595,12 @@ use this if you mean an authority instead""")
             sys.exit(1)
         self.command_options = command_options
 
+        # allow incoming types on 2 characters only
+        if hasattr(command_options, 'type'):
+            command_options.type = normalize_type(command_options.type)
+            if not command_options.type:
+                sys.exit(1)
+        
         self.read_config () 
         self.bootstrap ()
         self.logger.debug("Command={}".format(self.command))
