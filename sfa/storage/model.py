@@ -110,7 +110,9 @@ class RegRecord (Base, AlchemyObj):
         result="<Record id=%s, type=%s, hrn=%s, authority=%s" % \
                 (self.record_id, self.type, self.hrn, self.authority)
 #        for extra in ('pointer', 'email', 'name'):
-        for extra in ('email', 'name'):
+#        for extra in ('email', 'name'):
+# displaying names at this point it too dangerous, because of unicode
+        for extra in ('email'):
             if hasattr(self, extra):
                 result += " {}={},".format(extra, getattr(self, extra))
         # skip the uniform '--- BEGIN CERTIFICATE --' stuff
@@ -208,7 +210,8 @@ class RegAuthority (RegRecord):
     # no proper data yet, just hack the typename
     def __repr__ (self):
         result = RegRecord.__repr__(self).replace("Record", "Authority")
-        result.replace(">", " name={}>".format(self.name))
+# here again trying to display names that can be utf8 is too dangerous        
+#        result.replace(">", " name={}>".format(self.name))
         return result
 
     def update_pis (self, pi_hrns, dbsession):
