@@ -1,6 +1,6 @@
 %define name sfa
 %define version 3.1
-%define taglevel 16
+%define taglevel 17
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -253,6 +253,11 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Fri Jun 05 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-17
+- workaround for 'name' not being exposed properly by List() on authority objects
+- fix a corner case in PL importer
+- trashed module registry_manager_openstack
+
 * Thu Jun 04 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-16
 - added a new builtin column 'name' for authorities in the sfa registry
 - this is kept in sync with MyPLC's site names when relevant
