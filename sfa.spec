@@ -1,6 +1,6 @@
 %define name sfa
 %define version 3.1
-%define taglevel 17
+%define taglevel 18
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -253,6 +253,9 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Mon Jun 08 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-18
+- incorporated Frederic Saint Marcel's addition of ASAP management tag
+
 * Fri Jun 05 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-17
 - workaround for 'name' not being exposed properly by List() on authority objects
 - fix a corner case in PL importer
