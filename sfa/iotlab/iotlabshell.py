@@ -137,10 +137,13 @@ class IotLABShell(object):
             return {'error': err.reason}
         for exp in experiments['items']:
             # BUG IN OAR REST API : job with reservation didn't return
-            # resources attribute list
-            # we use another request for finding job resources
+            # resources attribute list. We use another request for
+            # finding job resources
             exp_nodes = self.api.method('admin/experiments/%d' % exp['id'])
             exp['resources'] = exp_nodes['nodes']
+            # BUG ASAP jobs without date information
+            if exp['date'] == "as soon as possible":
+                exp['date'] = 0
             reserved_nodes_dict[exp['id']] = exp
         return reserved_nodes_dict
 

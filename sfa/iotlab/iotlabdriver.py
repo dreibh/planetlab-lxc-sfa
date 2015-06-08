@@ -63,7 +63,6 @@ class IotLabDriver(Driver):
         return geni_slivers
 
     def aggregate_version(self):
-        logger.warning("iotlabdriver aggregate_version")
         version_manager = VersionManager()
         ad_rspec_versions = []
         request_rspec_versions = []
@@ -145,6 +144,9 @@ class IotLabDriver(Driver):
         leases = rspec.version.get_leases()
         start_time = min([int(lease['start_time'])
                          for lease in leases])
+        # ASAP Jobs
+        if start_time == 0:
+            start_time = None
         end_time = max([int(lease['start_time']) +
                        int(lease['duration'])*60
                        for lease in leases])

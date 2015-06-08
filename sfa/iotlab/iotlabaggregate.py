@@ -187,8 +187,6 @@ class IotLABAggregate(object):
                 leases.append(reserved_nodes[lease_id])
 
             rspec_leases = self.leases_to_rspec_leases(leases)
-            logger.warning("iotlabaggregate list_resources rspec_leases  %s" %
-                           rspec_leases)
             rspec.version.add_leases(rspec_leases)
         return rspec.toxml()
 
