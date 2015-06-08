@@ -5,5 +5,6 @@ class PLTag(Element):
     fields = [
         'tagname',
         'value',
+        'scope',
     ]
         

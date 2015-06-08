@@ -23,7 +23,26 @@ class Allocate(Method):
     @param slice_urn (string) URN of slice to allocate to
     @param credentials (dict) of credentials
     @param rspec (string) rspec to allocate
-    
+    @param options (dict)
+
+    As of 3.1.16, the PL driver implements here an important option named
+    'pltags' that affects the management of slice tags.
+
+    This option can take 3 values
+      (*) options['pltags'] == 'ignore' (default)
+          This is the recommended mode; in this mode all slice tags passed 
+          here are ignore, which correspond to the <planetlab:attribute> XML tags in 
+          the <sliver_type> areas of incoming rspec to Allocate.
+          In other words you are guaranteed to leave slice tags alone.
+      (*) options['pltags'] == 'append'
+          All incoming slice tags are added to corresponding slivers, 
+          unless an exact match can be found in the PLC db
+      (*) options['pltags'] == 'sync'
+          The historical mode, that attempts to leave the PLC db in a state
+          in sync with the ones specified in incoming rspec.
+
+    See also http://svn.planet-lab.org/wiki/SFASliceTags
+
     """
     interfaces = ['aggregate', 'slicemgr']
     accepts = [

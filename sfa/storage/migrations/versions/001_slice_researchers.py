@@ -4,9 +4,9 @@
 from sqlalchemy import Table, MetaData, Column, ForeignKey
 from sqlalchemy import Integer, String
 
-metadata=MetaData()
+metadata = MetaData()
 
-# this is needed my migrate so it can locate 'records.record_id'
+# this is needed by migrate so it can locate 'records.record_id'
 records = \
     Table ( 'records', metadata,
             Column ('record_id', Integer, primary_key=True),

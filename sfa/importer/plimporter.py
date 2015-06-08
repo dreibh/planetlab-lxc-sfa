@@ -47,7 +47,7 @@ class PlImporter:
 
     def __init__ (self, auth_hierarchy, logger):
         self.auth_hierarchy = auth_hierarchy
-        self.logger=logger
+        self.logger = logger
 
     def add_options (self, parser):
         # we don't have any options for now
@@ -59,7 +59,7 @@ class PlImporter:
     def remember_record_by_hrn (self, record):
         tuple = (record.type, record.hrn)
         if tuple in self.records_by_type_hrn:
-            self.logger.warning ("PlImporter.remember_record_by_hrn: duplicate (%s,%s)"%tuple)
+            self.logger.warning ("PlImporter.remember_record_by_hrn: duplicate {}".format(tuple))
             return
         self.records_by_type_hrn [ tuple ] = record
 
@@ -70,7 +70,7 @@ class PlImporter:
             return
         tuple = (record.type, record.pointer)
         if tuple in self.records_by_type_pointer:
-            self.logger.warning ("PlImporter.remember_record_by_pointer: duplicate (%s,%s)"%tuple)
+            self.logger.warning ("PlImporter.remember_record_by_pointer: duplicate {}".format(tuple))
             return
         self.records_by_type_pointer [ ( record.type, record.pointer,) ] = record
 
@@ -119,7 +119,7 @@ class PlImporter:
                 auth_record.just_created()
                 global_dbsession.add(auth_record)
                 global_dbsession.commit()
-                self.logger.info("PlImporter: Imported authority (vini site) %s"%auth_record)
+                self.logger.info("PlImporter: Imported authority (vini site) {}".format(auth_record))
                 self.remember_record ( site_record )
 
     def run (self, options):
@@ -141,7 +141,8 @@ class PlImporter:
                      if record.pointer != -1] )
 
         # initialize record.stale to True by default, then mark stale=False on the ones that are in use
-        for record in all_records: record.stale=True
+        for record in all_records:
+            record.stale = True
 
         ######## retrieve PLC data
         # Get all plc sites
@@ -178,7 +179,7 @@ class PlImporter:
                     key = keys_by_id[key_id]
                     pubkeys.append(key)
                 except:
-                    self.logger.warning("Could not spot key %d - probably non-ssh"%key_id)
+                    self.logger.warning("Could not spot key {} - probably non-ssh".format(key_id))
             keys_by_person_id[person['person_id']] = pubkeys
         # Get all plc nodes  
         nodes = shell.GetNodes( {'peer_id': None}, ['node_id', 'hostname', 'site_id'])
@@ -193,7 +194,7 @@ class PlImporter:
         self.create_special_vini_record (interface_hrn)
 
         # Get top authority record
-        top_auth_record=self.locate_by_type_hrn ('authority', root_auth)
+        top_auth_record = self.locate_by_type_hrn ('authority', root_auth)
         admins = []
 
         # start importing 
@@ -209,7 +210,7 @@ class PlImporter:
             site_hrn = site['hrn']
             # import if hrn is not in list of existing hrns or if the hrn exists
             # but its not a site record
-            site_record=self.locate_by_type_hrn ('authority', site_hrn)
+            site_record = self.locate_by_type_hrn ('authority', site_hrn)
             if not site_record:
                 try:
                     urn = hrn_to_urn(site_hrn, 'authority')
@@ -218,28 +219,32 @@ class PlImporter:
                     auth_info = self.auth_hierarchy.get_auth_info(urn)
                     site_record = RegAuthority(hrn=site_hrn, gid=auth_info.get_gid_object(),
                                                pointer=site['site_id'],
-                                               authority=get_authority(site_hrn))
+                                               authority=get_authority(site_hrn),
+                                               name=site['name'])
                     site_record.just_created()
                     global_dbsession.add(site_record)
                     global_dbsession.commit()
-                    self.logger.info("PlImporter: imported authority (site) : %s" % site_record) 
-                    self.remember_record (site_record)
+                    self.logger.info("PlImporter: imported authority (site) : {}".format(site_record))
+                    self.remember_record(site_record)
                 except:
                     # if the site import fails then there is no point in trying to import the
                     # site's child records (node, slices, persons), so skip them.
-                    self.logger.log_exc("PlImporter: failed to import site %s. Skipping child records"%site_hrn) 
+                    self.logger.log_exc("PlImporter: failed to import site {}. Skipping child records"\
+                                        .format(site_hrn))
                     continue 
             else:
                 # xxx update the record ...
+                site_record.name = site['name']
                 pass
-            site_record.stale=False
+            site_record.stale = False
              
             # import node records
             for node_id in site['node_ids']:
                 try:
                     node = nodes_by_id[node_id]
                 except:
-                    self.logger.warning ("PlImporter: cannot find node_id %s - ignored"%node_id)
+                    self.logger.warning ("PlImporter: cannot find node_id {} - ignored"
+                                         .format(node_id))
                     continue 
                 site_auth = get_authority(site_hrn)
                 site_name = site['login_base']
@@ -258,55 +263,59 @@ class PlImporter:
                         node_record.just_created()
                         global_dbsession.add(node_record)
                         global_dbsession.commit()
-                        self.logger.info("PlImporter: imported node: %s" % node_record)  
+                        self.logger.info("PlImporter: imported node: {}".format(node_record))
                         self.remember_record (node_record)
                     except:
-                        self.logger.log_exc("PlImporter: failed to import node %s"%node_hrn) 
+                        self.logger.log_exc("PlImporter: failed to import node {}".format(node_hrn))
                         continue
                 else:
                     # xxx update the record ...
                     pass
-                node_record.stale=False
+                node_record.stale = False
 
-            site_pis=[]
+            site_pis = []
             # import persons
             for person_id in site['person_ids']:
-                proceed=False
+                proceed = False
                 if person_id in persons_by_id:
-                    person=persons_by_id[person_id]
-                    proceed=True
+                    person = persons_by_id[person_id]
+                    proceed = True
                 elif person_id in disabled_person_ids:
                     pass
                 else:
-                    self.logger.warning ("PlImporter: cannot locate person_id %s in site %s - ignored"%(person_id,site_hrn))
+                    self.logger.warning ("PlImporter: cannot locate person_id {} in site {} - ignored"\
+                                         .format(person_id, site_hrn))
                 # make sure to NOT run this if anything is wrong
                 if not proceed: continue
 
                 #person_hrn = email_to_hrn(site_hrn, person['email'])
                 person_hrn = person['hrn']
                 if person_hrn is None:
-                    self.logger.warn("Person %s has no hrn - skipped"%person['email'])
+                    self.logger.warn("Person {} has no hrn - skipped".format(person['email']))
                     continue
                 # xxx suspicious again
-                if len(person_hrn) > 64: person_hrn = person_hrn[:64]
+                if len(person_hrn) > 64:
+                    person_hrn = person_hrn[:64]
                 person_urn = hrn_to_urn(person_hrn, 'user')
 
                 user_record = self.locate_by_type_hrn ( 'user', person_hrn)
 
                 # return a tuple pubkey (a plc key object) and pkey (a Keypair object)
                 def init_person_key (person, plc_keys):
-                    pubkey=None
+                    pubkey = None
                     if  person['key_ids']:
                         # randomly pick first key in set
                         pubkey = plc_keys[0]
                         try:
                             pkey = convert_public_key(pubkey['key'])
                         except:
-                            self.logger.warn('PlImporter: unable to convert public key for %s' % person_hrn)
+                            self.logger.warn('PlImporter: unable to convert public key for {}'
+                                             .format(person_hrn))
                             pkey = Keypair(create=True)
                     else:
                         # the user has no keys. Creating a random keypair for the user's gid
-                        self.logger.warn("PlImporter: person %s does not have a PL public key"%person_hrn)
+                        self.logger.warn("PlImporter: person {} does not have a PL public key"
+                                         .format(person_hrn))
                         pkey = Keypair(create=True)
                     return (pubkey, pkey)
 
@@ -314,8 +323,9 @@ class PlImporter:
                 try:
                     plc_keys = keys_by_person_id.get(person['person_id'],[])
                     if not user_record:
-                        (pubkey,pkey) = init_person_key (person, plc_keys )
-                        person_gid = self.auth_hierarchy.create_gid(person_urn, create_uuid(), pkey, email=person['email'])
+                        (pubkey, pkey) = init_person_key (person, plc_keys )
+                        person_gid = self.auth_hierarchy.create_gid(person_urn, create_uuid(), pkey,
+                                                                    email=person['email'])
                         user_record = RegUser (hrn=person_hrn, gid=person_gid, 
                                                pointer=person['person_id'], 
                                                authority=get_authority(person_hrn),
@@ -323,11 +333,11 @@ class PlImporter:
                         if pubkey: 
                             user_record.reg_keys=[RegKey (pubkey['key'], pubkey['key_id'])]
                         else:
-                            self.logger.warning("No key found for user %s"%user_record)
+                            self.logger.warning("No key found for user {}".format(user_record))
                         user_record.just_created()
                         global_dbsession.add (user_record)
                         global_dbsession.commit()
-                        self.logger.info("PlImporter: imported person: %s" % user_record)
+                        self.logger.info("PlImporter: imported person: {}".format(user_record))
                         self.remember_record ( user_record )
                     else:
                         # update the record ?
@@ -351,13 +361,13 @@ class PlImporter:
                         sfa_keys = user_record.reg_keys
                         def sfa_key_in_list (sfa_key,plc_keys):
                             for plc_key in plc_keys:
-                                if plc_key['key']==sfa_key.key:
+                                if plc_key['key'] == sfa_key.key:
                                     return True
                             return False
                         # are all the SFA keys known to PLC ?
-                        new_keys=False
+                        new_keys = False
                         if not sfa_keys and plc_keys:
-                            new_keys=True
+                            new_keys = True
                         else: 
                             for sfa_key in sfa_keys:
                                  if not sfa_key_in_list (sfa_key,plc_keys):
@@ -367,18 +377,18 @@ class PlImporter:
                             person_gid = self.auth_hierarchy.create_gid(person_urn, create_uuid(), pkey)
                             person_gid.set_email(person['email'])
                             if not pubkey:
-                                user_record.reg_keys=[]
+                                user_record.reg_keys = []
                             else:
-                                user_record.reg_keys=[ RegKey (pubkey['key'], pubkey['key_id'])]
+                                user_record.reg_keys = [ RegKey (pubkey['key'], pubkey['key_id'])]
                             user_record.gid = person_gid
                             user_record.just_updated()
-                            self.logger.info("PlImporter: updated person: %s" % user_record)
+                            self.logger.info("PlImporter: updated person: {}".format(user_record))
                     user_record.email = person['email']
                     global_dbsession.commit()
-                    user_record.stale=False
+                    user_record.stale = False
                     # accumulate PIs - PLCAPI has a limitation that when someone has PI role
                     # this is valid for all sites she is in..
-                    # PI is coded with role_id==20
+                    # PI is coded with role_id == 20
                     if 20 in person['role_ids']:
                         site_pis.append (user_record)
 
@@ -387,7 +397,8 @@ class PlImporter:
                         admins.append(user_record)
 
                 except:
-                    self.logger.log_exc("PlImporter: failed to import person %d %s"%(person['person_id'],person['email']))
+                    self.logger.log_exc("PlImporter: failed to import person {} {}"
+                                        .format(person['person_id'], person['email']))
     
             # maintain the list of PIs for a given site
             # for the record, Jordan had proposed the following addition as a welcome hotfix to a previous version:
@@ -404,12 +415,14 @@ class PlImporter:
                 try:
                     slice = slices_by_id[slice_id]
                 except:
-                    self.logger.warning ("PlImporter: cannot locate slice_id %s - ignored"%slice_id)
+                    self.logger.warning ("PlImporter: cannot locate slice_id {} - ignored"
+                                         .format(slice_id))
                     continue
                 #slice_hrn = slicename_to_hrn(interface_hrn, slice['name'])
                 slice_hrn = slice['hrn']
                 if slice_hrn is None:
-                    self.logger.warning("Slice %s has no hrn - skipped"%slice['name'])
+                    self.logger.warning("Slice {} has no hrn - skipped"
+                                        .format(slice['name']))
                     continue
                 slice_record = self.locate_by_type_hrn ('slice', slice_hrn)
                 if not slice_record:
@@ -423,45 +436,50 @@ class PlImporter:
                         slice_record.just_created()
                         global_dbsession.add(slice_record)
                         global_dbsession.commit()
-                        self.logger.info("PlImporter: imported slice: %s" % slice_record)  
+                        self.logger.info("PlImporter: imported slice: {}".format(slice_record))
                         self.remember_record ( slice_record )
                     except:
-                        self.logger.log_exc("PlImporter: failed to import slice %s (%s)"%(slice_hrn,slice['name']))
+                        self.logger.log_exc("PlImporter: failed to import slice {} ({})"
+                                            .format(slice_hrn, slice['name']))
                 else:
                     # xxx update the record ...
                     # given that we record the current set of users anyways, there does not seem to be much left to do here
-                    # self.logger.warning ("Slice update not yet implemented on slice %s (%s)"%(slice_hrn,slice['name']))
+                    # self.logger.warning ("Slice update not yet implemented on slice {} ({})"
+                    #                      .format(slice_hrn, slice['name']))
                     pass
                 # record current users affiliated with the slice
                 slice_record.reg_researchers = \
-                    [ self.locate_by_type_pointer ('user',user_id) for user_id in slice['person_ids'] ]
+                    [ self.locate_by_type_pointer ('user', user_id) for user_id in slice['person_ids'] ]
+                # remove any weird value (looks like we can get 'None' here
+                slice_record.reg_researchers = [ x for x in slice_record.reg_researchers if x ]
                 global_dbsession.commit()
-                slice_record.stale=False
+                slice_record.stale = False
 
         # Set PL Admins as PI's of the top authority
         if admins:
             top_auth_record.reg_pis = list(set(admins))
             global_dbsession.commit()
-            self.logger.info('PlImporter: set PL admins %s as PIs of %s'%(admins,top_auth_record.hrn))
+            self.logger.info('PlImporter: set PL admins {} as PIs of {}'
+                             .format(admins, top_auth_record.hrn))
 
         ### remove stale records
         # special records must be preserved
         system_hrns = [interface_hrn, root_auth, interface_hrn + '.slicemanager']
         for record in all_records: 
             if record.hrn in system_hrns: 
-                record.stale=False
+                record.stale = False
             if record.peer_authority:
-                record.stale=False
+                record.stale = False
             if ".vini" in interface_hrn and interface_hrn.endswith('vini') and \
                 record.hrn.endswith("internet2"):
-                record.stale=False
+                record.stale = False
 
         for record in all_records:
-            try:        stale=record.stale
+            try:        stale = record.stale
             except:     
-                stale=True
-                self.logger.warning("stale not found with %s"%record)
+                stale = True
+                self.logger.warning("stale not found with {}".format(record))
             if stale:
-                self.logger.info("PlImporter: deleting stale record: %s" % record)
+                self.logger.info("PlImporter: deleting stale record: {}".format(record))
                 global_dbsession.delete(record)
                 global_dbsession.commit()

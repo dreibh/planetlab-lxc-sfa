@@ -46,7 +46,8 @@ from sfa.client.return_value import ReturnValue
 from sfa.client.candidates import Candidates
 from sfa.client.manifolduploader import ManifoldUploader
 
-CM_PORT=12346
+CM_PORT = 12346
+DEFAULT_RSPEC_VERSION = "GENI 3"
 
 from sfa.client.common import optparse_listvalue_callback, optparse_dictvalue_callback, \
     terminal_render, filter_records 
@@ -83,7 +84,7 @@ def display_record(record, dump=False):
         record.dump(sort=True)
     else:
         info = record.getdict()
-        print "%s (%s)" % (info['hrn'], info['type'])
+        print "{} ({})".format(info['hrn'], info['type'])
     return
 
 
@@ -101,82 +102,78 @@ def credential_printable (cred):
     result += credential.pretty_cred()
     result += "\n"
     rights = credential.get_privileges()
-    result += "type=%s\n" % credential.type    
-    result += "version=%s\n" % credential.version    
-    result += "rights=%s\n" % rights
+    result += "type={}\n".format(credential.type)
+    result += "version={}\n".format(credential.version)
+    result += "rights={}\n".format(rights)
     return result
 
 def show_credentials (cred_s):
     if not isinstance (cred_s,list): cred_s = [cred_s]
     for cred in cred_s:
-        print "Using Credential %s"%credential_printable(cred)
+        print "Using Credential {}".format(credential_printable(cred))
 
-# save methods
-def save_raw_to_file(var, filename, format="text", banner=None):
-    if filename == "-":
-        # if filename is "-", send it to stdout
-        f = sys.stdout
+########## save methods
+
+### raw
+def save_raw_to_file(var, filename, format='text', banner=None):
+    if filename == '-':
+        _save_raw_to_file(var, sys.stdout, format, banner)
     else:
-        f = open(filename, "w")
-    if banner:
-        f.write(banner+"\n")
+        with open(filename, w) as fileobj:
+            _save_raw_to_file(var, fileobj, format, banner)
+        print "(Over)wrote {}".format(filename)
+
+def _save_raw_to_file(var, f, format, banner):
     if format == "text":
-        f.write(str(var))
+        if banner: f.write(banner+"\n")
+        f.write("{}".format(var))
+        if banner: f.write('\n'+banner+"\n")
     elif format == "pickled":
         f.write(pickle.dumps(var))
     elif format == "json":
-        if hasattr(json, "dumps"):
-            f.write(json.dumps(var))   # python 2.6
-        else:
-            f.write(json.write(var))   # python 2.5
+        f.write(json.dumps(var))   # python 2.6
     else:
         # this should never happen
         print "unknown output format", format
-    if banner:
-        f.write('\n'+banner+"\n")
 
+### 
 def save_rspec_to_file(rspec, filename):
     if not filename.endswith(".rspec"):
         filename = filename + ".rspec"
-    f = open(filename, 'w')
-    f.write("%s"%rspec)
-    f.close()
-    return
-
-def save_records_to_file(filename, record_dicts, format="xml"):
-    if format == "xml":
-        index = 0
-        for record_dict in record_dicts:
-            if index > 0:
-                save_record_to_file(filename + "." + str(index), record_dict)
-            else:
-                save_record_to_file(filename, record_dict)
-            index = index + 1
-    elif format == "xmllist":
-        f = open(filename, "w")
-        f.write("<recordlist>\n")
-        for record_dict in record_dicts:
-            record_obj=Record(dict=record_dict)
-            f.write('<record hrn="' + record_obj.hrn + '" type="' + record_obj.type + '" />\n')
-        f.write("</recordlist>\n")
-        f.close()
-    elif format == "hrnlist":
-        f = open(filename, "w")
-        for record_dict in record_dicts:
-            record_obj=Record(dict=record_dict)
-            f.write(record_obj.hrn + "\n")
-        f.close()
-    else:
-        # this should never happen
-        print "unknown output format", format
+    with open(filename, 'w') as f:
+        f.write("{}".format(rspec))
+    print "(Over)wrote {}".format(filename)
 
 def save_record_to_file(filename, record_dict):
     record = Record(dict=record_dict)
     xml = record.save_as_xml()
-    f=codecs.open(filename, encoding='utf-8',mode="w")
-    f.write(xml)
-    f.close()
-    return
+    with codecs.open(filename, encoding='utf-8',mode="w") as f:
+        f.write(xml)
+    print "(Over)wrote {}".format(filename)
+
+def save_records_to_file(filename, record_dicts, format="xml"):
+    if format == "xml":
+        for index, record_dict in enumerate(record_dicts):
+            save_record_to_file(filename + "." + str(index), record_dict)
+    elif format == "xmllist":
+        with open(filename, "w") as f:
+            f.write("<recordlist>\n")
+            for record_dict in record_dicts:
+                record_obj = Record(dict=record_dict)
+                f.write('<record hrn="' + record_obj.hrn + '" type="' + record_obj.type + '" />\n')
+            f.write("</recordlist>\n")
+            print "(Over)wrote {}".format(filename)
+
+    elif format == "hrnlist":
+        with open(filename, "w") as f:
+            for record_dict in record_dicts:
+                record_obj = Record(dict=record_dict)
+                f.write(record_obj.hrn + "\n")
+            print "(Over)wrote {}".format(filename)
+
+    else:
+        # this should never happen
+        print "unknown output format", format
 
 # minimally check a key argument
 def check_ssh_key (key):
@@ -184,6 +181,23 @@ def check_ssh_key (key):
     return re.match(good_ssh_key, key, re.IGNORECASE)
 
 # load methods
+def normalize_type (type):
+    if type.startswith('au'):
+        return 'authority'
+    elif type.startswith('us'):
+        return 'user'
+    elif type.startswith('sl'):
+        return 'slice'
+    elif type.startswith('no'):
+        return 'node'
+    elif type.startswith('ag'):
+        return 'aggregate'
+    elif type.startswith('al'):
+        return 'all'
+    else:
+        print 'unknown type {} - should start with one of au|us|sl|no|ag|al'.format(type)
+        return None
+
 def load_record_from_opts(options):
     record_dict = {}
     if hasattr(options, 'xrn') and options.xrn:
@@ -208,6 +222,9 @@ def load_record_from_opts(options):
         record_dict['reg-researchers'] = options.reg_researchers
     if hasattr(options, 'email') and options.email:
         record_dict['email'] = options.email
+    # authorities can have a name for standalone deployment
+    if hasattr(options, 'name') and options.name:
+        record_dict['name'] = options.name
     if hasattr(options, 'reg_pis') and options.reg_pis:
         record_dict['reg-pis'] = options.reg_pis
 
@@ -217,11 +234,9 @@ def load_record_from_opts(options):
     return Record(dict=record_dict)
 
 def load_record_from_file(filename):
-    f=codecs.open(filename, encoding="utf-8", mode="r")
-    xml_string = f.read()
-    f.close()
-    return Record(xml=xml_string)
-
+    with codecs.open(filename, encoding="utf-8", mode="r") as f:
+        xml_str = f.read()
+    return Record(xml=xml_str)
 
 import uuid
 def unique_call_id(): return uuid.uuid4().urn
@@ -308,7 +323,7 @@ class Sfi:
         format3offset=47
         line=80*'-'
         if not verbose:
-            print format3%("command","cmd_args","description")
+            print format3%("command", "cmd_args", "description")
             print line
         else:
             print line
@@ -323,34 +338,35 @@ class Sfi:
             if verbose:
                 print line
             if command==canonical:
-                doc=doc.replace("\n","\n"+format3offset*' ')
-                print format3%(command,args_string,doc)
+                doc = doc.replace("\n", "\n" + format3offset * ' ')
+                print format3 % (command,args_string,doc)
                 if verbose:
                     self.create_parser_command(command).print_help()
             else:
-                print format3%(command,"<<alias for %s>>"%canonical,"")
+                print format3 % (command,"<<alias for %s>>"%canonical,"")
             
     ### now if a known command was found we can be more verbose on that one
     def print_help (self):
         print "==================== Generic sfi usage"
         self.sfi_parser.print_help()
-        (doc,_,example,canonical)=commands_dict[self.command]
+        (doc, _, example, canonical) = commands_dict[self.command]
         if canonical != self.command:
-            print "\n==================== NOTE: %s is an alias for genuine %s"%(self.command,canonical)
-            self.command=canonical
-        print "\n==================== Purpose of %s"%self.command
+            print "\n==================== NOTE: {} is an alias for genuine {}"\
+                .format(self.command, canonical)
+            self.command = canonical
+        print "\n==================== Purpose of {}".format(self.command)
         print doc
-        print "\n==================== Specific usage for %s"%self.command
+        print "\n==================== Specific usage for {}".format(self.command)
         self.command_parser.print_help()
         if example:
-            print "\n==================== %s example(s)"%self.command
+            print "\n==================== {} example(s)".format(self.command)
             print example
 
     def create_parser_global(self):
         # Generate command line parser
         parser = OptionParser(add_help_option=False,
                               usage="sfi [sfi_options] command [cmd_options] [cmd_args]",
-                              description="Commands: %s"%(" ".join(commands_list)))
+                              description="Commands: {}".format(" ".join(commands_list)))
         parser.add_option("-r", "--registry", dest="registry",
                          help="root registry", metavar="URL", default=None)
         parser.add_option("-s", "--sliceapi", dest="sm", default=None, metavar="URL",
@@ -400,8 +416,8 @@ class Sfi:
         (_, args_string, __,canonical) = commands_dict[command]
 
         parser = OptionParser(add_help_option=False,
-                              usage="sfi [sfi_options] %s [cmd_options] %s"
-                              % (command, args_string))
+                              usage="sfi [sfi_options] {} [cmd_options] {}"\
+                              .format(command, args_string))
         parser.add_option ("-h","--help",dest='help',action='store_true',default=False,
                            help="Summary of one command usage")
 
@@ -421,8 +437,9 @@ class Sfi:
 
         if canonical in ("register", "update"):
             parser.add_option('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-            parser.add_option('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
+            parser.add_option('-t', '--type', dest='type', metavar='<type>', help='object type (2 first chars is enough)', default=None)
             parser.add_option('-e', '--email', dest='email', default="",  help="email (mandatory for users)") 
+            parser.add_option('-n', '--name', dest='name', default="",  help="name (optional for authorities)") 
             parser.add_option('-k', '--key', dest='key', metavar='<key>', help='public key string or file', 
                               default=None)
             parser.add_option('-s', '--slices', dest='slices', metavar='<slices>', help='Set/replace slice xrns',
@@ -453,10 +470,9 @@ class Sfi:
                               help="renew as long as possible")
         # registy filter option
         if canonical in ("list", "show", "remove"):
-            parser.add_option("-t", "--type", dest="type", type="choice",
-                            help="type filter ([all]|user|slice|authority|node|aggregate)",
-                            choices=("all", "user", "slice", "authority", "node", "aggregate"),
-                            default="all")
+            parser.add_option("-t", "--type", dest="type", metavar="<type>",
+                              default="all",
+                              help="type filter - 2 first chars is enough ([all]|user|slice|authority|node|aggregate)")
         if canonical in ("show"):
             parser.add_option("-k","--key",dest="keys",action="append",default=[],
                               help="specify specific keys to be displayed from record")
@@ -464,8 +480,8 @@ class Sfi:
                               help="call Resolve without the 'details' option")
         if canonical in ("resources", "describe"):
             # rspec version
-            parser.add_option("-r", "--rspec-version", dest="rspec_version", default="GENI 3",
-                              help="schema type and version of resulting RSpec")
+            parser.add_option("-r", "--rspec-version", dest="rspec_version", default=DEFAULT_RSPEC_VERSION,
+                              help="schema type and version of resulting RSpec (default:{})".format(DEFAULT_RSPEC_VERSION))
             # disable/enable cached rspecs
             parser.add_option("-c", "--current", dest="current", default=False,
                               action="store_true",  
@@ -477,9 +493,9 @@ class Sfi:
             #panos: a new option to define the type of information about resources a user is interested in
             parser.add_option("-i", "--info", dest="info",
                                 help="optional component information", default=None)
-            # a new option to retreive or not reservation-oriented RSpecs (leases)
+            # a new option to retrieve or not reservation-oriented RSpecs (leases)
             parser.add_option("-l", "--list_leases", dest="list_leases", type="choice",
-                                help="Retreive or not reservation-oriented RSpecs ([resources]|leases|all )",
+                                help="Retrieve or not reservation-oriented RSpecs ([resources]|leases|all)",
                                 choices=("all", "resources", "leases"), default="resources")
 
 
@@ -535,8 +551,12 @@ use this if you mean an authority instead""")
         (doc, args_string, example, canonical) = commands_dict[command]
         method=getattr(self, canonical, None)
         if not method:
-            print "sfi: unknown command %s"%command
-            raise SystemExit,"Unknown command %s"%command
+            print "sfi: unknown command {}".format(command)
+            raise SystemExit("Unknown command {}".format(command))
+        for arg in command_args:
+            if 'help' in arg or arg == '-h':
+                self.print_help()
+                sys.exit(1)
         return method(command_options, command_args)
 
     def main(self):
@@ -570,16 +590,22 @@ use this if you mean an authority instead""")
             sys.exit(1)
         self.command_options = command_options
 
+        # allow incoming types on 2 characters only
+        if hasattr(command_options, 'type'):
+            command_options.type = normalize_type(command_options.type)
+            if not command_options.type:
+                sys.exit(1)
+        
         self.read_config () 
         self.bootstrap ()
-        self.logger.debug("Command=%s" % self.command)
+        self.logger.debug("Command={}".format(self.command))
 
         try:
             retcod = self.dispatch(command, command_options, command_args)
         except SystemExit:
             return 1
         except:
-            self.logger.log_exc ("sfi command %s failed"%command)
+            self.logger.log_exc ("sfi command {} failed".format(command))
             return 1
         return retcod
     
@@ -609,12 +635,12 @@ use this if you mean an authority instead""")
                 config.save(config_file)
                  
         except:
-            self.logger.critical("Failed to read configuration file %s"%config_file)
+            self.logger.critical("Failed to read configuration file {}".format(config_file))
             self.logger.info("Make sure to remove the export clauses and to add quotes")
             if self.options.verbose==0:
                 self.logger.info("Re-run with -v for more details")
             else:
-                self.logger.log_exc("Could not read config file %s"%config_file)
+                self.logger.log_exc("Could not read config file {}".format(config_file))
             sys.exit(1)
      
         self.config_instance=config
@@ -625,7 +651,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_SM"):
            self.sm_url = config.SFI_SM
         else:
-           self.logger.error("You need to set e.g. SFI_SM='http://your.slicemanager.url:12347/' in %s" % config_file)
+           self.logger.error("You need to set e.g. SFI_SM='http://your.slicemanager.url:12347/' in {}".format(config_file))
            errors += 1 
 
         # Set Registry URL
@@ -634,7 +660,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_REGISTRY"):
            self.reg_url = config.SFI_REGISTRY
         else:
-           self.logger.error("You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in %s" % config_file)
+           self.logger.error("You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in {}".format(config_file))
            errors += 1 
 
         # Set user HRN
@@ -643,7 +669,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_USER"):
            self.user = config.SFI_USER
         else:
-           self.logger.error("You need to set e.g. SFI_USER='plc.princeton.username' in %s" % config_file)
+           self.logger.error("You need to set e.g. SFI_USER='plc.princeton.username' in {}".format(config_file))
            errors += 1 
 
         # Set authority HRN
@@ -652,7 +678,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_AUTH"):
            self.authority = config.SFI_AUTH
         else:
-           self.logger.error("You need to set e.g. SFI_AUTH='plc.princeton' in %s" % config_file)
+           self.logger.error("You need to set e.g. SFI_AUTH='plc.princeton' in {}".format(config_file))
            errors += 1 
 
         self.config_file=config_file
@@ -687,10 +713,13 @@ use this if you mean an authority instead""")
             if not os.path.isfile(client_bootstrap.private_key_filename()):
                 self.logger.info ("private key not found, trying legacy name")
                 try:
-                    legacy_private_key = os.path.join (self.options.sfi_dir, "%s.pkey"%Xrn.unescape(get_leaf(self.user)))
-                    self.logger.debug("legacy_private_key=%s"%legacy_private_key)
+                    legacy_private_key = os.path.join (self.options.sfi_dir, "{}.pkey"
+                                                       .format(Xrn.unescape(get_leaf(self.user))))
+                    self.logger.debug("legacy_private_key={}"
+                                      .format(legacy_private_key))
                     client_bootstrap.init_private_key_if_missing (legacy_private_key)
-                    self.logger.info("Copied private key from legacy location %s"%legacy_private_key)
+                    self.logger.info("Copied private key from legacy location {}"
+                                     .format(legacy_private_key))
                 except:
                     self.logger.log_exc("Can't find private key ")
                     sys.exit(1)
@@ -733,7 +762,8 @@ use this if you mean an authority instead""")
         object_hrn = object_gid.get_hrn()
     
         if not object_cred.get_privileges().get_all_delegate():
-            self.logger.error("Object credential %s does not have delegate bit set"%object_hrn)
+            self.logger.error("Object credential {} does not have delegate bit set"
+                              .format(object_hrn))
             return
 
         # the delegating user's gid
@@ -752,9 +782,10 @@ use this if you mean an authority instead""")
     def registry (self):
         # cache the result
         if not hasattr (self, 'registry_proxy'):
-            self.logger.info("Contacting Registry at: %s"%self.reg_url)
-            self.registry_proxy = SfaServerProxy(self.reg_url, self.private_key, self.my_gid, 
-                                                 timeout=self.options.timeout, verbose=self.options.debug)  
+            self.logger.info("Contacting Registry at: {}".format(self.reg_url))
+            self.registry_proxy \
+                =  SfaServerProxy(self.reg_url, self.private_key, self.my_gid, 
+                                  timeout=self.options.timeout, verbose=self.options.debug)  
         return self.registry_proxy
 
     def sliceapi (self):
@@ -767,17 +798,18 @@ use this if you mean an authority instead""")
                 records = self.registry().Resolve(node_hrn, self.my_credential_string)
                 records = filter_records('node', records)
                 if not records:
-                    self.logger.warning("No such component:%r"% opts.component)
+                    self.logger.warning("No such component:{}".format(opts.component))
                 record = records[0]
-                cm_url = "http://%s:%d/"%(record['hostname'],CM_PORT)
+                cm_url = "http://{}:{}/".format(record['hostname'], CM_PORT)
                 self.sliceapi_proxy=SfaServerProxy(cm_url, self.private_key, self.my_gid)
             else:
                 # otherwise use what was provided as --sliceapi, or SFI_SM in the config
                 if not self.sm_url.startswith('http://') or self.sm_url.startswith('https://'):
                     self.sm_url = 'http://' + self.sm_url
-                self.logger.info("Contacting Slice Manager at: %s"%self.sm_url)
-                self.sliceapi_proxy = SfaServerProxy(self.sm_url, self.private_key, self.my_gid, 
-                                                     timeout=self.options.timeout, verbose=self.options.debug)  
+                self.logger.info("Contacting Slice Manager at: {}".format(self.sm_url))
+                self.sliceapi_proxy \
+                    = SfaServerProxy(self.sm_url, self.private_key, self.my_gid, 
+                                     timeout=self.options.timeout, verbose=self.options.debug)  
         return self.sliceapi_proxy
 
     def get_cached_server_version(self, server):
@@ -790,7 +822,7 @@ use this if you mean an authority instead""")
             cache = Cache(cache_file)
         except IOError:
             cache = Cache()
-            self.logger.info("Local cache not found at: %s" % cache_file)
+            self.logger.info("Local cache not found at: {}".format(cache_file))
 
         if cache:
             version = cache.get(cache_key)
@@ -800,7 +832,7 @@ use this if you mean an authority instead""")
             version= ReturnValue.get_value(result)
             # cache version for 20 minutes
             cache.add(cache_key, version, ttl= 60*20)
-            self.logger.info("Updating cache file %s" % cache_file)
+            self.logger.info("Updating cache file {}".format(cache_file))
             cache.save_to_file(cache_file)
 
         return version   
@@ -856,7 +888,7 @@ use this if you mean an authority instead""")
        if (os.path.isfile(file)):
           return file
        else:
-          self.logger.critical("No such rspec file %s"%rspec)
+          self.logger.critical("No such rspec file {}".format(rspec))
           sys.exit(1)
     
     def get_record_file(self, record):
@@ -867,7 +899,7 @@ use this if you mean an authority instead""")
        if (os.path.isfile(file)):
           return file
        else:
-          self.logger.critical("No such registry record file %s"%record)
+          self.logger.critical("No such registry record file {}".format(record))
           sys.exit(1)
 
 
@@ -892,7 +924,7 @@ use this if you mean an authority instead""")
     @declare_command("","")
     def config (self, options, args):
         "Display contents of current config"
-        print "# From configuration file %s"%self.config_file
+        print "# From configuration file {}".format(self.config_file)
         flags=[ ('sfi', [ ('registry','reg_url'),
                           ('auth','authority'),
                           ('user','user'),
@@ -903,15 +935,15 @@ use this if you mean an authority instead""")
             flags.append ( ('myslice', ['backend', 'delegate', 'platform', 'username'] ) )
 
         for (section, tuples) in flags:
-            print "[%s]"%section
+            print "[{}]".format(section)
             try:
                 for (external_name, internal_name) in tuples:
-                    print "%-20s = %s"%(external_name,getattr(self,internal_name))
+                    print "{:-20} = {}".format(external_name, getattr(self, internal_name))
             except:
                 for name in tuples:
-                    varname="%s_%s"%(section.upper(),name.upper())
-                    value=getattr(self.config_instance,varname)
-                    print "%-20s = %s"%(name,value)
+                    varname = "{}_{}".format(section.upper(), name.upper())
+                    value = getattr(self.config_instance,varname)
+                    print "{:-20} = {}".format(name, value)
         # xxx should analyze result
         return 0
 
@@ -982,7 +1014,7 @@ use this if you mean an authority instead""")
         record_dicts = self.registry().Resolve(hrn, self.my_credential_string, resolve_options)
         record_dicts = filter_records(options.type, record_dicts)
         if not record_dicts:
-            self.logger.error("No record of type %s"% options.type)
+            self.logger.error("No record of type {}".format(options.type))
             return
         # user has required to focus on some keys
         if options.keys:
@@ -1020,12 +1052,12 @@ use this if you mean an authority instead""")
             try:
                 record_filepath = args[0]
                 rec_file = self.get_record_file(record_filepath)
-                record_dict.update(load_record_from_file(rec_file).todict())
+                record_dict.update(load_record_from_file(rec_file).record_to_dict())
             except:
-                print "Cannot load record file %s"%record_filepath
+                print "Cannot load record file {}".format(record_filepath)
                 sys.exit(1)
         if options:
-            record_dict.update(load_record_from_opts(options).todict())
+            record_dict.update(load_record_from_opts(options).record_to_dict())
         # we should have a type by now
         if 'type' not in record_dict :
             self.print_help()
@@ -1052,11 +1084,11 @@ use this if you mean an authority instead""")
         if len(args) > 0:
             record_filepath = args[0]
             rec_file = self.get_record_file(record_filepath)
-            record_dict.update(load_record_from_file(rec_file).todict())
+            record_dict.update(load_record_from_file(rec_file).record_to_dict())
         if options:
-            record_dict.update(load_record_from_opts(options).todict())
+            record_dict.update(load_record_from_opts(options).record_to_dict())
         # at the very least we need 'type' here
-        if 'type' not in record_dict:
+        if 'type' not in record_dict or record_dict['type'] is None:
             self.print_help()
             sys.exit(1)
 
@@ -1082,7 +1114,7 @@ use this if you mean an authority instead""")
         elif record_dict['type'] in ['node']:
             cred = self.my_authority_credential_string()
         else:
-            raise "unknown record type" + record_dict['type']
+            raise Exception("unknown record type {}".format(record_dict['type']))
         if options.show_credential:
             show_credentials(cred)
         update = self.registry().Update(record_dict, cred)
@@ -1115,7 +1147,7 @@ use this if you mean an authority instead""")
     # ==================================================================
 
     # show rspec for named slice
-    @declare_command("","")
+    @declare_command("","",['discover'])
     def resources(self, options, args):
         """
         discover available resources (ListResources)
@@ -1251,7 +1283,12 @@ use this if you mean an authority instead""")
         """
         server = self.sliceapi()
         server_version = self.get_cached_server_version(server)
+        if len(args) != 2:
+            self.print_help()
+            sys.exit(1)
         slice_hrn = args[0]
+        rspec_file = self.get_rspec_file(args[1])
+
         slice_urn = Xrn(slice_hrn, type='slice').get_urn()
 
         # credentials
@@ -1271,8 +1308,6 @@ use this if you mean an authority instead""")
             show_credentials(creds)
 
         # rspec
-        rspec_file = self.get_rspec_file(args[1])
-        rspec = open(rspec_file).read()
         api_options = {}
         api_options ['call_id'] = unique_call_id()
         # users
@@ -1291,7 +1326,9 @@ use this if you mean an authority instead""")
         api_options['sfa_users'] = sfa_users
         api_options['geni_users'] = geni_users
 
-        allocate = server.Allocate(slice_urn, creds, rspec, api_options)
+        with open(rspec_file) as rspec:
+            rspec_xml = rspec.read()
+            allocate = server.Allocate(slice_urn, creds, rspec_xml, api_options)
         value = ReturnValue.get_value(allocate)
         if self.options.raw:
             save_raw_to_file(allocate, self.options.raw, self.options.rawformat, self.options.rawbanner)
@@ -1504,8 +1541,8 @@ use this if you mean an authority instead""")
         if options.file:
             filename = options.file
         else:
-            filename = os.sep.join([self.options.sfi_dir, '%s.gid' % target_hrn])
-        self.logger.info("writing %s gid to %s" % (target_hrn, filename))
+            filename = os.sep.join([self.options.sfi_dir, '{}.gid'.format(target_hrn)])
+        self.logger.info("writing {} gid to {}".format(target_hrn, filename))
         GID(string=gid).save_to_file(filename)
         # xxx should analyze result
         return 0
@@ -1536,25 +1573,25 @@ use this if you mean an authority instead""")
         to_hrn = args[0]
         # support for several delegations in the same call
         # so first we gather the things to do
-        tuples=[]
+        tuples = []
         for slice_hrn in options.delegate_slices:
-            message="%s.slice"%slice_hrn
+            message = "{}.slice".format(slice_hrn)
             original = self.slice_credential_string(slice_hrn)
             tuples.append ( (message, original,) )
         if options.delegate_pi:
             my_authority=self.authority
-            message="%s.pi"%my_authority
+            message = "{}.pi".format(my_authority)
             original = self.my_authority_credential_string()
             tuples.append ( (message, original,) )
         for auth_hrn in options.delegate_auths:
-            message="%s.auth"%auth_hrn
-            original=self.authority_credential_string(auth_hrn)
+            message = "{}.auth".format(auth_hrn)
+            original = self.authority_credential_string(auth_hrn)
             tuples.append ( (message, original, ) )
         # if nothing was specified at all at this point, let's assume -u
         if not tuples: options.delegate_user=True
         # this user cred
         if options.delegate_user:
-            message="%s.user"%self.user
+            message = "{}.user".format(self.user)
             original = self.my_credential_string
             tuples.append ( (message, original, ) )
 
@@ -1567,10 +1604,11 @@ use this if you mean an authority instead""")
         for (message,original) in tuples:
             delegated_string = self.client_bootstrap.delegate_credential_string(original, to_hrn, to_type)
             delegated_credential = Credential (string=delegated_string)
-            filename = os.path.join ( self.options.sfi_dir,
-                                      "%s_for_%s.%s.cred"%(message,to_hrn,to_type))
+            filename = os.path.join(self.options.sfi_dir,
+                                    "{}_for_{}.{}.cred".format(message, to_hrn, to_type))
             delegated_credential.save_to_file(filename, save_parents=True)
-            self.logger.info("delegated credential for %s to %s and wrote to %s"%(message,to_hrn,filename))
+            self.logger.info("delegated credential for {} to {} and wrote to {}"
+                             .format(message, to_hrn, filename))
     
     ####################
     @declare_command("","""$ less +/myslice sfi_config
@@ -1629,35 +1667,40 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             else:
                 full_key="MYSLICE_" + key.upper()
                 value=getattr(self.config_instance,full_key,None)
-            if value:   myslice_dict[key]=value
-            else:       print "Unsufficient config, missing key %s in [myslice] section of sfi_config"%key
+            if value:
+                myslice_dict[key]=value
+            else:
+                print "Unsufficient config, missing key {} in [myslice] section of sfi_config"\
+                    .format(key)
         if len(myslice_dict) != len(myslice_keys):
             sys.exit(1)
 
         # (b) figure whether we are PI for the authority where we belong
-        self.logger.info("Resolving our own id %s"%self.user)
+        self.logger.info("Resolving our own id {}".format(self.user))
         my_records=self.registry().Resolve(self.user,self.my_credential_string)
-        if len(my_records)!=1: print "Cannot Resolve %s -- exiting"%self.user; sys.exit(1)
-        my_record=my_records[0]
+        if len(my_records) != 1:
+            print "Cannot Resolve {} -- exiting".format(self.user)
+            sys.exit(1)
+        my_record = my_records[0]
         my_auths_all = my_record['reg-pi-authorities']
-        self.logger.info("Found %d authorities that we are PI for"%len(my_auths_all))
-        self.logger.debug("They are %s"%(my_auths_all))
+        self.logger.info("Found {} authorities that we are PI for".format(len(my_auths_all)))
+        self.logger.debug("They are {}".format(my_auths_all))
         
         my_auths = my_auths_all
         if options.delegate_auths:
             my_auths = list(set(my_auths_all).intersection(set(options.delegate_auths)))
-            self.logger.debug("Restricted to user-provided auths"%(my_auths))
+            self.logger.debug("Restricted to user-provided auths {}".format(my_auths))
 
         # (c) get the set of slices that we are in
         my_slices_all=my_record['reg-slices']
-        self.logger.info("Found %d slices that we are member of"%len(my_slices_all))
-        self.logger.debug("They are: %s"%(my_slices_all))
+        self.logger.info("Found {} slices that we are member of".format(len(my_slices_all)))
+        self.logger.debug("They are: {}".format(my_slices_all))
  
         my_slices = my_slices_all
         # if user provided slices, deal only with these - if they are found
         if options.delegate_slices:
             my_slices = list(set(my_slices_all).intersection(set(options.delegate_slices)))
-            self.logger.debug("Restricted to user-provided slices: %s"%(my_slices))
+            self.logger.debug("Restricted to user-provided slices: {}".format(my_slices))
 
         # (d) make sure we have *valid* credentials for all these
         hrn_credentials=[]
@@ -1677,16 +1720,17 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             delegated_credential = self.client_bootstrap.delegate_credential_string (credential, delegatee_hrn, delegatee_type)
             # save these so user can monitor what she's uploaded
             filename = os.path.join ( self.options.sfi_dir,
-                                      "%s.%s_for_%s.%s.cred"%(hrn,htype,delegatee_hrn,delegatee_type))
+                                      "{}.{}_for_{}.{}.cred"\
+                                      .format(hrn, htype, delegatee_hrn, delegatee_type))
             with file(filename,'w') as f:
                 f.write(delegated_credential)
-            self.logger.debug("(Over)wrote %s"%filename)
+            self.logger.debug("(Over)wrote {}".format(filename))
             hrn_delegated_credentials.append ((hrn, htype, delegated_credential, filename, ))
 
         # (f) and finally upload them to manifold server
         # xxx todo add an option so the password can be set on the command line
         # (but *NOT* in the config file) so other apps can leverage this
-        self.logger.info("Uploading on backend at %s"%myslice_dict['backend'])
+        self.logger.info("Uploading on backend at {}".format(myslice_dict['backend']))
         uploader = ManifoldUploader (logger=self.logger,
                                      url=myslice_dict['backend'],
                                      platform=myslice_dict['platform'],
@@ -1698,11 +1742,12 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             # inspect
             inspect=Credential(string=delegated_credential)
             expire_datetime=inspect.get_expiration()
-            message="%s (%s) [exp:%s]"%(hrn,htype,expire_datetime)
+            message="{} ({}) [exp:{}]".format(hrn, htype, expire_datetime)
             if uploader.upload(delegated_credential,message=message):
                 count_success+=1
             count_all+=1
-        self.logger.info("Successfully uploaded %d/%d credentials"%(count_success,count_all))
+        self.logger.info("Successfully uploaded {}/{} credentials"
+                         .format(count_success, count_all))
 
         # at first I thought we would want to save these,
         # like 'sfi delegate does' but on second thought
@@ -1731,7 +1776,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             gid = GID(string=trusted_cert)
             gid.dump()
             cert = Certificate(string=trusted_cert)
-            self.logger.debug('Sfi.trusted -> %r'%cert.get_subject())
-            print "Certificate:\n%s\n\n"%trusted_cert
+            self.logger.debug('Sfi.trusted -> {}'.format(cert.get_subject()))
+            print "Certificate:\n{}\n\n".format(trusted_cert)
         # xxx should analyze result
         return 0
