@@ -109,7 +109,7 @@ class IotLABShell(object):
 
     def get_reserved_nodes(self):
         """
-        Get all OAR jobs with state Waiting or Running.
+        Get all OAR jobs not terminated.
 
         :Example:
         {"total":"1907",
@@ -128,7 +128,9 @@ class IotLABShell(object):
         """
         logger.warning("iotlashell get_reserved_nodes")
         reserved_nodes_dict = {}
-        request = 'admin/experiments?state=Running,Waiting'
+        request = ('admin/experiments?state='
+                   'Running,Waiting,toAckReservation,'
+                   'toLaunch,Launching')
         try:
             experiments = self.api.method(request)
         except HTTPError as err:
