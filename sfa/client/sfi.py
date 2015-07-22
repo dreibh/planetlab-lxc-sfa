@@ -937,13 +937,14 @@ use this if you mean an authority instead""")
         for (section, tuples) in flags:
             print "[{}]".format(section)
             try:
-                for (external_name, internal_name) in tuples:
-                    print "{:-20} = {}".format(external_name, getattr(self, internal_name))
+                for external_name, internal_name in tuples:
+                    print "{:<20} = {}".format(external_name, getattr(self, internal_name))
             except:
-                for name in tuples:
-                    varname = "{}_{}".format(section.upper(), name.upper())
+                print 'failed'
+                for external_name, internal_name in tuples:
+                    varname = "{}_{}".format(section.upper(), external_name.upper())
                     value = getattr(self.config_instance,varname)
-                    print "{:-20} = {}".format(name, value)
+                    print "{:<20} = {}".format(external_name, value)
         # xxx should analyze result
         return 0
 
