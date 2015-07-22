@@ -3,6 +3,8 @@
 # this module is also used in sfascan
 #
 
+from __future__ import print_function
+
 import sys
 sys.path.append('.')
 
@@ -67,12 +69,12 @@ def display_rspec(rspec, format='rspec'):
     else:
         result = rspec
 
-    print result
+    print(result)
     return
 
 def display_list(results):
     for result in results:
-        print result
+        print(result)
 
 def display_records(recordList, dump=False):
     ''' Print all fields in the record'''
@@ -84,7 +86,7 @@ def display_record(record, dump=False):
         record.dump(sort=True)
     else:
         info = record.getdict()
-        print "{} ({})".format(info['hrn'], info['type'])
+        print("{} ({})".format(info['hrn'], info['type']))
     return
 
 
@@ -110,7 +112,7 @@ def credential_printable (cred):
 def show_credentials (cred_s):
     if not isinstance (cred_s,list): cred_s = [cred_s]
     for cred in cred_s:
-        print "Using Credential {}".format(credential_printable(cred))
+        print("Using Credential {}".format(credential_printable(cred)))
 
 ########## save methods
 
@@ -121,7 +123,7 @@ def save_raw_to_file(var, filename, format='text', banner=None):
     else:
         with open(filename, w) as fileobj:
             _save_raw_to_file(var, fileobj, format, banner)
-        print "(Over)wrote {}".format(filename)
+        print("(Over)wrote {}".format(filename))
 
 def _save_raw_to_file(var, f, format, banner):
     if format == "text":
@@ -134,7 +136,7 @@ def _save_raw_to_file(var, f, format, banner):
         f.write(json.dumps(var))   # python 2.6
     else:
         # this should never happen
-        print "unknown output format", format
+        print("unknown output format", format)
 
 ### 
 def save_rspec_to_file(rspec, filename):
@@ -142,14 +144,14 @@ def save_rspec_to_file(rspec, filename):
         filename = filename + ".rspec"
     with open(filename, 'w') as f:
         f.write("{}".format(rspec))
-    print "(Over)wrote {}".format(filename)
+    print("(Over)wrote {}".format(filename))
 
 def save_record_to_file(filename, record_dict):
     record = Record(dict=record_dict)
     xml = record.save_as_xml()
     with codecs.open(filename, encoding='utf-8',mode="w") as f:
         f.write(xml)
-    print "(Over)wrote {}".format(filename)
+    print("(Over)wrote {}".format(filename))
 
 def save_records_to_file(filename, record_dicts, format="xml"):
     if format == "xml":
@@ -162,18 +164,18 @@ def save_records_to_file(filename, record_dicts, format="xml"):
                 record_obj = Record(dict=record_dict)
                 f.write('<record hrn="' + record_obj.hrn + '" type="' + record_obj.type + '" />\n')
             f.write("</recordlist>\n")
-            print "(Over)wrote {}".format(filename)
+            print("(Over)wrote {}".format(filename))
 
     elif format == "hrnlist":
         with open(filename, "w") as f:
             for record_dict in record_dicts:
                 record_obj = Record(dict=record_dict)
                 f.write(record_obj.hrn + "\n")
-            print "(Over)wrote {}".format(filename)
+            print("(Over)wrote {}".format(filename))
 
     else:
         # this should never happen
-        print "unknown output format", format
+        print("unknown output format", format)
 
 # minimally check a key argument
 def check_ssh_key (key):
@@ -195,7 +197,7 @@ def normalize_type (type):
     elif type.startswith('al'):
         return 'all'
     else:
-        print 'unknown type {} - should start with one of au|us|sl|no|ag|al'.format(type)
+        print('unknown type {} - should start with one of au|us|sl|no|ag|al'.format(type))
         return None
 
 def load_record_from_opts(options):
@@ -323,44 +325,44 @@ class Sfi:
         format3offset=47
         line=80*'-'
         if not verbose:
-            print format3%("command", "cmd_args", "description")
-            print line
+            print(format3%("command", "cmd_args", "description"))
+            print(line)
         else:
-            print line
+            print(line)
             self.create_parser_global().print_help()
         # preserve order from the code
         for command in commands_list:
             try:
                 (doc, args_string, example, canonical) = commands_dict[command]
             except:
-                print "Cannot find info on command %s - skipped"%command
+                print("Cannot find info on command %s - skipped"%command)
                 continue
             if verbose:
-                print line
+                print(line)
             if command==canonical:
                 doc = doc.replace("\n", "\n" + format3offset * ' ')
-                print format3 % (command,args_string,doc)
+                print(format3 % (command,args_string,doc))
                 if verbose:
                     self.create_parser_command(command).print_help()
             else:
-                print format3 % (command,"<<alias for %s>>"%canonical,"")
+                print(format3 % (command,"<<alias for %s>>"%canonical,""))
             
     ### now if a known command was found we can be more verbose on that one
     def print_help (self):
-        print "==================== Generic sfi usage"
+        print("==================== Generic sfi usage")
         self.sfi_parser.print_help()
         (doc, _, example, canonical) = commands_dict[self.command]
         if canonical != self.command:
-            print "\n==================== NOTE: {} is an alias for genuine {}"\
-                .format(self.command, canonical)
+            print("\n==================== NOTE: {} is an alias for genuine {}"
+                  .format(self.command, canonical))
             self.command = canonical
-        print "\n==================== Purpose of {}".format(self.command)
-        print doc
-        print "\n==================== Specific usage for {}".format(self.command)
+        print("\n==================== Purpose of {}".format(self.command))
+        print(doc)
+        print("\n==================== Specific usage for {}".format(self.command))
         self.command_parser.print_help()
         if example:
-            print "\n==================== {} example(s)".format(self.command)
-            print example
+            print("\n==================== {} example(s)".format(self.command))
+            print(example)
 
     def create_parser_global(self):
         # Generate command line parser
@@ -551,7 +553,7 @@ use this if you mean an authority instead""")
         (doc, args_string, example, canonical) = commands_dict[command]
         method=getattr(self, canonical, None)
         if not method:
-            print "sfi: unknown command {}".format(command)
+            print("sfi: unknown command {}".format(command))
             raise SystemExit("Unknown command {}".format(command))
         for arg in command_args:
             if 'help' in arg or arg == '-h':
@@ -912,7 +914,7 @@ use this if you mean an authority instead""")
         if not output: 
             return 0
         # something went wrong
-        print 'ERROR:',output
+        print('ERROR:', output)
         return 1
 
     #==========================================================================
@@ -924,7 +926,7 @@ use this if you mean an authority instead""")
     @declare_command("","")
     def config (self, options, args):
         "Display contents of current config"
-        print "# From configuration file {}".format(self.config_file)
+        print("# From configuration file {}".format(self.config_file))
         flags=[ ('sfi', [ ('registry','reg_url'),
                           ('auth','authority'),
                           ('user','user'),
@@ -935,16 +937,15 @@ use this if you mean an authority instead""")
             flags.append ( ('myslice', ['backend', 'delegate', 'platform', 'username'] ) )
 
         for (section, tuples) in flags:
-            print "[{}]".format(section)
+            print("[{}]".format(section))
             try:
                 for external_name, internal_name in tuples:
-                    print "{:<20} = {}".format(external_name, getattr(self, internal_name))
+                    print("{:<20} = {}".format(external_name, getattr(self, internal_name)))
             except:
-                print 'failed'
                 for external_name, internal_name in tuples:
                     varname = "{}_{}".format(section.upper(), external_name.upper())
                     value = getattr(self.config_instance,varname)
-                    print "{:<20} = {}".format(external_name, value)
+                    print("{:<20} = {}".format(external_name, value))
         # xxx should analyze result
         return 0
 
@@ -1029,7 +1030,7 @@ use this if you mean an authority instead""")
         records = [ Record(dict=record_dict) for record_dict in record_dicts ]
         for record in records:
             if (options.format == "text"):      record.dump(sort=True)  
-            else:                               print record.save_as_xml() 
+            else:                               print(record.save_as_xml())
         if options.file:
             save_records_to_file(options.file, record_dicts, options.fileformat)
         # xxx should analyze result
@@ -1055,7 +1056,7 @@ use this if you mean an authority instead""")
                 rec_file = self.get_record_file(record_filepath)
                 record_dict.update(load_record_from_file(rec_file).record_to_dict())
             except:
-                print "Cannot load record file {}".format(record_filepath)
+                print("Cannot load record file {}".format(record_filepath))
                 sys.exit(1)
         if options:
             record_dict.update(load_record_from_opts(options).record_to_dict())
@@ -1274,7 +1275,7 @@ use this if you mean an authority instead""")
         if self.options.raw:
             save_raw_to_file(delete, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
-            print value
+            print(value)
         return self.success (delete)
 
     @declare_command("slice_hrn rspec","")
@@ -1336,7 +1337,7 @@ use this if you mean an authority instead""")
         if options.file is not None:
             save_rspec_to_file (value['geni_rspec'], options.file)
         if (self.options.raw is None) and (options.file is None):
-            print value
+            print(value)
         return self.success(allocate)
 
     @declare_command("slice_hrn [<sliver_urn>...]","")
@@ -1401,7 +1402,7 @@ use this if you mean an authority instead""")
         if options.file is not None:
             save_rspec_to_file (value['geni_rspec'], options.file)
         if (self.options.raw is None) and (options.file is None):
-            print value
+            print(value)
         return self.success(provision)
 
     @declare_command("slice_hrn","")
@@ -1429,7 +1430,7 @@ use this if you mean an authority instead""")
         if self.options.raw:
             save_raw_to_file(status, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
-            print value
+            print(value)
         return self.success (status)
 
     @declare_command("slice_hrn [<sliver_urn>...] action","")
@@ -1461,7 +1462,7 @@ use this if you mean an authority instead""")
         if self.options.raw:
             save_raw_to_file(perform_action, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
-            print value
+            print(value)
         return self.success (perform_action)
 
     @declare_command("slice_hrn [<sliver_urn>...] time",
@@ -1505,7 +1506,7 @@ use this if you mean an authority instead""")
         if self.options.raw:
             save_raw_to_file(renew, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
-            print value
+            print(value)
         return self.success(renew)
 
     @declare_command("slice_hrn","")
@@ -1525,7 +1526,7 @@ use this if you mean an authority instead""")
         if self.options.raw:
             save_raw_to_file(shutdown, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
-            print value
+            print(value)
         return self.success (shutdown)
 
     @declare_command("[name]","")
@@ -1671,8 +1672,8 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             if value:
                 myslice_dict[key]=value
             else:
-                print "Unsufficient config, missing key {} in [myslice] section of sfi_config"\
-                    .format(key)
+                print("Unsufficient config, missing key {} in [myslice] section of sfi_config"
+                      .format(key))
         if len(myslice_dict) != len(myslice_keys):
             sys.exit(1)
 
@@ -1680,7 +1681,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
         self.logger.info("Resolving our own id {}".format(self.user))
         my_records=self.registry().Resolve(self.user,self.my_credential_string)
         if len(my_records) != 1:
-            print "Cannot Resolve {} -- exiting".format(self.user)
+            print("Cannot Resolve {} -- exiting".format(self.user))
             sys.exit(1)
         my_record = my_records[0]
         my_auths_all = my_record['reg-pi-authorities']
@@ -1773,11 +1774,11 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             trusted_certs = ReturnValue.get_value(trusted_certs)
 
         for trusted_cert in trusted_certs:
-            print "\n===========================================================\n"
+            print("\n===========================================================\n")
             gid = GID(string=trusted_cert)
             gid.dump()
             cert = Certificate(string=trusted_cert)
             self.logger.debug('Sfi.trusted -> {}'.format(cert.get_subject()))
-            print "Certificate:\n{}\n\n".format(trusted_cert)
+            print("Certificate:\n{}\n\n".format(trusted_cert))
         # xxx should analyze result
         return 0
