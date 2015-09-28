@@ -1152,9 +1152,10 @@ use this if you mean an authority instead""")
                 # just request the version the client wants
                 api_options['geni_rspec_version'] = version_manager.get_version(options.rspec_version).to_dict()
             else:
-                api_options['geni_rspec_version'] = {'type': 'geni', 'version': '3'}
+                api_options['geni_rspec_version'] = {'type': options.rspec_version}
         else:
             api_options['geni_rspec_version'] = {'type': 'geni', 'version': '3'}
+
         list_resources = server.ListResources (creds, api_options)
         value = ReturnValue.get_value(list_resources)
         if self.options.raw:
