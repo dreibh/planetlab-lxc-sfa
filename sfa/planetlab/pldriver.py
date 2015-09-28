@@ -31,7 +31,7 @@ def list_to_dict(recs, key):
     convert a list of dictionaries into a dictionary keyed on the 
     specified dictionary key 
     """
-    return dict ( [ (rec[key],rec) for rec in recs ] )
+    return { rec[key] : rec for rec in recs }
 
 #
 # PlShell is just an xmlrpc serverproxy where methods
@@ -45,9 +45,9 @@ class PlDriver (Driver):
 
     def __init__ (self, api):
         Driver.__init__ (self, api)
-        config=api.config
+        config = api.config
         self.shell = PlShell (config)
-        self.cache=None
+        self.cache = None
         if config.SFA_AGGREGATE_CACHING:
             if PlDriver.cache is None:
                 PlDriver.cache = Cache()
@@ -60,9 +60,9 @@ class PlDriver (Driver):
             filter['slice_id'] = int(sliver_id_parts[0])
         except ValueError:
             filter['name'] = sliver_id_parts[0] 
-        slices = self.shell.GetSlices(filter,['hrn'])
+        slices = self.shell.GetSlices(filter, ['hrn'])
         if not slices:
-            raise Forbidden("Unable to locate slice record for sliver:  %s" % xrn)
+            raise Forbidden("Unable to locate slice record for sliver:  {}".format(xrn))
         slice = slices[0]
         slice_xrn = slice['hrn']
         return slice_xrn 
@@ -101,7 +101,7 @@ class PlDriver (Driver):
         # make sure we have a credential for every specified sliver ierd
         for sliver_name in sliver_names:
             if sliver_name not in slice_cred_names:
-                msg = "Valid credential not found for target: %s" % sliver_name
+                msg = "Valid credential not found for target: {}".format(sliver_name)
                 raise Forbidden(msg)
 
     ########################################
@@ -121,14 +121,14 @@ class PlDriver (Driver):
             if not sites:
                 # xxx when a site gets registered through SFA we need to set its max_slices
                 if 'max_slices' not in pl_record:
-                    pl_record['max_slices']=2
+                    pl_record['max_slices'] = 2
                 pointer = self.shell.AddSite(pl_record)
                 self.shell.SetSiteHrn(int(pointer), hrn)
             else:
                 pointer = sites[0]['site_id']
 
         elif type == 'slice':
-            acceptable_fields=['url', 'instantiation', 'name', 'description']
+            acceptable_fields = ['url', 'instantiation', 'name', 'description']
             for key in pl_record.keys():
                 if key not in acceptable_fields:
                     pl_record.pop(key)
@@ -147,10 +147,11 @@ class PlDriver (Driver):
             persons = self.shell.GetPersons({'peer_id': None, 'email': sfa_record['email']})
             if not persons:
                 for key in ['first_name','last_name']:
-                    if key not in sfa_record: sfa_record[key]='*from*sfa*'
+                    if key not in sfa_record:
+                        sfa_record[key] = '*from*sfa*'
                 # AddPerson does not allow everything to be set
                 can_add = ['first_name', 'last_name', 'title','email', 'password', 'phone', 'url', 'bio']
-                add_person_dict=dict ( [ (k,sfa_record[k]) for k in sfa_record if k in can_add ] )
+                add_person_dict = { k : sfa_record[k] for k in sfa_record if k in can_add }
                 pointer = self.shell.AddPerson(add_person_dict)
                 self.shell.SetPersonHrn(int(pointer), hrn)
             else:
@@ -163,13 +164,13 @@ class PlDriver (Driver):
             self.shell.AddPersonToSite(pointer, login_base)
     
             # What roles should this user have?
-            roles=[]
+            roles = []
             if 'roles' in sfa_record: 
                 # if specified in xml, but only low-level roles
                 roles = [ role for role in sfa_record['roles'] if role in ['user','tech'] ]
             # at least user if no other cluse could be found
             if not roles:
-                roles=['user']
+                roles = ['user']
             for role in roles:
                 self.shell.AddRoleToPerson(role, pointer)
             # Add the user's key
@@ -177,7 +178,7 @@ class PlDriver (Driver):
                 self.shell.AddPersonKey(pointer, {'key_type' : 'ssh', 'key' : pub_key})
 
         elif type == 'node':
-            login_base = PlXrn(xrn=sfa_record['authority'],type='authority').pl_login_base()
+            login_base = PlXrn(xrn=sfa_record['authority'], type='authority').pl_login_base()
             nodes = self.shell.GetNodes({'peer_id': None, 'hostname': pl_record['hostname']})
             if not nodes:
                 pointer = self.shell.AddNode(login_base, pl_record)
@@ -199,11 +200,12 @@ class PlDriver (Driver):
             raise UnknownSfaType(type)
 
         if (type == "authority"):
+            logger.debug("pldriver.update: calling UpdateSite with {}".format(new_sfa_record))
             self.shell.UpdateSite(pointer, new_sfa_record)
             self.shell.SetSiteHrn(pointer, hrn)
     
         elif type == "slice":
-            pl_record=self.sfa_fields_to_pl_fields(type, hrn, new_sfa_record)
+            pl_record = self.sfa_fields_to_pl_fields(type, hrn, new_sfa_record)
             if 'name' in pl_record:
                 pl_record.pop('name')
                 self.shell.UpdateSlice(pointer, pl_record)
@@ -251,8 +253,8 @@ class PlDriver (Driver):
 
     ##########
     def remove (self, sfa_record):
-        type=sfa_record['type']
-        pointer=sfa_record['pointer']
+        type = sfa_record['type']
+        pointer = sfa_record['pointer']
         if type == 'user':
             persons = self.shell.GetPersons({'peer_id': None, 'person_id': pointer})
             # only delete this person if he has site ids. if he doesnt, it probably means
@@ -272,9 +274,6 @@ class PlDriver (Driver):
         return True
 
 
-
-
-
     ##
     # Convert SFA fields to PLC fields for use when registering or updating
     # registry record in the PLC database
@@ -287,7 +286,7 @@ class PlDriver (Driver):
         if type == "slice":
             pl_record["name"] = hrn_to_pl_slicename(hrn)
             if "instantiation" in sfa_record:
-                pl_record['instantiation']=sfa_record['instantiation']
+                pl_record['instantiation'] = sfa_record['instantiation']
             else:
                 pl_record["instantiation"] = "plc-instantiated"
 	    if "url" in sfa_record:
@@ -312,7 +311,7 @@ class PlDriver (Driver):
 
         elif type == "authority":
             pl_record["login_base"] = PlXrn(xrn=hrn,type='authority').pl_login_base()
-            if "name" not in sfa_record:
+            if "name" not in sfa_record or not sfa_record['name']:
                 pl_record["name"] = hrn
             if "abbreviated_name" not in sfa_record:
                 pl_record["abbreviated_name"] = hrn
@@ -538,7 +537,7 @@ class PlDriver (Driver):
             #    continue 
             sfa_info = {}
             type = record['type']
-            logger.info("fill_record_sfa_info - incoming record typed %s"%type)
+            logger.info("fill_record_sfa_info - incoming record typed {}".format(type))
             if (type == "slice"):
                 # all slice users are researchers
                 record['geni_urn'] = hrn_to_urn(record['hrn'], 'slice')
@@ -594,17 +593,17 @@ class PlDriver (Driver):
     # plcapi works by changes, compute what needs to be added/deleted
     def update_relation (self, subject_type, target_type, relation_name, subject_id, target_ids):
         # hard-wire the code for slice/user for now, could be smarter if needed
-        if subject_type =='slice' and target_type == 'user' and relation_name == 'researcher':
-            subject=self.shell.GetSlices (subject_id)[0]
+        if subject_type == 'slice' and target_type == 'user' and relation_name == 'researcher':
+            subject = self.shell.GetSlices (subject_id)[0]
             current_target_ids = subject['person_ids']
             add_target_ids = list ( set (target_ids).difference(current_target_ids))
             del_target_ids = list ( set (current_target_ids).difference(target_ids))
-            logger.debug ("subject_id = %s (type=%s)"%(subject_id,type(subject_id)))
+            logger.debug ("subject_id = {} (type={})".format(subject_id, type(subject_id)))
             for target_id in add_target_ids:
                 self.shell.AddPersonToSlice (target_id,subject_id)
-                logger.debug ("add_target_id = %s (type=%s)"%(target_id,type(target_id)))
+                logger.debug ("add_target_id = {} (type={})".format(target_id, type(target_id)))
             for target_id in del_target_ids:
-                logger.debug ("del_target_id = %s (type=%s)"%(target_id,type(target_id)))
+                logger.debug ("del_target_id = {} (type={})".format(target_id, type(target_id)))
                 self.shell.DeletePersonFromSlice (target_id, subject_id)
         elif subject_type == 'authority' and target_type == 'user' and relation_name == 'pi':
             # due to the plcapi limitations this means essentially adding pi role to all people in the list
@@ -614,7 +613,8 @@ class PlDriver (Driver):
                 if 'pi' not in person['roles']:
                     self.shell.AddRoleToPerson('pi',person['person_id'])
         else:
-            logger.info('unexpected relation %s to maintain, %s -> %s'%(relation_name,subject_type,target_type))
+            logger.info('unexpected relation {} to maintain, {} -> {}'\
+                        .format(relation_name, subject_type, target_type))
 
         
     ########################################
@@ -647,12 +647,23 @@ class PlDriver (Driver):
         return status
 
     def allocate (self, urn, rspec_string, expiration, options=None):
+        """
+        Allocate a PL slice
+
+        Supported options:
+        (*) geni_users
+        (*) append : if set to True, provided attributes are appended 
+            to the current list of tags for the slice
+            otherwise, the set of provided attributes are meant to be the 
+            the exact set of tags at the end of the call, meaning pre-existing tags
+            are deleted if not repeated in the incoming request
+        """
         if options is None: options={}
         xrn = Xrn(urn)
         aggregate = PlAggregate(self)
         slices = PlSlices(self)
         sfa_peer = slices.get_sfa_peer(xrn.get_hrn())
-        slice_record=None    
+        slice_record = None    
         users = options.get('geni_users', [])
 
         if users:
@@ -669,7 +680,7 @@ class PlDriver (Driver):
         # ensure person records exists
         persons = slices.verify_persons(xrn.hrn, slice, users, sfa_peer, options=options)
         # ensure slice attributes exists
-        slices.verify_slice_attributes(slice, requested_attributes, options=options)
+        slices.verify_slice_tags(slice, requested_attributes, options=options)
        
         # add/remove slice from nodes
         request_nodes = rspec.version.get_nodes_with_slivers()
@@ -701,7 +712,7 @@ class PlDriver (Driver):
                     filter['name'] = sliver_id_parts[0]
                 slices = self.shell.GetSlices(filter,['hrn'])
                 if not slices:
-                    raise Forbidden("Unable to locate slice record for sliver:  %s" % xrn)
+                    raise Forbidden("Unable to locate slice record for sliver:  {}".format(xrn))
                 slice = slices[0]
                 slice_urn = hrn_to_urn(slice['hrn'], type='slice')
                 urns = [slice_urn]          
@@ -715,7 +726,7 @@ class PlDriver (Driver):
             persons = slices.verify_persons(slice['hrn'], slice, users, sfa_peer, options=options)
             # update sliver allocation states and set them to geni_provisioned
             sliver_ids = [sliver['sliver_id'] for sliver in slivers]
-            dbsession=self.api.dbsession()
+            dbsession = self.api.dbsession()
             SliverAllocation.set_allocations(sliver_ids, 'geni_provisioned',dbsession)
 
         version_manager = VersionManager()
@@ -748,8 +759,8 @@ class PlDriver (Driver):
                     self.shell.DeleteLeases(leases_ids)
      
                 # delete sliver allocation states
-                dbsession=self.api.dbsession()
-                SliverAllocation.delete_allocations(sliver_ids,dbsession)
+                dbsession = self.api.dbsession()
+                SliverAllocation.delete_allocations(sliver_ids, dbsession)
             finally:
                 pass
 
@@ -788,7 +799,8 @@ class PlDriver (Driver):
         description = self.describe(urns, 'GENI 3', options)
         for sliver in description['geni_slivers']:
             if sliver['geni_operational_status'] == 'geni_pending_allocation':
-                raise UnsupportedOperation(action, "Sliver must be fully allocated (operational status is not geni_pending_allocation)")
+                raise UnsupportedOperation\
+                    (action, "Sliver must be fully allocated (operational status is not geni_pending_allocation)")
         #
         # Perform Operational Action Here
         #

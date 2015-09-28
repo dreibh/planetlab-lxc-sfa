@@ -42,18 +42,20 @@ from sqlalchemy.orm.collections import InstrumentedList
 # e.g. registry calls this 'reg-researchers'
 # while some drivers call this 'researcher'
 # we need to make sure that both keys appear and are the same
-def _normalize_input (record, reg_key, driver_key):
+def _normalize_input(record, reg_key, driver_key):
     # this looks right, use this for both keys
     if reg_key in record:
         # and issue a warning if they were both set and different
         # as we're overwriting some user data here
         if driver_key in record:
-            logger.warning ("normalize_input: incoming record has both values, using %s"%reg_key)
-        record[driver_key]=record[reg_key]
+            logger.warning ("normalize_input: incoming record has both values, using {}"
+                            .format(reg_key))
+        record[driver_key] = record[reg_key]
     # we only have one key set, duplicate for the other one
     elif driver_key in record:
-        logger.warning ("normalize_input: you should use '%s' instead of '%s'"%(reg_key,driver_key))
-        record[reg_key]=record[driver_key]
+        logger.warning ("normalize_input: you should use '{}' instead of '{}'"
+                        .format(reg_key, driver_key))
+        record[reg_key] = record[driver_key]
 
 def normalize_input_record (record):
     _normalize_input (record, 'reg-researchers','researcher')
@@ -62,13 +64,14 @@ def normalize_input_record (record):
     # xxx the keys thing could use a little bit more attention:
     # some parts of the code are using 'keys' while they should use 'reg-keys' 
     # but I run out of time for now
-    if 'reg-keys' in record: record['keys']=record['reg-keys']
+    if 'reg-keys' in record:
+        record['keys'] = record['reg-keys']
     return record
 
 class RegistryManager:
 
     def __init__ (self, config): 
-        logger.info("Creating RegistryManager[%s]"%id(self))
+        logger.info("Creating RegistryManager[{}]".format(id(self)))
 
     # The GENI GetVersion call
     def GetVersion(self, api, options):
@@ -104,9 +107,9 @@ class RegistryManager:
 
         # get record info
         dbsession = api.dbsession()
-        record=dbsession.query(RegRecord).filter_by(type=type,hrn=hrn).first()
+        record = dbsession.query(RegRecord).filter_by(type=type, hrn=hrn).first()
         if not record:
-            raise RecordNotFound("hrn=%s, type=%s"%(hrn,type))
+            raise RecordNotFound("hrn={}, type={}".format(hrn, type))
 
         # get the callers gid
         # if caller_xrn is not specified assume the caller is the record
@@ -121,7 +124,9 @@ class RegistryManager:
             else:
                 caller_record = dbsession.query(RegRecord).filter_by(hrn=caller_hrn).first()
             if not caller_record:
-                raise RecordNotFound("Unable to associated caller (hrn=%s, type=%s) with credential for (hrn: %s, type: %s)"%(caller_hrn, caller_type, hrn, type))
+                raise RecordNotFound(
+                    "Unable to associated caller (hrn={}, type={}) with credential for (hrn: {}, type: {})"
+                    .format(caller_hrn, caller_type, hrn, type))
             caller_gid = GID(string=caller_record.gid)
  
         object_hrn = record.get_gid_object().get_hrn()
@@ -129,8 +134,8 @@ class RegistryManager:
         rights = api.auth.determine_user_rights(caller_hrn, record)
         # make sure caller has rights to this object
         if rights.is_empty():
-            raise PermissionError("%s has no rights to %s (%s)" % \
-                                  (caller_hrn, object_hrn, xrn))    
+            raise PermissionError("{} has no rights to {} ({})"
+                                  .format(caller_hrn, object_hrn, xrn))
         object_gid = GID(string=record.gid)
         new_cred = Credential(subject = object_gid.get_subject())
         new_cred.set_gid_caller(caller_gid)
@@ -207,12 +212,13 @@ class RegistryManager:
         local_records = dbsession.query(RegRecord).filter(RegRecord.hrn.in_(local_hrns))
         if type:
             local_records = local_records.filter_by(type=type)
-        local_records=local_records.all()
+        local_records = local_records.all()
         
         for local_record in local_records:
-            augment_with_sfa_builtins (local_record)
+            augment_with_sfa_builtins(local_record)
 
-        logger.info("Resolve, (details=%s,type=%s) local_records=%s "%(details,type,local_records))
+        logger.info("Resolve, (details={}, type={}) local_records={} "
+                    .format(details, type, local_records))
         local_dicts = [ record.__dict__ for record in local_records ]
         
         if details:
@@ -223,18 +229,19 @@ class RegistryManager:
             # used to be in the driver code, sounds like a poorman thing though
             def solve_neighbour_url (record):
                 if not record.type.startswith('authority'): return 
-                hrn=record.hrn
+                hrn = record.hrn
                 for neighbour_dict in [ api.aggregates, api.registries ]:
                     if hrn in neighbour_dict:
                         record.url=neighbour_dict[hrn].get_url()
                         return 
-            for record in local_records: solve_neighbour_url (record)
+            for record in local_records:
+                solve_neighbour_url (record)
         
         # convert local record objects to dicts for xmlrpc
         # xxx somehow here calling dict(record) issues a weird error
         # however record.todict() seems to work fine
         # records.extend( [ dict(record) for record in local_records ] )
-        records.extend( [ record.todict(exclude_types=[InstrumentedList]) for record in local_records ] )
+        records.extend( [ record.record_to_dict(exclude_types=(InstrumentedList,)) for record in local_records ] )
 
         if not records:
             raise RecordNotFound(str(hrns))
@@ -243,7 +250,7 @@ class RegistryManager:
     
     def List (self, api, xrn, origin_hrn=None, options=None):
         if options is None: options={}
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         # load all know registry names into a prefix tree and attempt to find
         # the longest matching prefix
         hrn, type = urn_to_hrn(xrn)
@@ -269,7 +276,7 @@ class RegistryManager:
             record_dicts = record_list
         
         # if we still have not found the record yet, try the local registry
-#        logger.debug("before trying local records, %d foreign records"% len(record_dicts))
+#        logger.debug("before trying local records, {} foreign records".format(len(record_dicts)))
         if not record_dicts:
             recursive = False
             if ('recursive' in options and options['recursive']):
@@ -282,13 +289,19 @@ class RegistryManager:
                 raise MissingAuthority(hrn)
             if recursive:
                 records = dbsession.query(RegRecord).filter(RegRecord.hrn.startswith(hrn)).all()
-#                logger.debug("recursive mode, found %d local records"%(len(records)))
+#                logger.debug("recursive mode, found {} local records".format(len(records)))
             else:
                 records = dbsession.query(RegRecord).filter_by(authority=hrn).all()
-#                logger.debug("non recursive mode, found %d local records"%(len(records)))
+#                logger.debug("non recursive mode, found {} local records".format(len(records)))
             # so that sfi list can show more than plain names...
-            for record in records: augment_with_sfa_builtins (record)
-            record_dicts=[ record.todict(exclude_types=[InstrumentedList]) for record in records ]
+            for record in records:
+                # xxx mystery - see also the bottom of model.py
+                # resulting records have been observed to not always have
+                # their __dict__ actually in line with the object's contents;
+                # was first observed with authorities' 'name' column
+                # that would be missing from result as received by client
+                augment_with_sfa_builtins(record)
+            record_dicts = [ record.record_to_dict(exclude_types=(InstrumentedList,)) for record in records ]
     
         return record_dicts
     
@@ -305,11 +318,11 @@ class RegistryManager:
         # Add the email of the user to SubjectAltName in the GID
         email = None
         hrn = Xrn(xrn).get_hrn()
-        dbsession=api.dbsession()
-        record=dbsession.query(RegUser).filter_by(hrn=hrn).first()
+        dbsession = api.dbsession()
+        record = dbsession.query(RegUser).filter_by(hrn=hrn).first()
         if record:
-            email=getattr(record,'email',None)
-        gid = api.auth.hierarchy.create_gid(xrn, create_uuid(), pkey, email = email)
+            email = getattr(record,'email',None)
+        gid = api.auth.hierarchy.create_gid(xrn, create_uuid(), pkey, email=email)
         return gid.save_to_string(save_parents=True)
     
     ####################
@@ -330,7 +343,7 @@ class RegistryManager:
     # hrns is the list of hrns that should be linked to the subject from now on
     # target_type would be e.g. 'user' in the 'slice' x 'researcher' example
     def update_driver_relation (self, api, record_obj, hrns, target_type, relation_name):
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         # locate the linked objects in our db
         subject_type=record_obj.type
         subject_id=record_obj.pointer
@@ -342,11 +355,11 @@ class RegistryManager:
 
     def Register(self, api, record_dict):
     
-        logger.debug("Register: entering with record_dict=%s"%printable(record_dict))
+        logger.debug("Register: entering with record_dict={}".format(printable(record_dict)))
         normalize_input_record (record_dict)
-        logger.debug("Register: normalized record_dict=%s"%printable(record_dict))
+        logger.debug("Register: normalized record_dict={}".format(printable(record_dict)))
 
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         hrn, type = record_dict['hrn'], record_dict['type']
         urn = hrn_to_urn(hrn,type)
         # validate the type
@@ -354,7 +367,7 @@ class RegistryManager:
             raise UnknownSfaType(type) 
         
         # check if record_dict already exists
-        existing_records = dbsession.query(RegRecord).filter_by(type=type,hrn=hrn).all()
+        existing_records = dbsession.query(RegRecord).filter_by(type=type, hrn=hrn).all()
         if existing_records:
             raise ExistingRecord(hrn)
            
@@ -375,7 +388,7 @@ class RegistryManager:
                 if pub_key and isinstance(pub_key, types.ListType): pub_key = pub_key[0]
                 pkey = convert_public_key(pub_key)
     
-            email=getattr(record,'email',None)
+            email = getattr(record,'email',None)
             gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey, email = email)
             gid = gid_object.save_to_string(save_parents=True)
             record.gid = gid
@@ -404,7 +417,7 @@ class RegistryManager:
                 keys=getattr(record,'reg-keys')
                 # some people send the key as a string instead of a list of strings
                 if isinstance(keys,types.StringTypes): keys=[keys]
-                logger.debug ("creating %d keys for user %s"%(len(keys),record.hrn))
+                logger.debug ("creating {} keys for user {}".format(len(keys), record.hrn))
                 record.reg_keys = [ RegKey (key) for key in keys ]
             
         # update testbed-specific data if needed
@@ -421,19 +434,19 @@ class RegistryManager:
     
     def Update(self, api, record_dict):
 
-        logger.debug("Update: entering with record_dict=%s"%printable(record_dict))
+        logger.debug("Update: entering with record_dict={}".format(printable(record_dict)))
         normalize_input_record (record_dict)
-        logger.debug("Update: normalized record_dict=%s"%printable(record_dict))
+        logger.debug("Update: normalized record_dict={}".format(printable(record_dict)))
 
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         assert ('type' in record_dict)
-        new_record=make_record(dict=record_dict)
-        (type,hrn) = (new_record.type, new_record.hrn)
+        new_record = make_record(dict=record_dict)
+        (type, hrn) = (new_record.type, new_record.hrn)
         
         # make sure the record exists
-        record = dbsession.query(RegRecord).filter_by(type=type,hrn=hrn).first()
+        record = dbsession.query(RegRecord).filter_by(type=type, hrn=hrn).first()
         if not record:
-            raise RecordNotFound("hrn=%s, type=%s"%(hrn,type))
+            raise RecordNotFound("hrn={}, type={}".format(hrn, type))
         record.just_updated()
     
         # Use the pointer from the existing record, not the one that the user
@@ -441,12 +454,12 @@ class RegistryManager:
         pointer = record.pointer
 
         # is there a change in keys ?
-        new_key=None
-        if type=='user':
-            if getattr(new_record,'keys',None):
-                new_key=new_record.keys
-                if isinstance (new_key,types.ListType):
-                    new_key=new_key[0]
+        new_key = None
+        if type == 'user':
+            if getattr(new_record, 'keys', None):
+                new_key = new_record.keys
+                if isinstance (new_key, types.ListType):
+                    new_key = new_key[0]
 
         # take new_key into account
         if new_key:
@@ -455,9 +468,9 @@ class RegistryManager:
             uuid = create_uuid()
             urn = hrn_to_urn(hrn,type)
 
-            email=getattr(new_record,'email',None)
+            email = getattr(new_record, 'email', None)
             if email is None:
-                email=getattr(record,'email',None)
+                email = getattr(record, 'email', None)
             gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey, email = email)
             gid = gid_object.save_to_string(save_parents=True)
         
@@ -466,48 +479,63 @@ class RegistryManager:
         # not too big a deal with planetlab as the driver is authoritative, but...
 
         # update native relations
-        if isinstance (record, RegSlice):
-            researcher_hrns = getattr(new_record,'reg-researchers',None)
-            if researcher_hrns is not None: record.update_researchers (researcher_hrns, dbsession)
+        if isinstance(record, RegSlice):
+            researcher_hrns = getattr(new_record, 'reg-researchers', None)
+            if researcher_hrns is not None:
+                record.update_researchers (researcher_hrns, dbsession)
 
-        elif isinstance (record, RegAuthority):
-            pi_hrns = getattr(new_record,'reg-pis',None)
-            if pi_hrns is not None: record.update_pis (pi_hrns, dbsession)
+        elif isinstance(record, RegAuthority):
+            pi_hrns = getattr(new_record, 'reg-pis', None)
+            if pi_hrns is not None:
+                record.update_pis(pi_hrns, dbsession)
+            name = getattr(new_record, 'name', None)
+            if name is not None:
+                record.name = name
+
+        elif isinstance(record, RegUser):
+            email = getattr(new_record, 'email', None)
+            if email is not None:
+                record.email = email
         
         # update the PLC information that was specified with the record
-        # xxx oddly enough, without this useless statement, 
+        # xxx mystery -- see also the bottom of model.py,
+        # oddly enough, without this useless statement, 
         # record.__dict__ as received by the driver seems to be off
-        # anyway the driver should receive an object 
+        # anyway the driver should receive an object
         # (and then extract __dict__ itself if needed)
-        print "DO NOT REMOVE ME before driver.update, record=%s"%record
+        print "DO NOT REMOVE ME before driver.update, record={}".format(record)
+        # as of June 2015: I suspect we could remove that print line above and replace it with
+        # augment_with_sfa_builtins(record)
+        # instead, that checks for these fields, like it is done above in List()
+        # but that would need to be confirmed by more extensive tests
         new_key_pointer = -1
         try:
            (pointer, new_key_pointer) = api.driver.update (record.__dict__, new_record.__dict__, hrn, new_key)
         except:
            pass
         if new_key and new_key_pointer:
-            record.reg_keys=[ RegKey (new_key, new_key_pointer)]
+            record.reg_keys = [ RegKey(new_key, new_key_pointer) ]
             record.gid = gid
 
         dbsession.commit()
         # update membership for researchers, pis, owners, operators
-        self.update_driver_relations (api, record, new_record)
+        self.update_driver_relations(api, record, new_record)
         
         return 1 
     
     # expecting an Xrn instance
     def Remove(self, api, xrn, origin_hrn=None):
-        dbsession=api.dbsession()
-        hrn=xrn.get_hrn()
-        type=xrn.get_type()
-        request=dbsession.query(RegRecord).filter_by(hrn=hrn)
+        dbsession = api.dbsession()
+        hrn = xrn.get_hrn()
+        type = xrn.get_type()
+        request = dbsession.query(RegRecord).filter_by(hrn=hrn)
         if type and type not in ['all', '*']:
-            request=request.filter_by(type=type)
+            request = request.filter_by(type=type)
     
         record = request.first()
         if not record:
-            msg="Could not find hrn %s"%hrn
-            if type: msg += " type=%s"%type
+            msg = "Could not find hrn {}".format(hrn)
+            if type: msg += " type={}".format(type)
             raise RecordNotFound(msg)
 
         type = record.type
@@ -540,29 +568,29 @@ class RegistryManager:
 
     # This is a PLC-specific thing, won't work with other platforms
     def get_key_from_incoming_ip (self, api):
-        dbsession=api.dbsession()
+        dbsession = api.dbsession()
         # verify that the callers's ip address exist in the db and is an interface
         # for a node in the db
         (ip, port) = api.remote_addr
         interfaces = api.driver.shell.GetInterfaces({'ip': ip}, ['node_id'])
         if not interfaces:
-            raise NonExistingRecord("no such ip %(ip)s" % locals())
+            raise NonExistingRecord("no such ip {}".format(ip))
         nodes = api.driver.shell.GetNodes([interfaces[0]['node_id']], ['node_id', 'hostname'])
         if not nodes:
-            raise NonExistingRecord("no such node using ip %(ip)s" % locals())
+            raise NonExistingRecord("no such node using ip {}".format(ip))
         node = nodes[0]
        
         # look up the sfa record
-        record=dbsession.query(RegRecord).filter_by(type='node',pointer=node['node_id']).first()
+        record = dbsession.query(RegRecord).filter_by(type='node', pointer=node['node_id']).first()
         if not record:
-            raise RecordNotFound("node with pointer %s"%node['node_id'])
+            raise RecordNotFound("node with pointer {}".format(node['node_id']))
         
         # generate a new keypair and gid
         uuid = create_uuid()
         pkey = Keypair(create=True)
         urn = hrn_to_urn(record.hrn, record.type)
 
-        email=getattr(record,'email',None)
+        email = getattr(record, 'email', None)
         gid_object = api.auth.hierarchy.create_gid(urn, uuid, pkey, email)
         gid = gid_object.save_to_string(save_parents=True)
         record.gid = gid
@@ -583,12 +611,12 @@ class RegistryManager:
         scp = "/usr/bin/scp" 
         #identity = "/etc/planetlab/root_ssh_key.rsa"
         identity = "/etc/sfa/root_ssh_key"
-        scp_options=" -i %(identity)s " % locals()
-        scp_options+="-o StrictHostKeyChecking=no " % locals()
-        scp_key_command="%(scp)s %(scp_options)s %(key_filename)s root@%(host)s:%(key_dest)s" %\
-                         locals()
-        scp_gid_command="%(scp)s %(scp_options)s %(gid_filename)s root@%(host)s:%(gid_dest)s" %\
-                         locals()    
+        scp_options =  " -i {identity} ".format(**locals())
+        scp_options += "-o StrictHostKeyChecking=no "
+        scp_key_command = "{scp} {scp_options} {key_filename} root@{host}:{key_dest}"\
+            .format(**locals())
+        scp_gid_command = "{scp} {scp_options} {gid_filename} root@{host}:{gid_dest}"\
+                          .format(**locals())
 
         all_commands = [scp_key_command, scp_gid_command]
         

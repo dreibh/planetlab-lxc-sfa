@@ -1,7 +1,8 @@
 from sqlalchemy import Table, MetaData, Column
 from sqlalchemy import Integer, String
 
-metadata=MetaData()
+metadata = MetaData()
+
 sliver_allocation_table = \
     Table ( 'sliver_allocation', metadata,
             Column('sliver_id', String, primary_key=True),

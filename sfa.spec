@@ -1,6 +1,6 @@
 %define name sfa
 %define version 3.1
-%define taglevel 13
+%define taglevel 18
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -84,11 +84,6 @@ Summary: the SFA layer around IotLab
 Group: Applications/System
 Requires: sfa
 
-%package cortexlab
-Summary: the SFA layer around CortexLab
-Group: Applications/System
-Requires: sfa
-
 %package dummy
 Summary: the SFA layer around a Dummy Testbed 
 Group: Applications/System
@@ -131,9 +126,6 @@ The SFA driver for NITOS.
 
 %description iotlab
 The SFA driver for IotLab.
-
-%description cortexlab
-The SFA driver for CortexLab.
 
 %description dummy
 The SFA driver for a Dummy Testbed.
@@ -223,9 +215,6 @@ rm -rf $RPM_BUILD_ROOT
 %files iotlab
 %{python_sitelib}/sfa/iotlab
 
-%files cortexlab
-%{python_sitelib}/sfa/cortexlab
-
 %files dummy
 %{python_sitelib}/sfa/dummy
 
@@ -264,6 +253,48 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Mon Jun 08 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-18
+- incorporated Frederic Saint Marcel's addition of ASAP management tag
+
+* Fri Jun 05 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-17
+- workaround for 'name' not being exposed properly by List() on authority objects
+- fix a corner case in PL importer
+- trashed module registry_manager_openstack
+
+* Thu Jun 04 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-16
+- added a new builtin column 'name' for authorities in the sfa registry
+- this is kept in sync with MyPLC's site names when relevant
+- sfa update -t authority thus now has a new -n/--name option
+- sfi register or update can specify record type on only 2 characters (au, us, no, or sl)
+- reviewed Describe and Allocate wrt slice tags for a PL AM:
+- Describe now exposes all slice tags with a 'scope' being 'sliver' or 'slice'
+- Allocate now by default ignores incoming slice tags
+- Allocate's options can mention 'pltags' among 'ignore', 'append', 'sync'
+- default being 'ignore'
+- in 'ignore' mode, slice tags are unchanged in the PL db
+- in 'append' mode, slice tags from the rspec are added to the db unless
+- they are already present
+- in 'sync' mode, the code attempts to leave the PL db in sync with the tags
+- provided in rspec; this can be dangerous and is thus no longer the default
+- behaviour
+
+* Thu Apr 23 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-15
+- major rework of the iotlab driver, that uses an IoT-lab REST API
+- and so does not need to interact with LDAP and OAR directly
+- deprecated cortexlab driver altogether
+- cosmetic changes in displaying credentials, rights and certificates
+- for hopefully more readable error messages
+- always start postgresql if not running (ignore /etc/myplc-release)
+- does not need lxc=enter-namespace anymore for make sync
+
+* Thu Apr 09 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-14
+- for SSL & python-2.7.9: ignore server verification
+- assume 2.7: remove compat code - always use HTTPSConnection (not HTTPS anymore)
+- fix: Reset GIDs works even if user has no pub_key
+- tweak for ubuntu (that does not have systemctl)
+- iotlab driver:  fix ldap account creation at each lease
+- miscell cosmetic & layout
+
 * Mon Dec 01 2014 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-13
 - bugfix - was adding extraneous backslashes in email address when attempting to AddPerson
 

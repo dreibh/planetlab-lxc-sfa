@@ -51,13 +51,18 @@ def print_dict(rdict, options, counter=1):
         if keys: print tab * (counter) + "(children: %s)" % (",".join(keys))    
         
 
+#
+# this code probably is obsolete
+# RSpec is not imported, it does not have a toDict() method anyway
+# plus, getNodes.py is not exposed in packaging
+# 
 def main():
     parser = create_parser(); 
     (options, args) = parser.parse_args()
     if not options.infile:
         print "RSpec file not specified"
         return 
-        
+
     rspec = RSpec()
     try:
         rspec.parseFile(options.infile)

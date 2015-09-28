@@ -18,7 +18,7 @@ from sfa.util.xml import XML
 from sfa.trust.gid import GID
 
 ##############################
-Base=declarative_base()
+Base = declarative_base()
 
 ####################
 # dicts vs objects
@@ -75,7 +75,7 @@ class AlchemyObj(Record):
 # but we had to define another more internal column (classtype) so we 
 # accomodate variants in types like authority+am and the like
 
-class RegRecord (Base,AlchemyObj):
+class RegRecord(Base, AlchemyObj):
     __tablename__       = 'records'
     record_id           = Column (Integer, primary_key=True)
     # this is the discriminator that tells which class to use
@@ -107,11 +107,19 @@ class RegRecord (Base,AlchemyObj):
         if dict:                                self.load_from_dict (dict)
 
     def __repr__(self):
-        result="<Record id=%s, type=%s, hrn=%s, authority=%s, pointer=%s" % \
-                (self.record_id, self.type, self.hrn, self.authority, self.pointer)
+        result="<Record id=%s, type=%s, hrn=%s, authority=%s" % \
+                (self.record_id, self.type, self.hrn, self.authority)
+#        for extra in ('pointer', 'email', 'name'):
+#        for extra in ('email', 'name'):
+# displaying names at this point it too dangerous, because of unicode
+        for extra in ('email'):
+            if hasattr(self, extra):
+                result += " {}={},".format(extra, getattr(self, extra))
         # skip the uniform '--- BEGIN CERTIFICATE --' stuff
-        if self.gid: result+=" gid=%s..."%self.gid[28:36]
-        else: result+=" nogid"
+        if self.gid:
+            result+=" gid=%s..."%self.gid[28:36]
+        else:
+            result+=" nogid"
         result += ">"
         return result
 
@@ -126,30 +134,35 @@ class RegRecord (Base,AlchemyObj):
         else:                               return gid.save_to_string(save_parents=True)
 
     def validate_datetime (self, key, incoming):
-        if isinstance (incoming, datetime):     return incoming
-        elif isinstance (incoming, (int,float)):return datetime.fromtimestamp (incoming)
-        else: logger.info("Cannot validate datetime for key %s with input %s"%\
-                              (key,incoming))
+        if isinstance (incoming, datetime):
+            return incoming
+        elif isinstance (incoming, (int, float)):
+            return datetime.fromtimestamp (incoming)
+        else:
+            logger.info("Cannot validate datetime for key %s with input %s"%\
+                        (key,incoming))
 
     @validates ('date_created')
-    def validate_date_created (self, key, incoming): return self.validate_datetime (key, incoming)
+    def validate_date_created (self, key, incoming):
+        return self.validate_datetime (key, incoming)
 
     @validates ('last_updated')
-    def validate_last_updated (self, key, incoming): return self.validate_datetime (key, incoming)
+    def validate_last_updated (self, key, incoming):
+        return self.validate_datetime (key, incoming)
 
     # xxx - there might be smarter ways to handle get/set'ing gid using validation hooks 
     def get_gid_object (self):
-        if not self.gid: return None
-        else: return GID(string=self.gid)
+        if not self.gid:        return None
+        else:                   return GID(string=self.gid)
 
     def just_created (self):
-        now=datetime.utcnow()
-        self.date_created=now
-        self.last_updated=now
+        now = datetime.utcnow()
+        self.date_created = now
+        self.last_updated = now
 
     def just_updated (self):
-        now=datetime.utcnow()
-        self.last_updated=now
+        now = datetime.utcnow()
+        self.last_updated = now
 
 #################### cross-relations tables
 # authority x user (pis) association
@@ -169,38 +182,49 @@ slice_researcher_table = \
 # all subclasses define a convenience constructor with a default value for type, 
 # and when applicable a way to define local fields in a kwd=value argument
 ####################
-class RegAuthority (RegRecord):
+class RegAuthority(RegRecord):
     __tablename__       = 'authorities'
     __mapper_args__     = { 'polymorphic_identity' : 'authority' }
     record_id           = Column (Integer, ForeignKey ("records.record_id"), primary_key=True)
     #### extensions come here
+    name                = Column ('name', String)
+    #### extensions come here
     reg_pis             = relationship \
         ('RegUser',
-         secondary=authority_pi_table,
-         primaryjoin=RegRecord.record_id==authority_pi_table.c.authority_id,
-         secondaryjoin=RegRecord.record_id==authority_pi_table.c.pi_id,
-         backref='reg_authorities_as_pi')
+         secondary = authority_pi_table,
+         primaryjoin = RegRecord.record_id==authority_pi_table.c.authority_id,
+         secondaryjoin = RegRecord.record_id==authority_pi_table.c.pi_id,
+         backref = 'reg_authorities_as_pi',
+        )
     
     def __init__ (self, **kwds):
+        # handle local settings
+        if 'name' in kwds:
+            self.name = kwds.pop('name')
         # fill in type if not previously set
-        if 'type' not in kwds: kwds['type']='authority'
+        if 'type' not in kwds:
+            kwds['type']='authority'
         # base class constructor
         RegRecord.__init__(self, **kwds)
 
     # no proper data yet, just hack the typename
     def __repr__ (self):
-        return RegRecord.__repr__(self).replace("Record","Authority")
+        result = RegRecord.__repr__(self).replace("Record", "Authority")
+# here again trying to display names that can be utf8 is too dangerous        
+#        result.replace(">", " name={}>".format(self.name))
+        return result
 
     def update_pis (self, pi_hrns, dbsession):
         # strip that in case we have <researcher> words </researcher>
         pi_hrns = [ x.strip() for x in pi_hrns ]
-        request = dbsession.query (RegUser).filter(RegUser.hrn.in_(pi_hrns))
-        logger.info ("RegAuthority.update_pis: %d incoming pis, %d matches found"%(len(pi_hrns),request.count()))
-        pis = dbsession.query (RegUser).filter(RegUser.hrn.in_(pi_hrns)).all()
+        request = dbsession.query(RegUser).filter(RegUser.hrn.in_(pi_hrns))
+        logger.info("RegAuthority.update_pis: %d incoming pis, %d matches found"\
+                    % (len(pi_hrns), request.count()))
+        pis = dbsession.query(RegUser).filter(RegUser.hrn.in_(pi_hrns)).all()
         self.reg_pis = pis
 
 ####################
-class RegSlice (RegRecord):
+class RegSlice(RegRecord):
     __tablename__       = 'slices'
     __mapper_args__     = { 'polymorphic_identity' : 'slice' }
     record_id           = Column (Integer, ForeignKey ("records.record_id"), primary_key=True)
@@ -210,20 +234,23 @@ class RegSlice (RegRecord):
          secondary=slice_researcher_table,
          primaryjoin=RegRecord.record_id==slice_researcher_table.c.slice_id,
          secondaryjoin=RegRecord.record_id==slice_researcher_table.c.researcher_id,
-         backref='reg_slices_as_researcher')
+         backref='reg_slices_as_researcher',
+        )
 
     def __init__ (self, **kwds):
-        if 'type' not in kwds: kwds['type']='slice'
+        if 'type' not in kwds:
+            kwds['type']='slice'
         RegRecord.__init__(self, **kwds)
 
     def __repr__ (self):
-        return RegRecord.__repr__(self).replace("Record","Slice")
+        return RegRecord.__repr__(self).replace("Record", "Slice")
 
     def update_researchers (self, researcher_hrns, dbsession):
         # strip that in case we have <researcher> words </researcher>
         researcher_hrns = [ x.strip() for x in researcher_hrns ]
         request = dbsession.query (RegUser).filter(RegUser.hrn.in_(researcher_hrns))
-        logger.info ("RegSlice.update_researchers: %d incoming researchers, %d matches found"%(len(researcher_hrns),request.count()))
+        logger.info ("RegSlice.update_researchers: %d incoming researchers, %d matches found"\
+                     % (len(researcher_hrns), request.count()))
         researchers = dbsession.query (RegUser).filter(RegUser.hrn.in_(researcher_hrns)).all()
         self.reg_researchers = researchers
 
@@ -232,31 +259,33 @@ class RegSlice (RegRecord):
     # helper function is called from the trust/ area that
     def get_pis (self):
         from sqlalchemy.orm import sessionmaker
-        Session=sessionmaker()
-        dbsession=Session.object_session(self)
+        Session = sessionmaker()
+        dbsession = Session.object_session(self)
         from sfa.util.xrn import get_authority
         authority_hrn = get_authority(self.hrn)
         auth_record = dbsession.query(RegAuthority).filter_by(hrn=authority_hrn).first()
         return auth_record.reg_pis
         
     @validates ('expires')
-    def validate_expires (self, key, incoming): return self.validate_datetime (key, incoming)
+    def validate_expires (self, key, incoming):
+        return self.validate_datetime (key, incoming)
 
 ####################
-class RegNode (RegRecord):
+class RegNode(RegRecord):
     __tablename__       = 'nodes'
     __mapper_args__     = { 'polymorphic_identity' : 'node' }
     record_id           = Column (Integer, ForeignKey ("records.record_id"), primary_key=True)
     
-    def __init__ (self, **kwds):
-        if 'type' not in kwds: kwds['type']='node'
+    def __init__(self, **kwds):
+        if 'type' not in kwds:
+            kwds['type']='node'
         RegRecord.__init__(self, **kwds)
 
     def __repr__ (self):
-        return RegRecord.__repr__(self).replace("Record","Node")
+        return RegRecord.__repr__(self).replace("Record", "Node")
 
 ####################
-class RegUser (RegRecord):
+class RegUser(RegRecord):
     __tablename__       = 'users'
     # these objects will have type='user' in the records table
     __mapper_args__     = { 'polymorphic_identity' : 'user' }
@@ -267,20 +296,22 @@ class RegUser (RegRecord):
     # a 'keys' tag, and assigning a list of strings in a reference column like this crashes
     reg_keys            = relationship \
         ('RegKey', backref='reg_user',
-         cascade="all, delete, delete-orphan")
+         cascade = "all, delete, delete-orphan",
+        )
     
     # so we can use RegUser (email=.., hrn=..) and the like
     def __init__ (self, **kwds):
         # handle local settings
-        if 'email' in kwds: self.email=kwds.pop('email')
-        if 'type' not in kwds: kwds['type']='user'
+        if 'email' in kwds:
+            self.email = kwds.pop('email')
+        if 'type' not in kwds:
+            kwds['type'] = 'user'
         RegRecord.__init__(self, **kwds)
 
     # append stuff at the end of the record __repr__
     def __repr__ (self): 
-        result = RegRecord.__repr__(self).replace("Record","User")
-        result.replace (">"," email=%s"%self.email)
-        result += ">"
+        result = RegRecord.__repr__(self).replace("Record", "User")
+        result.replace(">", " email={}>".format(self.email))
         return result
 
     @validates('email') 
@@ -293,20 +324,21 @@ class RegUser (RegRecord):
 # meaning, when querying the whole records, we expect there should
 # be a single query to fetch all the keys 
 # or, is it enough that we issue a single query to retrieve all the keys 
-class RegKey (Base):
+class RegKey(Base):
     __tablename__       = 'keys'
     key_id              = Column (Integer, primary_key=True)
-    record_id             = Column (Integer, ForeignKey ("records.record_id"))
+    record_id           = Column (Integer, ForeignKey ("records.record_id"))
     key                 = Column (String)
     pointer             = Column (Integer, default = -1)
     
     def __init__ (self, key, pointer=None):
-        self.key=key
-        if pointer: self.pointer=pointer
+        self.key = key
+        if pointer:
+            self.pointer = pointer
 
     def __repr__ (self):
-        result="<key id=%s key=%s..."%(self.key_id,self.key[8:16],)
-        try:    result += " user=%s"%self.reg_user.record_id
+        result = "<key id=%s key=%s..." % (self.key_id, self.key[8:16],)
+        try:    result += " user=%s" % self.reg_user.record_id
         except: result += " no-user"
         result += ">"
         return result
@@ -332,8 +364,8 @@ class SliverAllocation(Base,AlchemyObj):
             self.allocation_state = kwds['allocation_state']
 
     def __repr__(self):
-        result = "<sliver_allocation sliver_id=%s allocation_state=%s" % \
-                  (self.sliver_id, self.allocation_state)
+        result = "<sliver_allocation sliver_id=%s allocation_state=%s"\
+                 % (self.sliver_id, self.allocation_state)
         return result
 
     @validates('allocation_state')
@@ -374,7 +406,7 @@ class SliverAllocation(Base,AlchemyObj):
         dbsession.commit()
     
     def sync(self, dbsession):
-        constraints = [SliverAllocation.sliver_id==self.sliver_id]
+        constraints = [SliverAllocation.sliver_id == self.sliver_id]
         results = dbsession.query(SliverAllocation).filter(and_(*constraints))
         records = []
         for result in results:
@@ -419,27 +451,27 @@ def make_record (dict=None, xml=""):
 # convert an incoming record - typically from xmlrpc - into an object
 def make_record_dict (record_dict):
     assert ('type' in record_dict)
-    type=record_dict['type'].split('+')[0]
-    if type=='authority':
-        result=RegAuthority (dict=record_dict)
-    elif type=='user':
-        result=RegUser (dict=record_dict)
-    elif type=='slice':
-        result=RegSlice (dict=record_dict)
-    elif type=='node':
-        result=RegNode (dict=record_dict)
+    type = record_dict['type'].split('+')[0]
+    if type == 'authority':
+        result = RegAuthority (dict=record_dict)
+    elif type == 'user':
+        result = RegUser (dict=record_dict)
+    elif type == 'slice':
+        result = RegSlice (dict=record_dict)
+    elif type == 'node':
+        result = RegNode (dict=record_dict)
     else:
         logger.debug("Untyped RegRecord instance")
-        result=RegRecord (dict=record_dict)
-    logger.info ("converting dict into Reg* with type=%s"%type)
-    logger.info ("returning=%s"%result)
+        result = RegRecord (dict=record_dict)
+    logger.info("converting dict into Reg* with type=%s"%type)
+    logger.info("returning=%s"%result)
     # xxx todo
     # register non-db attributes in an extensions field
     return result
         
-def make_record_xml (xml):
-    xml_record = XML(xml)
-    xml_dict = xml_record.todict()
+def make_record_xml (xml_str):
+    xml = XML(xml_str)
+    xml_dict = xml.todict()
     logger.info("load from xml, keys=%s"%xml_dict.keys())
     return make_record_dict (xml_dict)
 
@@ -450,27 +482,48 @@ def make_record_xml (xml):
 # were the relationships data came from the testbed side
 # for each type, a dict of the form {<field-name-exposed-in-record>:<alchemy_accessor_name>}
 # so after that, an 'authority' record will e.g. have a 'reg-pis' field with the hrns of its pi-users
-augment_map={'authority': {'reg-pis':'reg_pis',},
-             'slice': {'reg-researchers':'reg_researchers',},
-             'user': {'reg-pi-authorities':'reg_authorities_as_pi',
-                      'reg-slices':'reg_slices_as_researcher',},
-             }
+augment_map = {'authority': {'reg-pis' : 'reg_pis',},
+               'slice': {'reg-researchers' : 'reg_researchers',},
+               'user': {'reg-pi-authorities' : 'reg_authorities_as_pi',
+                        'reg-slices' : 'reg_slices_as_researcher',},
+           }
 
-def augment_with_sfa_builtins (local_record):
+
+# xxx mystery
+# the way we use sqlalchemy might be a little wrong
+# in any case what has been observed is that (Reg)Records as returned by an sqlalchemy
+# query not always have their __dict__ properly adjusted
+# typically a RegAuthority object would have its object.name set properly, but
+# object.__dict__ has no 'name' key
+# which is an issue because we rely on __dict__ for many things, in particular this
+# is what gets exposed to the drivers (this is historical and dates back before sqlalchemy)
+# so it is recommended to always run this function that will make sure
+# that such built-in fields are properly set in __dict__ too
+# 
+def augment_with_sfa_builtins(local_record):
     # don't ruin the import of that file in a client world
     from sfa.util.xrn import Xrn
     # add a 'urn' field
-    setattr(local_record,'reg-urn',Xrn(xrn=local_record.hrn,type=local_record.type).urn)
+    setattr(local_record, 'reg-urn', Xrn(xrn=local_record.hrn, type=local_record.type).urn)
     # users have keys and this is needed to synthesize 'users' sent over to CreateSliver
-    if local_record.type=='user':
+    fields_to_check = []
+    if local_record.type == 'user':
         user_keys = [ key.key for key in local_record.reg_keys ]
         setattr(local_record, 'reg-keys', user_keys)
+        fields_to_check = ['email']
+    elif local_record.type == 'authority':
+        fields_to_check = ['name']
+    for field in fields_to_check:
+        if not field in local_record.__dict__:
+            logger.debug("augment_with_sfa_builtins: hotfixing missing '{}' in {}"
+                         .format(field, local_record.hrn))
+            local_record.__dict__[field] = getattr(local_record, field)
     # search in map according to record type
-    type_map=augment_map.get(local_record.type,{})
+    type_map = augment_map.get(local_record.type, {})
     # use type-dep. map to do the job
-    for (field_name,attribute) in type_map.items():
+    for (field_name, attribute) in type_map.items():
         # get related objects
-        related_records = getattr(local_record,attribute,[])
+        related_records = getattr(local_record, attribute, [])
         hrns = [ r.hrn for r in related_records ]
         setattr (local_record, field_name, hrns)
     
