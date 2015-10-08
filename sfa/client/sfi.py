@@ -990,7 +990,7 @@ use this if you mean an authority instead""")
         try:
             list = self.registry().List(hrn, self.my_credential_string, options)
         except IndexError:
-            raise Exception, "Not enough parameters for the 'list' command"
+            raise Exception("Not enough parameters for the 'list' command")
 
         # filter on person, slice, site, node, etc.
         # This really should be in the self.filter_records funct def comment...
@@ -1104,7 +1104,7 @@ use this if you mean an authority instead""")
         elif record_dict['type'] in ['slice']:
             try:
                 cred = self.slice_credential_string(record_dict['hrn'])
-            except ServerException, e:
+            except ServerException as e:
                # XXX smbaker -- once we have better error return codes, update this
                # to do something better than a string compare
                if "Permission error" in e.args[0]:

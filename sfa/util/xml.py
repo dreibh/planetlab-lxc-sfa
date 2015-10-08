@@ -153,7 +153,7 @@ class XmlElement:
     # are redirected on self.element
     def __getattr__ (self, name):
         if not hasattr(self.element, name):
-            raise AttributeError, name
+            raise AttributeError(name)
         return getattr(self.element, name)
 
 class XML:
@@ -182,7 +182,7 @@ class XML:
             # 'rspec' file doesnt exist. 'rspec' is proably an xml string
             try:
                 tree = etree.parse(StringIO(xml), parser)
-            except Exception, e:
+            except Exception as e:
                 raise InvalidXML(str(e))
         root = tree.getroot()
         self.namespaces = dict(root.nsmap)

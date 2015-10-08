@@ -1,4 +1,7 @@
 #!/usr/bin/python 
+
+from __future__ import print_function
+
 from datetime import datetime, timedelta
 
 from sfa.util.xml import XML, XpathFilter
@@ -133,7 +136,7 @@ if __name__ == '__main__':
     input = sys.argv[1]
     with open(input) as f:
         rspec = RSpec(f.read())
-    print rspec
+    print(rspec)
 #    rspec.register_rspec_element(RSpecElements.NETWORK, 'network', '//network')
 #    rspec.register_rspec_element(RSpecElements.NODE, 'node', '//node')
 #    print rspec.get(RSpecElements.NODE)[0]
