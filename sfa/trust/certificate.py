@@ -151,7 +151,7 @@ class Keypair:
 
     def create(self):
         self.key = crypto.PKey()
-        self.key.generate_key(crypto.TYPE_RSA, 1024)
+        self.key.generate_key(crypto.TYPE_RSA, 2048)
 
     ##
     # Save the private key to a file
@@ -300,7 +300,7 @@ class Keypair:
 # whether to save the parent certificates as well.
 
 class Certificate:
-    digest = "md5"
+    digest = "sha256"
 
 #    x509 = None
 #    issuerKey = None
@@ -367,6 +367,10 @@ class Certificate:
         # if it is a chain of multiple certs, then split off the first one and
         # load it (support for the ---parent--- tag as well as normal chained certs)
 
+        if string is None or string.strip() == "":
+            logger.warn("Empty string in load_from_string")
+            return
+
         string = string.strip()
         
         # If it's not in proper PEM format, wrap it
@@ -391,6 +395,9 @@ class Certificate:
 
         self.x509 = crypto.load_certificate(crypto.FILETYPE_PEM, parts[0])
 
+        if self.x509 is None:
+            logger.warn("Loaded from string but cert is None: %s" % string)
+
         # if there are more certs, then create a parent and let the parent load
         # itself from the remainder of the string
         if len(parts) > 1 and parts[1] != '':
@@ -412,6 +419,9 @@ class Certificate:
     # @param save_parents If save_parents==True, then also save the parent certificates.
 
     def save_to_string(self, save_parents=True):
+        if self.x509 is None:
+            logger.warn("None cert in certificate.save_to_string")
+            return ""
         string = crypto.dump_certificate(crypto.FILETYPE_PEM, self.x509)
         if save_parents and self.parent:
             string = string + self.parent.save_to_string(save_parents)
@@ -498,6 +508,7 @@ class Certificate:
     ##
     # Get a pretty-print subject name of the certificate
     # let's try to make this a little more usable as is makes logs hairy
+    # FIXME: Consider adding 'urn:publicid' and 'uuid' back for GENI?
     pretty_fields = ['email']
     def filter_chunk(self, chunk):
         for field in self.pretty_fields:
@@ -601,8 +612,19 @@ class Certificate:
 
     def get_extension(self, name):
 
+        if name is None:
+            return None
+
+        certstr = self.save_to_string()
+        if certstr is None or certstr == "":
+            return None
         # pyOpenSSL does not have a way to get extensions
-        m2x509 = X509.load_cert_string(self.save_to_string())
+        m2x509 = X509.load_cert_string(certstr)
+        if m2x509 is None:
+            logger.warn("No cert loaded in get_extension")
+            return None
+        if m2x509.get_ext(name) is None:
+            return None
         value = m2x509.get_ext(name).get_value()
 
         return value
@@ -734,7 +756,7 @@ class Certificate:
             if self.is_signed_by_cert(trusted_cert):
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.x509.has_expired():
-                    if debug_verify_chain: 
+                    if debug_verify_chain:
                         logger.debug("verify_chain: YES. Cert %s signed by trusted cert %s"%(
                             self.pretty_cert(), trusted_cert.pretty_cert()))
                     return trusted_cert
@@ -757,11 +779,11 @@ class Certificate:
         if not self.is_signed_by_cert(self.parent):
             if debug_verify_chain:
                 logger.debug("verify_chain: NO. %s is not signed by parent %s, but by %s"%\
-                             (self.pretty_cert(), 
-                              self.parent.pretty_cert(), 
+                             (self.pretty_cert(),
+                              self.parent.pretty_cert(),
                               self.get_issuer()))
             raise CertNotSignedByParent("%s: Parent %s, issuer %s"\
-                                            % (self.pretty_cert(), 
+                                            % (self.pretty_cert(),
                                                self.parent.pretty_cert(),
                                                self.get_issuer()))
 
