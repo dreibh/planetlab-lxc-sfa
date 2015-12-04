@@ -242,7 +242,7 @@ def filter_creds_by_caller(creds, caller_hrn_list):
         for cred in creds:
             try:
                 tmp_cred = Credential(string=cred)
-                if tmp_cred.get_cred_type() != Credential.SFA_CREDENTIAL_TYPE:
+                if tmp_cred.type != Credential.SFA_CREDENTIAL_TYPE:
                     continue
                 if tmp_cred.get_gid_caller().get_hrn() in caller_hrn_list:
                     caller_creds.append(cred)
@@ -273,17 +273,17 @@ class Credential(object):
         self.signature = None
         self.xml = None
         self.refid = None
-        self.cred_type = Credential.SFA_CREDENTIAL_TYPE
+        self.type = Credential.SFA_CREDENTIAL_TYPE
         self.version = None
 
         if cred:
             if isinstance(cred, StringTypes):
                 string = cred
-                self.cred_type = Credential.SFA_CREDENTIAL_TYPE
+                self.type = Credential.SFA_CREDENTIAL_TYPE
                 self.version = '3'
             elif isinstance(cred, dict):
                 string = cred['geni_value']
-                self.cred_type = cred['geni_type']
+                self.type = cred['geni_type']
                 self.version = cred['geni_version']
 
         if string or filename:
@@ -309,9 +309,6 @@ class Credential(object):
                 break
         if not self.xmlsec_path:
             logger.warn("Could not locate binary for xmlsec1 - SFA will be unable to sign stuff !!")
-
-    def get_cred_type(self): 
-        return self.cred_type
 
     def get_subject(self):
         if not self.gidObject:
