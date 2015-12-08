@@ -1,6 +1,6 @@
 %define name sfa
 %define version 3.1
-%define taglevel 18
+%define taglevel 19
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -253,6 +253,13 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Tue Dec 08 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-19
+- imported changes from GENI as reported - Aaron Helsinger
+- minimal changes so that parts can be imported from nepi/py3
+- iotlab driver : fix ASAP jobs with state != Waiting, Running - Frederic
+- sfi client more accurately advertises rspec version - Loic
+- + bugfix in initscript
+
 * Mon Jun 08 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-18
 - incorporated Frederic Saint Marcel's addition of ASAP management tag
 
