@@ -167,7 +167,10 @@ def verify_speaks_for(cred, tool_gid, speaking_for_urn,
         for x in trusted_roots:
             cert_args += ['--trusted-pem', x.filename]
     # FIXME: Why do we not need to specify the --node-id option as credential.py does?
-    xmlsec1_args = [cred.xmlsec_path, '--verify'] + cert_args + [ cred_file]
+    xmlsec1 = cred.get_xmlsec1_path()
+    if not xmlsec1:
+        raise Exception("Could not locate required 'xmlsec1' program")
+    xmlsec1_args = [xmlsec1, '--verify'] + cert_args + [ cred_file]
     output = run_subprocess(xmlsec1_args, stdout=None, stderr=subprocess.PIPE)
     os.unlink(cred_file)
     if output != 0:
@@ -306,7 +309,6 @@ def create_sign_abaccred(tool_gid, user_gid, ma_gid, user_key_file, cred_filenam
     print "Created ABAC credential: '%s' in file %s" % \
             (cred.pretty_cred(), cred_filename)
 
-# FIXME: Assumes xmlsec1 is on path
 # FIXME: Assumes signer is itself signed by an 'ma_gid' that can be trusted
 def create_speaks_for(tool_gid, user_gid, ma_gid, \
                           user_key_file, cred_filename, dur_days=365):
@@ -366,8 +368,10 @@ def create_speaks_for(tool_gid, user_gid, ma_gid, \
     # --output signed.xml tosign.xml
     pems = "%s,%s,%s" % (user_key_file, user_gid.get_filename(),
                          ma_gid.get_filename())
-    # FIXME: assumes xmlsec1 is on path
-    cmd = ['xmlsec1',  '--sign',  '--privkey-pem', pems, 
+    xmlsec1 = cred.get_xmlsec1_path()
+    if not xmlsec1:
+        raise Exception("Could not locate required 'xmlsec1' program")
+    cmd = [ xmlsec1,  '--sign',  '--privkey-pem', pems, 
            '--output', cred_filename, unsigned_cred_filename]
 
 #    print " ".join(cmd)

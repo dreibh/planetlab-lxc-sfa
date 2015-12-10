@@ -299,16 +299,25 @@ class Credential(object):
             else:
                 self.xml = str
                 self.decode()
+        # not strictly necessary but won't hurt either
+        self.get_xmlsec1_path()
 
-        # Find an xmlsec1 path
-        self.xmlsec_path = ''
-        paths = ['/usr/bin','/usr/local/bin','/bin','/opt/bin','/opt/local/bin']
-        for path in paths:
-            if os.path.isfile(path + '/' + 'xmlsec1'):
-                self.xmlsec_path = path + '/' + 'xmlsec1'
-                break
-        if not self.xmlsec_path:
-            logger.warn("Could not locate binary for xmlsec1 - SFA will be unable to sign stuff !!")
+    @staticmethod
+    def get_xmlsec1_path():
+        if not getattr(Credential, 'xmlsec1_path', None):
+            # Find a xmlsec1 binary path
+            Credential.xmlsec1_path = ''
+            paths = ['/usr/bin', '/usr/local/bin', '/bin', '/opt/bin', '/opt/local/bin']
+            try:     paths += os.getenv('PATH').split(':')
+            except:  pass
+            for path in paths:
+                xmlsec1 = os.path.join(path, 'xmlsec1')
+                if os.path.isfile(xmlsec1):
+                    Credential.xmlsec1_path = xmlsec1
+                    break
+        if not Credential.xmlsec1_path:
+            logger.error("Could not locate required binary 'xmlsec1' - SFA will be unable to sign stuff !!")
+        return Credential.xmlsec1_path
 
     def get_subject(self):
         if not self.gidObject:
@@ -683,8 +692,11 @@ class Credential(object):
         # Call out to xmlsec1 to sign it
         ref = 'Sig_%s' % self.get_refid()
         filename = self.save_to_random_tmp_file()
-        command='%s --sign --node-id "%s" --privkey-pem %s,%s %s' \
-            % (self.xmlsec_path, ref, self.issuer_privkey, ",".join(gid_files), filename)
+        xmlsec1 = self.get_xmlsec1_path()
+        if not xmlsec1:
+            raise Exception("Could not locate required 'xmlsec1' program")
+        command = '%s --sign --node-id "%s" --privkey-pem %s,%s %s' \
+            % (xmlsec1, ref, self.issuer_privkey, ",".join(gid_files), filename)
 #        print 'command',command
         signed = os.popen(command).read()
         os.remove(filename)
@@ -881,7 +893,10 @@ class Credential(object):
             #cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
             #command = '{} --verify --node-id "{}" {} {} 2>&1'.\
             #          format(self.xmlsec_path, ref, cert_args, filename)
-            command = [ self.xmlsec_path, '--verify', '--node-id', ref ]
+            xmlsec1 = cred.get_xmlsec1_path()
+            if not xmlsec1:
+                raise Exception("Could not locate required 'xmlsec1' program")
+            command = [ xmlsec1, '--verify', '--node-id', ref ]
             for trusted in trusted_certs:
                 command += ["--trusted-pem", trusted ]
             command += [ filename ]
