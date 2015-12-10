@@ -368,7 +368,7 @@ def create_speaks_for(tool_gid, user_gid, ma_gid, \
     # --output signed.xml tosign.xml
     pems = "%s,%s,%s" % (user_key_file, user_gid.get_filename(),
                          ma_gid.get_filename())
-    xmlsec1 = cred.get_xmlsec1_path()
+    xmlsec1 = Credential.get_xmlsec1_path()
     if not xmlsec1:
         raise Exception("Could not locate required 'xmlsec1' program")
     cmd = [ xmlsec1,  '--sign',  '--privkey-pem', pems, 

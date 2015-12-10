@@ -893,7 +893,7 @@ class Credential(object):
             #cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
             #command = '{} --verify --node-id "{}" {} {} 2>&1'.\
             #          format(self.xmlsec_path, ref, cert_args, filename)
-            xmlsec1 = cred.get_xmlsec1_path()
+            xmlsec1 = self.get_xmlsec1_path()
             if not xmlsec1:
                 raise Exception("Could not locate required 'xmlsec1' program")
             command = [ xmlsec1, '--verify', '--node-id', ref ]
