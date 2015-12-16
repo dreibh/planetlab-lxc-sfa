@@ -27,7 +27,8 @@ DEFAULT_PLATFORM = 'ple'
 
 # starting with 2.7.9 we need to turn off server verification
 import ssl
-ssl_needs_unverified_context = hasattr(ssl, '_create_unverified_context')
+try:    turn_off_server_verify = { 'context' : ssl._create_unverified_context() } 
+except: turn_off_server_verify = {}
 
 import xmlrpclib
 import getpass
@@ -82,11 +83,9 @@ class ManifoldUploader:
 #        return self._proxy
         url=self.url()
         self.logger.debug("Connecting manifold url %s"%url)
-        if not ssl_needs_unverified_context:
-            proxy = xmlrpclib.ServerProxy(url, allow_none = True)
-        else:
-            proxy = xmlrpclib.ServerProxy(url, allow_none = True,
-                                          context=ssl._create_unverified_context())
+        proxy = xmlrpclib.ServerProxy(url, allow_none = True,
+                                      **turn_off_server_verify)
+
         return proxy
 
     # does the job for one credential
