@@ -207,7 +207,7 @@ class Keypair:
         # prob not necc since this cert itself is junk but still...
         m2x509.set_version(2)
         junk_key = Keypair(create=True)
-        m2x509.sign(pkey=junk_key.get_m2_pkey(), md="sha1")
+        m2x509.sign(pkey=junk_key.get_m2_pubkey(), md="sha1")
 
         # convert the m2 x509 cert to a pyopenssl x509
         m2pem = m2x509.as_pem()
@@ -236,7 +236,7 @@ class Keypair:
     ##
     # Return an M2Crypto key object
 
-    def get_m2_pkey(self):
+    def get_m2_pubkey(self):
         if not self.m2key:
             self.m2key = M2Crypto.EVP.load_key_string(self.as_pem())
         return self.m2key
@@ -245,7 +245,7 @@ class Keypair:
     # Returns a string containing the public key represented by this object.
 
     def get_pubkey_string(self):
-        m2pkey = self.get_m2_pkey()
+        m2pkey = self.get_m2_pubkey()
         return base64.b64encode(m2pkey.as_der())
 
     ##
@@ -261,13 +261,13 @@ class Keypair:
         return self.as_pem() == pkey.as_pem()
 
     def sign_string(self, data):
-        k = self.get_m2_pkey()
+        k = self.get_m2_pubkey()
         k.sign_init()
         k.sign_update(data)
         return base64.b64encode(k.sign_final())
 
     def verify_string(self, data, sig):
-        k = self.get_m2_pkey()
+        k = self.get_m2_pubkey()
         k.verify_init()
         k.verify_update(data)
         return M2Crypto.m2.verify_final(k.ctx, base64.b64decode(sig), k.pkey)
@@ -675,12 +675,12 @@ class Certificate:
     # @param pkey is a Keypair object representing a public key. If Pkey
     #     did not sign the certificate, then an exception will be thrown.
 
-    def verify(self, pkey):
+    def verify(self, pubkey):
         # pyOpenSSL does not have a way to verify signatures
         m2x509 = X509.load_cert_string(self.save_to_string())
-        m2pkey = pkey.get_m2_pkey()
+        m2pubkey = pubkey.get_m2_pubkey()
         # verify it
-        return m2x509.verify(m2pkey)
+        return m2x509.verify(m2pubkey)
 
         # XXX alternatively, if openssl has been patched, do the much simpler:
         # try:
