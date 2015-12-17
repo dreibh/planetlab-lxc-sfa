@@ -27,14 +27,14 @@ class TrustedRoots:
 
     def get_file_list(self):
         file_list  = []
-        pattern=os.path.join(self.basedir,"*")
+        pattern = os.path.join(self.basedir,"*")
         for cert_file in glob.glob(pattern):
             if os.path.isfile(cert_file):
                 if self.has_supported_extension(cert_file):
                     file_list.append(cert_file) 
                 else:
-                    logger.warning("File %s ignored - supported extensions are %r"%\
-                                       (cert_file,TrustedRoots.supported_extensions))
+                    logger.warning("File {} ignored - supported extensions are {}"
+                                   .format(cert_file, TrustedRoots.supported_extensions))
         return file_list
 
     def has_supported_extension (self,path):

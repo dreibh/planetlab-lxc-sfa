@@ -31,7 +31,7 @@ class SfaServer(threading.Thread):
     # @param cert_file certificate filename containing public key 
     #   (could be a GID file)
 
-    def __init__(self, ip, port, key_file, cert_file,interface):
+    def __init__(self, ip, port, key_file, cert_file, interface):
         threading.Thread.__init__(self)
         self.key = Keypair(filename = key_file)
         self.cert = Certificate(filename = cert_file)

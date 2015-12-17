@@ -174,8 +174,10 @@ class Keypair:
 
     def load_from_string(self, string):
         if glo_passphrase_callback:
-            self.key = crypto.load_privatekey(crypto.FILETYPE_PEM, string, functools.partial(glo_passphrase_callback, self, string) )
-            self.m2key = M2Crypto.EVP.load_key_string(string, functools.partial(glo_passphrase_callback, self, string) )
+            self.key = crypto.load_privatekey(
+                crypto.FILETYPE_PEM, string, functools.partial(glo_passphrase_callback, self, string))
+            self.m2key = M2Crypto.EVP.load_key_string(
+                string, functools.partial(glo_passphrase_callback, self, string))
         else:
             self.key = crypto.load_privatekey(crypto.FILETYPE_PEM, string)
             self.m2key = M2Crypto.EVP.load_key_string(string)
