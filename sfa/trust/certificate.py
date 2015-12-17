@@ -680,7 +680,9 @@ class Certificate:
         m2x509 = X509.load_cert_string(self.save_to_string())
         m2pubkey = pubkey.get_m2_pubkey()
         # verify it
-        return m2x509.verify(m2pubkey)
+        # verify returns -1 or 0 on failure depending on how serious the
+        # error conditions are
+        return m2x509.verify(m2pubkey) == 1
 
         # XXX alternatively, if openssl has been patched, do the much simpler:
         # try:
