@@ -59,6 +59,7 @@ class IotLABAggregate(object):
         # rspec_node['boot_state'] = 'true'
         if node['state'] == 'Absent' or \
            node['state'] == 'Suspected' or \
+           node['state'] == 'Dead' or \
            node['state'] == 'Busy':
             rspec_node['available'] = 'false'
         else:
