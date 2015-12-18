@@ -234,14 +234,14 @@ function db_start () {
 
     ######## Start up the server
     # not too nice, but.. when co-located with myplc we'll let it start/stop postgresql
-    if [ ! postgresql_check ] ; then
+    postgresql_check || {
 	service postgresql start >& /dev/null
 	MESSAGE=$"Starting PostgreSQL server"
 	echo -n "$MESSAGE"
 	[ "$ERRORS" == 0 ] && success "$MESSAGE" || failure "$MESSAGE" ; echo
 	# best-effort to make sure we turn it back off when running stop
 	touch $POSTGRESQL_STARTED
-    fi
+    }
     postgresql_check
     check
 	

@@ -84,7 +84,7 @@ class Method:
 
             return result
 
-        except SfaFault, fault:
+        except SfaFault as fault:
 
             caller = ""
 

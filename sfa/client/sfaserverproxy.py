@@ -2,7 +2,8 @@
 
 # starting with 2.7.9 we need to turn off server verification
 import ssl
-ssl_needs_unverified_context = hasattr(ssl, '_create_unverified_context')
+try:    turn_off_server_verify = { 'context' : ssl._create_unverified_context() } 
+except: turn_off_server_verify = {}
 
 import xmlrpclib
 from httplib import HTTPS, HTTPSConnection
@@ -48,13 +49,9 @@ class XMLRPCTransport(xmlrpclib.Transport):
         # create a HTTPS connection object from a host descriptor
         # host may be a string, or a (host, x509-dict) tuple
         host, extra_headers, x509 = self.get_host_info(host)
-        if not ssl_needs_unverified_context:
-            conn = HTTPSConnection(host, None, key_file = self.key_file,
-                                   cert_file = self.cert_file)
-        else:
-            conn = HTTPSConnection(host, None, key_file = self.key_file,
-                                   cert_file = self.cert_file,
-                                   context = ssl._create_unverified_context())
+        conn = HTTPSConnection(host, None, key_file = self.key_file,
+                               cert_file = self.cert_file,
+                               **turn_off_server_verify)
 
         # Some logic to deal with timeouts. It appears that some (or all) versions
         # of python don't set the timeout after the socket is created. We'll do it
@@ -85,13 +82,9 @@ class XMLRPCServerProxy(xmlrpclib.ServerProxy):
         # remember url for GetVersion
         # xxx not sure this is still needed as SfaServerProxy has this too
         self.url=url
-        if not ssl_needs_unverified_context:
-            xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none,
-                                           verbose=verbose)
-        else:
-            xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none,
-                                           verbose=verbose,
-                                           context=ssl._create_unverified_context())
+        xmlrpclib.ServerProxy.__init__(self, url, transport, allow_none=allow_none,
+                                       verbose=verbose,
+                                       **turn_off_server_verify)
 
     def __getattr__(self, attr):
         logger.debug ("xml-rpc %s method:%s" % (self.url, attr))
