@@ -25,11 +25,11 @@ class TestKeypair(unittest.TestCase):
 
       self.assertEqual(k.as_pem(), k2.as_pem())
 
-   def test_get_m2_pkey(self):
+   def test_get_m2_pubkey(self):
       k = Keypair()
       k.create()
 
-      m2 = k.get_m2_pkey()
+      m2 = k.get_m2_pubkey()
       self.assert_(m2 != None)
 
    def test_get_openssl_pkey(self):
