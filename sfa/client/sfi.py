@@ -927,7 +927,13 @@ use this if you mean an authority instead""")
 
     @declare_command("", "")
     def config (self, options, args):
-        "Display contents of current config"
+        """
+        Display contents of current config
+        """
+        if len(args) != 0:
+            self.print_help()
+            sys.exit(1)
+
         print("# From configuration file {}".format(self.config_file))
         flags = [ ('sfi', [ ('registry', 'reg_url'),
                             ('auth', 'authority'),
@@ -955,8 +961,12 @@ use this if you mean an authority instead""")
     def version(self, options, args):
         """
         display an SFA server version (GetVersion)
-    or version information about sfi itself
+        or version information about sfi itself
         """
+        if len(args) != 0:
+            self.print_help()
+            sys.exit(1)
+        
         if options.version_local:
             version = version_core()
         else:
@@ -982,6 +992,7 @@ use this if you mean an authority instead""")
         if len(args) != 1:
             self.print_help()
             sys.exit(1)
+
         hrn = args[0]
         opts = {}
         if options.recursive:
@@ -1011,6 +1022,7 @@ use this if you mean an authority instead""")
         if len(args) != 1:
             self.print_help()
             sys.exit(1)
+
         hrn = args[0]
         # explicitly require Resolve to run in details mode
         resolve_options = {}
@@ -1042,17 +1054,19 @@ use this if you mean an authority instead""")
     # this historically was named 'add', it is now 'register' with an alias for legacy
     @declare_command("[xml-filename]", "", ['add'])
     def register(self, options, args):
-        """create new record in registry (Register) 
-    from command line options (recommended) 
-    old-school method involving an xml file still supported"""
+        """
+        create new record in registry (Register) 
+        from command line options (recommended) 
+        old-school method involving an xml file still supported
+        """
+        if len(args) > 1:
+            self.print_help()
+            sys.exit(1)
 
         auth_cred = self.my_authority_credential_string()
         if options.show_credential:
             show_credentials(auth_cred)
         record_dict = {}
-        if len(args) > 1:
-            self.print_help()
-            sys.exit(1)
         if len(args) == 1:
             try:
                 record_filepath = args[0]
@@ -1082,11 +1096,17 @@ use this if you mean an authority instead""")
     
     @declare_command("[xml-filename]", "")
     def update(self, options, args):
-        """update record into registry (Update) 
-    from command line options (recommended) 
-    old-school method involving an xml file still supported"""
+        """
+        update record into registry (Update) 
+        from command line options (recommended) 
+        old-school method involving an xml file still supported
+        """
+        if len(args) > 1:
+            self.print_help()
+            sys.exit(1)
+
         record_dict = {}
-        if len(args) > 0:
+        if len(args) == 1:
             record_filepath = args[0]
             rec_file = self.get_record_file(record_filepath)
             record_dict.update(load_record_from_file(rec_file).record_to_dict())
@@ -1130,11 +1150,14 @@ use this if you mean an authority instead""")
   
     @declare_command("hrn", "")
     def remove(self, options, args):
-        "remove registry record by name (Remove)"
+        """
+        remove registry record by name (Remove)
+        """
         auth_cred = self.my_authority_credential_string()
         if len(args) != 1:
             self.print_help()
             sys.exit(1)
+
         hrn = args[0]
         type = options.type 
         if type in ['all']:
@@ -1157,8 +1180,11 @@ use this if you mean an authority instead""")
         """
         discover available resources (ListResources)
         """
-        server = self.sliceapi()
+        if len(args) != 0:
+            self.print_help()
+            sys.exit(1)
 
+        server = self.sliceapi()
         # set creds
         creds = [self.my_credential]
         if options.delegate:
@@ -1207,10 +1233,13 @@ use this if you mean an authority instead""")
     def describe(self, options, args):
         """
         shows currently allocated/provisioned resources 
-    of the named slice or set of slivers (Describe) 
+        of the named slice or set of slivers (Describe) 
         """
-        server = self.sliceapi()
+        if len(args) != 1:
+            self.print_help()
+            sys.exit(1)
 
+        server = self.sliceapi()
         # set creds
         creds = [self.slice_credential(args[0])]
         if options.delegate:
@@ -1252,8 +1281,11 @@ use this if you mean an authority instead""")
         """
         de-allocate and de-provision all or named slivers of the named slice (Delete)
         """
-        server = self.sliceapi()
+        if len(args) == 0:
+            self.print_help()
+            sys.exit(1)
 
+        server = self.sliceapi()
         # slice urn
         slice_hrn = args[0]
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
@@ -1287,11 +1319,12 @@ use this if you mean an authority instead""")
         """
          allocate resources to the named slice (Allocate)
         """
-        server = self.sliceapi()
-        server_version = self.get_cached_server_version(server)
         if len(args) != 2:
             self.print_help()
             sys.exit(1)
+
+        server = self.sliceapi()
+        server_version = self.get_cached_server_version(server)
         slice_hrn = args[0]
         rspec_file = self.get_rspec_file(args[1])
 
@@ -1349,6 +1382,10 @@ use this if you mean an authority instead""")
         """
         provision all or named already allocated slivers of the named slice (Provision)
         """
+        if len(args) == 0:
+            self.print_help()
+            sys.exit(1)
+
         server = self.sliceapi()
         server_version = self.get_cached_server_version(server)
         slice_hrn = args[0]
@@ -1414,8 +1451,11 @@ use this if you mean an authority instead""")
         """
         retrieve the status of the slivers belonging to the named slice (Status)
         """
-        server = self.sliceapi()
+        if len(args) != 1:
+            self.print_help()
+            sys.exit(1)
 
+        server = self.sliceapi()
         # slice urn
         slice_hrn = args[0]
         slice_urn = hrn_to_urn(slice_hrn, 'slice') 
@@ -1442,6 +1482,10 @@ use this if you mean an authority instead""")
         """
         Perform the named operational action on all or named slivers of the named slice
         """
+        if len(args) == 0:
+            self.print_help()
+            sys.exit(1)
+
         server = self.sliceapi()
         api_options = {}
         # slice urn
@@ -1479,10 +1523,11 @@ use this if you mean an authority instead""")
         """
         renew slice (Renew)
         """
-        server = self.sliceapi()
         if len(args) < 2:
             self.print_help()
             sys.exit(1)
+
+        server = self.sliceapi()
         slice_hrn = args[0]
         slice_urn = Xrn(slice_hrn, type='slice').get_urn()
 
@@ -1518,6 +1563,10 @@ use this if you mean an authority instead""")
         """
         shutdown named slice (Shutdown)
         """
+        if len(args) != 1:
+            self.print_help()
+            sys.exit(1)
+
         server = self.sliceapi()
         # slice urn
         slice_hrn = args[0]
@@ -1541,6 +1590,7 @@ use this if you mean an authority instead""")
         if len(args) < 1:
             self.print_help()
             sys.exit(1)
+
         target_hrn = args[0]
         my_gid_string = open(self.client_bootstrap.my_gid()).read() 
         gid = self.registry().CreateGid(self.my_credential_string, target_hrn, my_gid_string)
@@ -1576,6 +1626,7 @@ use this if you mean an authority instead""")
         if len(args) != 1:
             self.print_help()
             sys.exit(1)
+
         to_hrn = args[0]
         # support for several delegations in the same call
         # so first we gather the things to do
@@ -1649,10 +1700,11 @@ $ sfi m -b http://mymanifold.foo.com:7080/
     * refresh all your credentials (you as a user and pi, your slices)
     * upload them to the manifold backend server
     for last phase, sfi_config is read to look for the [myslice] section, 
-    and namely the 'backend', 'delegate' and 'user' settings"""
+    and namely the 'backend', 'delegate' and 'user' settings
+        """
 
         ##########
-        if len(args)>0:
+        if len(args) > 0:
             self.print_help()
             sys.exit(1)
         # enable info by default
