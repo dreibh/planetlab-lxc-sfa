@@ -1208,16 +1208,8 @@ use this if you mean an authority instead""")
                 api_options['cached'] = False
             else:
                 api_options['cached'] = True
-        if options.rspec_version:
-            version_manager = VersionManager()
-            server_version = self.get_cached_server_version(server)
-            if 'sfa' in server_version:
-                # just request the version the client wants
-                api_options['geni_rspec_version'] = version_manager.get_version(options.rspec_version).to_dict()
-            else:
-                api_options['geni_rspec_version'] = {'type': options.rspec_version}
-        else:
-            api_options['geni_rspec_version'] = {'type': 'geni', 'version': '3'}
+        version_manager = VersionManager()
+        api_options['geni_rspec_version'] = version_manager.get_version(options.rspec_version).to_dict()
 
         list_resources = server.ListResources (creds, api_options)
         value = ReturnValue.get_value(list_resources)
