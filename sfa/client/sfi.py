@@ -434,7 +434,7 @@ class Sfi:
                               action="store_true", dest="version_local", default=False,
                               help="display version of the local client")
 
-        if canonical in ("version", "trusted"):
+        if canonical in ("version", "trusted", "introspect"):
             parser.add_option("-R","--registry_interface",
                               action="store_true", dest="registry_interface", default=False,
                               help="target the registry interface instead of slice interface")
@@ -1831,3 +1831,31 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             print("Certificate:\n{}\n\n".format(trusted_cert))
         # xxx should analyze result
         return 0
+
+    @declare_command("", "")
+    def introspect(self, options, args):
+        """
+        If remote server supports XML-RPC instrospection API, allows
+        to list supported methods
+        """
+        if options.registry_interface:
+            server = self.registry()
+        else:
+            server = self.sliceapi()
+        results = server.serverproxy.system.listMethods()
+        # at first sight a list here means it's fine,
+        # and a dict suggests an error (no support for introspection?)
+        if isinstance(results, list):
+            results = [ name for name in results if 'system.' not in name ]
+            results.sort()
+            print("== methods supported at {}".format(server.url))
+            if 'Discover' in results:
+                print("== has support for 'Discover' - most likely a v3")
+            else:
+                print("== has no support for 'Discover' - most likely a v2")
+            for name in results:
+                print(name)
+        else:
+            print("Got return of type {}, expected a list".format(type(results)))
+            print("This suggests the remote end does not support introspection")
+            print(results)
