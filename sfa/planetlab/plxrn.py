@@ -27,14 +27,15 @@ def top_auth (hrn):
 
 def hash_loginbase(site_hrn):
     if len(site_hrn) <= 12:
-        return site_hrn.replace('.','8')
+        return site_hrn.replace('.','8').replace('_', '8')
     ratio = float(12) / len(site_hrn)
     auths_tab = site_hrn.split('.')
     auths_tab2 = []
     for auth in auths_tab:
-         auth2 = auth[:int(len(auth)*ratio)]
-         auths_tab2.append(auth2)
 
+        auth = auth.replace('_', '8')
+        auth2 = auth[:int(len(auth)*ratio)]
+        auths_tab2.append(auth2)
     return '8'.join(auths_tab2)
 
 class PlXrn (Xrn):
@@ -102,3 +103,15 @@ class PlXrn (Xrn):
         base = re.sub('[\\\\]*[^a-zA-Z0-9]', '', base)
 
         return base
+
+tests = [
+    'inria.foo.x',
+    'in.foo.x_y',
+    'inria.foo.longer',
+    'onelab.upmc.fit_demo',
+    'onelab.upmc.fit_demo.some_other',
+]
+
+if __name__ == '__main__':
+    for test in tests:
+        print("{} - hash_loginbase -> {}".format(test, hash_loginbase(test)))
