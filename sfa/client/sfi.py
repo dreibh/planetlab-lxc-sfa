@@ -98,7 +98,7 @@ def filter_records(type, records):
     return filtered_records
 
 
-def credential_printable (cred):
+def credential_printable(cred):
     credential = Credential(cred=cred)
     result = ""
     result += credential.pretty_cred()
@@ -109,8 +109,8 @@ def credential_printable (cred):
     result += "rights={}\n".format(rights)
     return result
 
-def show_credentials (cred_s):
-    if not isinstance (cred_s, list): cred_s = [cred_s]
+def show_credentials(cred_s):
+    if not isinstance(cred_s, list): cred_s = [cred_s]
     for cred in cred_s:
         print("Using Credential {}".format(credential_printable(cred)))
 
@@ -178,12 +178,12 @@ def save_records_to_file(filename, record_dicts, format="xml"):
         print("unknown output format", format)
 
 # minimally check a key argument
-def check_ssh_key (key):
+def check_ssh_key(key):
     good_ssh_key = r'^.*(?:ssh-dss|ssh-rsa)[ ]+[A-Za-z0-9+/=]+(?: .*)?$'
     return re.match(good_ssh_key, key, re.IGNORECASE)
 
 # load methods
-def normalize_type (type):
+def normalize_type(type):
     if type.startswith('au'):
         return 'authority'
     elif type.startswith('us'):
@@ -215,7 +215,7 @@ def load_record_from_opts(options):
             pubkey = open(options.key, 'r').read()
         except IOError:
             pubkey = options.key
-        if not check_ssh_key (pubkey):
+        if not check_ssh_key(pubkey):
             raise SfaInvalidArgument(name='key', msg="Could not find file, or wrong key format")
         record_dict['reg-keys'] = [pubkey]
     if hasattr(options, 'slices') and options.slices:
@@ -259,7 +259,7 @@ from functools import wraps
 commands_list=[]
 commands_dict={}
 
-def declare_command (args_string, example, aliases=None):
+def declare_command(args_string, example, aliases=None):
     def wrap(m): 
         name=getattr(m, '__name__')
         doc=getattr(m, '__doc__', "-- missing doc --")
@@ -273,12 +273,12 @@ def declare_command (args_string, example, aliases=None):
                 commands_list.append(alias)
                 commands_dict[alias]=command_tuple
         @wraps(m)
-        def new_method (*args, **kwds): return m(*args, **kwds)
+        def new_method(*args, **kwds): return m(*args, **kwds)
         return new_method
     return wrap
 
 
-def remove_none_fields (record):
+def remove_none_fields(record):
     none_fields=[ k for (k, v) in record.items() if v is None ]
     for k in none_fields: del record[k]
 
@@ -290,7 +290,7 @@ class Sfi:
     required_options=['verbose',  'debug',  'registry',  'sm',  'auth',  'user', 'user_private_key']
 
     @staticmethod
-    def default_sfi_dir ():
+    def default_sfi_dir():
         if os.path.isfile("./sfi_config"): 
             return os.getcwd()
         else:
@@ -301,7 +301,7 @@ class Sfi:
     class DummyOptions:
         pass
 
-    def __init__ (self, options=None):
+    def __init__(self, options=None):
         if options is None: options=Sfi.DummyOptions()
         for opt in Sfi.required_options:
             if not hasattr(options, opt):
@@ -321,7 +321,7 @@ class Sfi:
         self.client_bootstrap = None
 
     ### suitable if no reasonable command has been provided
-    def print_commands_help (self, options):
+    def print_commands_help(self, options):
         verbose = getattr(options, 'verbose')
         format3 = "%10s %-35s %s"
         format3offset = 47
@@ -350,7 +350,7 @@ class Sfi:
                 print(format3 % (command, "<<alias for %s>>"%canonical, ""))
             
     ### now if a known command was found we can be more verbose on that one
-    def print_help (self):
+    def print_help(self):
         print("==================== Generic sfi usage")
         self.sfi_parser.print_help()
         (doc, _, example, canonical) = commands_dict[self.command]
@@ -422,7 +422,7 @@ class Sfi:
         parser = OptionParser(add_help_option=False,
                               usage="sfi [sfi_options] {} [cmd_options] {}"\
                               .format(command, args_string))
-        parser.add_option ("-h","--help",dest='help',action='store_true',default=False,
+        parser.add_option("-h","--help",dest='help',action='store_true',default=False,
                            help="Summary of one command usage")
 
         if canonical in ("config"):
@@ -453,7 +453,7 @@ class Sfi:
                               callback=optparse_listvalue_callback)
             parser.add_option('-p', '--pis', dest='reg_pis', metavar='<PIs>', help='Set/replace Principal Investigators/Project Managers',
                               default='', type="str", action='callback', callback=optparse_listvalue_callback)
-            parser.add_option ('-X','--extra',dest='extras',default={},type='str',metavar="<EXTRA_ASSIGNS>",
+            parser.add_option('-X','--extra',dest='extras',default={},type='str',metavar="<EXTRA_ASSIGNS>",
                                action="callback", callback=optparse_dictvalue_callback, nargs=1,
                                help="set extra/testbed-dependent flags, e.g. --extra enabled=true")
 
@@ -579,7 +579,7 @@ use this if you mean an authority instead""")
             return -1
     
         # complete / find unique match with command set
-        command_candidates = Candidates (commands_list)
+        command_candidates = Candidates(commands_list)
         input = args[0]
         command = command_candidates.only_match(input)
         if not command:
@@ -600,8 +600,8 @@ use this if you mean an authority instead""")
             if not command_options.type:
                 sys.exit(1)
         
-        self.read_config () 
-        self.bootstrap ()
+        self.read_config() 
+        self.bootstrap()
         self.logger.debug("Command={}".format(self.command))
 
         try:
@@ -609,7 +609,7 @@ use this if you mean an authority instead""")
         except SystemExit:
             return 1
         except:
-            self.logger.log_exc ("sfi command {} failed".format(command))
+            self.logger.log_exc("sfi command {} failed".format(command))
             return 1
         return retcod
     
@@ -619,7 +619,7 @@ use this if you mean an authority instead""")
         shell_config_file  = os.path.join(self.options.sfi_dir, "sfi_config.sh")
         try:
             if Config.is_ini(config_file):
-                config = Config (config_file)
+                config = Config(config_file)
             else:
                 # try upgrading from shell config format
                 fp, fn = mkstemp(suffix='sfi_config', text=True)  
@@ -703,25 +703,25 @@ use this if you mean an authority instead""")
     #
     
     # init self-signed cert, user credentials and gid
-    def bootstrap (self):
+    def bootstrap(self):
         if self.options.verbose:
             self.logger.info("Initializing SfaClientBootstrap with {}".format(self.reg_url))
-        client_bootstrap = SfaClientBootstrap (self.user, self.reg_url, self.options.sfi_dir,
+        client_bootstrap = SfaClientBootstrap(self.user, self.reg_url, self.options.sfi_dir,
                                                logger=self.logger)
         # if -k is provided, use this to initialize private key
         if self.options.user_private_key:
-            client_bootstrap.init_private_key_if_missing (self.options.user_private_key)
+            client_bootstrap.init_private_key_if_missing(self.options.user_private_key)
         else:
             # trigger legacy compat code if needed 
             # the name has changed from just <leaf>.pkey to <hrn>.pkey
             if not os.path.isfile(client_bootstrap.private_key_filename()):
-                self.logger.info ("private key not found, trying legacy name")
+                self.logger.info("private key not found, trying legacy name")
                 try:
-                    legacy_private_key = os.path.join (self.options.sfi_dir, "{}.pkey"
+                    legacy_private_key = os.path.join(self.options.sfi_dir, "{}.pkey"
                                                        .format(Xrn.unescape(get_leaf(self.user))))
                     self.logger.debug("legacy_private_key={}"
                                       .format(legacy_private_key))
-                    client_bootstrap.init_private_key_if_missing (legacy_private_key)
+                    client_bootstrap.init_private_key_if_missing(legacy_private_key)
                     self.logger.info("Copied private key from legacy location {}"
                                      .format(legacy_private_key))
                 except:
@@ -732,11 +732,11 @@ use this if you mean an authority instead""")
         client_bootstrap.bootstrap_my_gid()
         # extract what's needed
         self.private_key = client_bootstrap.private_key()
-        self.my_credential_string = client_bootstrap.my_credential_string ()
+        self.my_credential_string = client_bootstrap.my_credential_string()
         self.my_credential = {'geni_type': 'geni_sfa',
                               'geni_version': '3', 
                               'geni_value': self.my_credential_string}
-        self.my_gid = client_bootstrap.my_gid ()
+        self.my_gid = client_bootstrap.my_gid()
         self.client_bootstrap = client_bootstrap
 
 
@@ -744,13 +744,13 @@ use this if you mean an authority instead""")
         if not self.authority:
             self.logger.critical("no authority specified. Use -a or set SF_AUTH")
             sys.exit(-1)
-        return self.client_bootstrap.authority_credential_string (self.authority)
+        return self.client_bootstrap.authority_credential_string(self.authority)
 
     def authority_credential_string(self, auth_hrn):
-        return self.client_bootstrap.authority_credential_string (auth_hrn)
+        return self.client_bootstrap.authority_credential_string(auth_hrn)
 
     def slice_credential_string(self, name):
-        return self.client_bootstrap.slice_credential_string (name)
+        return self.client_bootstrap.slice_credential_string(name)
 
     def slice_credential(self, name):
         return {'geni_type': 'geni_sfa',
@@ -783,18 +783,18 @@ use this if you mean an authority instead""")
     # Management of the servers
     # 
 
-    def registry (self):
+    def registry(self):
         # cache the result
-        if not hasattr (self, 'registry_proxy'):
+        if not hasattr(self, 'registry_proxy'):
             self.logger.info("Contacting Registry at: {}".format(self.reg_url))
             self.registry_proxy \
                 =  SfaServerProxy(self.reg_url, self.private_key, self.my_gid, 
                                   timeout=self.options.timeout, verbose=self.options.debug)  
         return self.registry_proxy
 
-    def sliceapi (self):
+    def sliceapi(self):
         # cache the result
-        if not hasattr (self, 'sliceapi_proxy'):
+        if not hasattr(self, 'sliceapi_proxy'):
             # if the command exposes the --component option, figure it's hostname and connect at CM_PORT
             if hasattr(self.command_options, 'component') and self.command_options.component:
                 # resolve the hrn at the registry
@@ -867,18 +867,18 @@ use this if you mean an authority instead""")
         return result                 
 
     ### ois = options if supported
-    # to be used in something like serverproxy.Method (arg1, arg2, *self.ois(api_options))
-    def ois (self, server, option_dict):
-        if self.server_supports_options_arg (server): 
+    # to be used in something like serverproxy.Method(arg1, arg2, *self.ois(api_options))
+    def ois(self, server, option_dict):
+        if self.server_supports_options_arg(server): 
             return [option_dict]
-        elif self.server_supports_call_id_arg (server):
-            return [ unique_call_id () ]
+        elif self.server_supports_call_id_arg(server):
+            return [ unique_call_id() ]
         else: 
             return []
 
     ### cis = call_id if supported - like ois
-    def cis (self, server):
-        if self.server_supports_call_id_arg (server):
+    def cis(self, server):
+        if self.server_supports_call_id_arg(server):
             return [ unique_call_id ]
         else:
             return []
@@ -909,7 +909,7 @@ use this if you mean an authority instead""")
 
     # helper function to analyze raw output
     # for main : return 0 if everything is fine, something else otherwise (mostly 1 for now)
-    def success (self, raw):
+    def success(self, raw):
         return_value = ReturnValue(raw)
         output = ReturnValue.get_output(return_value)
         # means everything is fine
@@ -926,7 +926,7 @@ use this if you mean an authority instead""")
     #==========================================================================
 
     @declare_command("", "")
-    def config (self, options, args):
+    def config(self, options, args):
         """
         Display contents of current config
         """
@@ -942,7 +942,7 @@ use this if you mean an authority instead""")
                         ]),
                 ]
         if options.myslice:
-            flags.append ( ('myslice', ['backend', 'delegate', 'platform', 'username'] ) )
+            flags.append( ('myslice', ['backend', 'delegate', 'platform', 'username'] ) )
 
         for (section, tuples) in flags:
             print("[{}]".format(section))
@@ -1008,7 +1008,7 @@ use this if you mean an authority instead""")
         # filter on person, slice, site, node, etc.
         # This really should be in the self.filter_records funct def comment...
         list = filter_records(options.type, list)
-        terminal_render (list, options)
+        terminal_render(list, options)
         if options.file:
             save_records_to_file(options.file, list, options.fileformat)
         # xxx should analyze result
@@ -1035,13 +1035,13 @@ use this if you mean an authority instead""")
             return
         # user has required to focus on some keys
         if options.keys:
-            def project (record):
+            def project(record):
                 projected = {}
                 for key in options.keys:
                     try: projected[key] = record[key]
                     except: pass
                 return projected
-            record_dicts = [ project (record) for record in record_dicts ]
+            record_dicts = [ project(record) for record in record_dicts ]
         records = [ Record(dict=record_dict) for record_dict in record_dicts ]
         for record in records:
             if (options.format == "text"):      record.dump(sort=True)  
@@ -1211,7 +1211,7 @@ use this if you mean an authority instead""")
         version_manager = VersionManager()
         api_options['geni_rspec_version'] = version_manager.get_version(options.rspec_version).to_dict()
 
-        list_resources = server.ListResources (creds, api_options)
+        list_resources = server.ListResources(creds, api_options)
         value = ReturnValue.get_value(list_resources)
         if self.options.raw:
             save_raw_to_file(list_resources, self.options.raw, self.options.rawformat, self.options.rawbanner)
@@ -1266,7 +1266,7 @@ use this if you mean an authority instead""")
             save_rspec_to_file(value['geni_rspec'], options.file)
         if (self.options.raw is None) and (options.file is None):
             display_rspec(value['geni_rspec'], options.format)
-        return self.success (describe)
+        return self.success(describe)
 
     @declare_command("slice_hrn [<sliver_urn>...]", "")
     def delete(self, options, args):
@@ -1304,7 +1304,7 @@ use this if you mean an authority instead""")
             save_raw_to_file(delete, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
             print(value)
-        return self.success (delete)
+        return self.success(delete)
 
     @declare_command("slice_hrn rspec", "")
     def allocate(self, options, args):
@@ -1364,7 +1364,7 @@ use this if you mean an authority instead""")
         if self.options.raw:
             save_raw_to_file(allocate, self.options.raw, self.options.rawformat, self.options.rawbanner)
         if options.file is not None:
-            save_rspec_to_file (value['geni_rspec'], options.file)
+            save_rspec_to_file(value['geni_rspec'], options.file)
         if (self.options.raw is None) and (options.file is None):
             print(value)
         return self.success(allocate)
@@ -1433,7 +1433,7 @@ use this if you mean an authority instead""")
         if self.options.raw:
             save_raw_to_file(provision, self.options.raw, self.options.rawformat, self.options.rawbanner)
         if options.file is not None:
-            save_rspec_to_file (value['geni_rspec'], options.file)
+            save_rspec_to_file(value['geni_rspec'], options.file)
         if (self.options.raw is None) and (options.file is None):
             print(value)
         return self.success(provision)
@@ -1467,7 +1467,7 @@ use this if you mean an authority instead""")
             save_raw_to_file(status, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
             print(value)
-        return self.success (status)
+        return self.success(status)
 
     @declare_command("slice_hrn [<sliver_urn>...] action", "")
     def action(self, options, args):
@@ -1503,7 +1503,7 @@ use this if you mean an authority instead""")
             save_raw_to_file(perform_action, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
             print(value)
-        return self.success (perform_action)
+        return self.success(perform_action)
 
     @declare_command("slice_hrn [<sliver_urn>...] time",
                      "\n".join(["sfi renew onelab.ple.heartbeat 2015-04-31",
@@ -1513,7 +1513,7 @@ use this if you mean an authority instead""")
                                 "sfi renew onelab.ple.heartbeat +2m",]))
     def renew(self, options, args):
         """
-        renew slice (Renew)
+        renew slice(Renew)
         """
         if len(args) < 2:
             self.print_help()
@@ -1572,7 +1572,7 @@ use this if you mean an authority instead""")
             save_raw_to_file(shutdown, self.options.raw, self.options.rawformat, self.options.rawbanner)
         else:
             print(value)
-        return self.success (shutdown)
+        return self.success(shutdown)
 
     @declare_command("[name]", "")
     def gid(self, options, args):
@@ -1609,7 +1609,7 @@ use this if you mean an authority instead""")
       because of the two -s options
 
 """)
-    def delegate (self, options, args):
+    def delegate(self, options, args):
         """
         (locally) create delegate credential for use by given hrn
     make sure to check for 'sfi myslice' instead if you plan
@@ -1626,16 +1626,16 @@ use this if you mean an authority instead""")
         for slice_hrn in options.delegate_slices:
             message = "{}.slice".format(slice_hrn)
             original = self.slice_credential_string(slice_hrn)
-            tuples.append ( (message, original,) )
+            tuples.append( (message, original,) )
         if options.delegate_pi:
             my_authority = self.authority
             message = "{}.pi".format(my_authority)
             original = self.my_authority_credential_string()
-            tuples.append ( (message, original,) )
+            tuples.append( (message, original,) )
         for auth_hrn in options.delegate_auths:
             message = "{}.auth".format(auth_hrn)
             original = self.authority_credential_string(auth_hrn)
-            tuples.append ( (message, original, ) )
+            tuples.append( (message, original, ) )
         # if nothing was specified at all at this point, let's assume -u
         if not tuples:
             options.delegate_user = True
@@ -1643,7 +1643,7 @@ use this if you mean an authority instead""")
         if options.delegate_user:
             message = "{}.user".format(self.user)
             original = self.my_credential_string
-            tuples.append ( (message, original, ) )
+            tuples.append( (message, original, ) )
 
         # default type for beneficial is user unless -A
         to_type = 'authority' if options.delegate_to_authority else 'user'
@@ -1652,7 +1652,7 @@ use this if you mean an authority instead""")
         # it's all in the filenaming scheme
         for (message, original) in tuples:
             delegated_string = self.client_bootstrap.delegate_credential_string(original, to_hrn, to_type)
-            delegated_credential = Credential (string=delegated_string)
+            delegated_credential = Credential(string=delegated_string)
             filename = os.path.join(self.options.sfi_dir,
                                     "{}_for_{}.{}.cred".format(message, to_hrn, to_type))
             delegated_credential.save_to_file(filename, save_parents=True)
@@ -1685,7 +1685,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
   and uses a custom backend for this one call
 """
 ) # declare_command
-    def myslice (self, options, args):
+    def myslice(self, options, args):
 
         """ This helper is for refreshing your credentials at myslice; it will
     * compute all the slices that you currently have credentials on
@@ -1754,12 +1754,12 @@ $ sfi m -b http://mymanifold.foo.com:7080/
 
         # (d) make sure we have *valid* credentials for all these
         hrn_credentials = []
-        hrn_credentials.append ( (self.user, 'user', self.my_credential_string,) )
+        hrn_credentials.append( (self.user, 'user', self.my_credential_string,) )
         for auth_hrn in my_auths:
-            hrn_credentials.append ( (auth_hrn, 'auth', self.authority_credential_string(auth_hrn),) )
+            hrn_credentials.append( (auth_hrn, 'auth', self.authority_credential_string(auth_hrn),) )
         for slice_hrn in my_slices:
             try:
-                hrn_credentials.append ( (slice_hrn, 'slice', self.slice_credential_string (slice_hrn),) )
+                hrn_credentials.append( (slice_hrn, 'slice', self.slice_credential_string(slice_hrn),) )
             except:
                 print("WARNING: could not get slice credential for slice {}"
                       .format(slice_hrn))
@@ -1771,21 +1771,21 @@ $ sfi m -b http://mymanifold.foo.com:7080/
         delegatee_hrn = myslice_dict['delegate']
         hrn_delegated_credentials = []
         for (hrn, htype, credential) in hrn_credentials:
-            delegated_credential = self.client_bootstrap.delegate_credential_string (credential, delegatee_hrn, delegatee_type)
+            delegated_credential = self.client_bootstrap.delegate_credential_string(credential, delegatee_hrn, delegatee_type)
             # save these so user can monitor what she's uploaded
-            filename = os.path.join ( self.options.sfi_dir,
+            filename = os.path.join( self.options.sfi_dir,
                                       "{}.{}_for_{}.{}.cred"\
                                       .format(hrn, htype, delegatee_hrn, delegatee_type))
             with file(filename, 'w') as f:
                 f.write(delegated_credential)
             self.logger.debug("(Over)wrote {}".format(filename))
-            hrn_delegated_credentials.append ((hrn, htype, delegated_credential, filename, ))
+            hrn_delegated_credentials.append((hrn, htype, delegated_credential, filename, ))
 
         # (f) and finally upload them to manifold server
         # xxx todo add an option so the password can be set on the command line
         # (but *NOT* in the config file) so other apps can leverage this
         self.logger.info("Uploading on backend at {}".format(myslice_dict['backend']))
-        uploader = ManifoldUploader (logger=self.logger,
+        uploader = ManifoldUploader(logger=self.logger,
                                      url=myslice_dict['backend'],
                                      platform=myslice_dict['platform'],
                                      username=myslice_dict['username'],
