@@ -1758,7 +1758,11 @@ $ sfi m -b http://mymanifold.foo.com:7080/
         for auth_hrn in my_auths:
             hrn_credentials.append ( (auth_hrn, 'auth', self.authority_credential_string(auth_hrn),) )
         for slice_hrn in my_slices:
-            hrn_credentials.append ( (slice_hrn, 'slice', self.slice_credential_string (slice_hrn),) )
+            try:
+                hrn_credentials.append ( (slice_hrn, 'slice', self.slice_credential_string (slice_hrn),) )
+            except:
+                print("WARNING: could not get slice credential for slice {}"
+                      .format(slice_hrn))
 
         # (e) check for the delegated version of these
         # xxx todo add an option -a/-A? like for 'sfi delegate' for when we ever 
