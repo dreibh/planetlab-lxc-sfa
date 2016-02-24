@@ -181,6 +181,12 @@ class Signature(object):
         self.gid = gid
 
     def decode(self):
+        # Helper function to pull characters off the front of a string if present
+        def remove_prefix(text, prefix):
+            if text and prefix and text.startswith(prefix):
+                return text[len(prefix):]
+            return text
+
         try:
             doc = parseString(self.xml)
         except ExpatError,e:
@@ -188,14 +194,14 @@ class Signature(object):
             raise
         sig = doc.getElementsByTagName("Signature")[0]
         ## This code until the end of function rewritten by Aaron Helsinger
-        ref_id = sig.getAttribute("xml:id").strip().strip("Sig_")
+        ref_id = remove_prefix(sig.getAttribute("xml:id").strip(), "Sig_")
         # The xml:id tag is optional, and could be in a 
         # Reference xml:id or Reference UID sub element instead
         if not ref_id or ref_id == '':
             reference = sig.getElementsByTagName('Reference')[0]
-            ref_id = reference.getAttribute('xml:id').strip().strip('Sig_')
+            ref_id = remove_prefix(reference.getAttribute('xml:id').strip(), "Sig_")
             if not ref_id or ref_id == '':
-                ref_id = reference.getAttribute('URI').strip().strip('#')
+                ref_id = remove_prefix(reference.getAttribute('URI').strip(), "#")
         self.set_refid(ref_id)
         keyinfos = sig.getElementsByTagName("X509Data")
         gids = None
