@@ -1,4 +1,3 @@
-from types import StringTypes
 from datetime import datetime
 
 from sqlalchemy import or_, and_ 
@@ -14,6 +13,7 @@ from sfa.storage.record import Record
 from sfa.util.sfalogging import logger
 from sfa.util.sfatime import utcparse, datetime_to_string
 from sfa.util.xml import XML 
+from sfa.util.py23 import StringType
 
 from sfa.trust.gid import GID
 
@@ -99,7 +99,7 @@ class RegRecord(Base, AlchemyObj):
         if type:                                self.type=type
         if hrn:                                 self.hrn=hrn
         if gid: 
-            if isinstance(gid, StringTypes):    self.gid=gid
+            if isinstance(gid, StringType):     self.gid=gid
             else:                               self.gid=gid.save_to_string(save_parents=True)
         if authority:                           self.authority=authority
         if peer_authority:                      self.peer_authority=peer_authority
@@ -130,7 +130,7 @@ class RegRecord(Base, AlchemyObj):
     @validates ('gid')
     def validate_gid (self, key, gid):
         if gid is None:                     return
-        elif isinstance(gid, StringTypes):  return gid
+        elif isinstance(gid, StringType):   return gid
         else:                               return gid.save_to_string(save_parents=True)
 
     def validate_datetime (self, key, incoming):

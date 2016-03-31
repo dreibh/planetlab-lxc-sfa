@@ -1,12 +1,12 @@
 from __future__ import print_function
 
 from sfa.util.sfatime import utcparse, datetime_to_string
-from types import StringTypes
 from datetime import datetime
 from sfa.util.xml import XML
 from sfa.trust.gid import GID
 
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import StringType
 
 class Record:
 
@@ -56,9 +56,9 @@ class Record:
     def load_from_dict (self, d):
         for (k,v) in d.iteritems():
             # experimental
-            if isinstance(v, StringTypes) and v.lower() in ['true']:
+            if isinstance(v, StringType) and v.lower() in ['true']:
                 v = True
-            if isinstance(v, StringTypes) and v.lower() in ['false']:
+            if isinstance(v, StringType) and v.lower() in ['false']:
                 v = False
             setattr(self, k, v)
 

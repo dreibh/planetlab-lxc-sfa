@@ -5,8 +5,10 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import NoneType, IntType, LongType, FloatType, StringTypes, DictType, TupleType, ListType
+from types import NoneType, IntType, LongType, FloatType, DictType, TupleType, ListType
 from sfa.util.faults import SfaAPIError
+
+from sfa.util.py23 import StringType
 
 class Parameter:
     """
@@ -89,7 +91,7 @@ def xmlrpc_type(arg):
         return "boolean"
     elif arg_type == FloatType:
         return "double"
-    elif arg_type in StringTypes:
+    elif issubclass(arg_type, StringType):
         return "string"
     elif arg_type == ListType or arg_type == TupleType:
         return "array"

@@ -17,6 +17,8 @@ from optparse import OptionParser
 
 from sfa.storage.parameter import Parameter, Mixed
 
+from sfa.util.py23 import StringType
+
 plc_ns="http://www.planet-lab.org/sfa"
 
 class SoapError(Exception):
@@ -162,7 +164,7 @@ class WSDLGen:
             return "xsd:boolean"
         elif arg_type == FloatType:
             return "xsd:double"
-        elif arg_type in StringTypes:
+        elif issubclass(arg_type, StringType):
             return "xsd:string"
         else:
            pdb.set_trace()

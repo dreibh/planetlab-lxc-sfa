@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import types
-
 from sfa.storage.model import *
 from sfa.storage.alchemy import *
 from sfa.trust.gid import create_uuid
@@ -22,7 +20,7 @@ def fix_users():
             pub_key=getattr(record,'reg_keys',None)
             if len(pub_key) > 0:
                 # use only first key in record
-                if pub_key and isinstance(pub_key, types.ListType): pub_key = pub_key[0]
+                if pub_key and isinstance(pub_key, list): pub_key = pub_key[0]
                 pub_key = pub_key.key
                 pkey = convert_public_key(pub_key)
             urn = Xrn (xrn=record.hrn, type='user').get_urn()

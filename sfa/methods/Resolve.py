@@ -1,5 +1,3 @@
-import types
-
 from sfa.util.xrn import Xrn, urn_to_hrn
 from sfa.util.method import Method
 
@@ -37,7 +35,7 @@ class Resolve(Method):
         if 'details' in options: details=options['details']
         else:                    details=False
         type = None
-        if not isinstance(xrns, types.ListType):
+        if not isinstance(xrns, list):
             type = Xrn(xrns).get_type()
             xrns=[xrns]
         hrns = [urn_to_hrn(xrn)[0] for xrn in xrns]

@@ -1,5 +1,6 @@
 from sfa.util.xrn import get_authority
-from types import StringTypes
+
+from sfa.util.py23 import StringType
 
 def get_peer(pldriver, hrn):
     # Because of myplc native federation,  we first need to determine if this
@@ -15,7 +16,7 @@ def get_peer(pldriver, hrn):
     # check if we are already peered with this site_authority, if so
     peers = pldriver.shell.GetPeers( {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
     for peer_record in peers:
-        names = [name.lower() for name in peer_record.values() if isinstance(name, StringTypes)]
+        names = [name.lower() for name in peer_record.values() if isinstance(name, StringType)]
         if site_authority in names:
             peer = peer_record['shortname']
 

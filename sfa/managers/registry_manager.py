@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import types
 # for get_key_from_incoming_ip
 import tempfile
 import os
@@ -163,7 +162,7 @@ class RegistryManager:
     def Resolve(self, api, xrns, type=None, details=False):
     
         dbsession = api.dbsession()
-        if not isinstance(xrns, types.ListType):
+        if not isinstance(xrns, list):
             # try to infer type if not set and we get a single input
             if not type:
                 type = Xrn(xrns).get_type()
@@ -387,7 +386,7 @@ class RegistryManager:
             pub_key=getattr(record,'reg-keys',None)
             if pub_key is not None:
                 # use only first key in record
-                if pub_key and isinstance(pub_key, types.ListType): pub_key = pub_key[0]
+                if pub_key and isinstance(pub_key, list): pub_key = pub_key[0]
                 pkey = convert_public_key(pub_key)
     
             email = getattr(record,'email',None)
@@ -416,10 +415,12 @@ class RegistryManager:
         elif isinstance (record, RegUser):
             # create RegKey objects for incoming keys
             if hasattr(record,'reg-keys'):
-                keys=getattr(record,'reg-keys')
+                keys = getattr(record, 'reg-keys')
                 # some people send the key as a string instead of a list of strings
-                if isinstance(keys,types.StringTypes): keys=[keys]
-                logger.debug ("creating {} keys for user {}".format(len(keys), record.hrn))
+                # note for python2/3 : no need to consider unicode in a key
+                if isinstance(keys, str):
+                    keys = [keys]
+                logger.debug("creating {} keys for user {}".format(len(keys), record.hrn))
                 record.reg_keys = [ RegKey (key) for key in keys ]
             
         # update testbed-specific data if needed
@@ -460,7 +461,7 @@ class RegistryManager:
         if type == 'user':
             if getattr(new_record, 'keys', None):
                 new_key = new_record.keys
-                if isinstance (new_key, types.ListType):
+                if isinstance (new_key, list):
                     new_key = new_key[0]
 
         # take new_key into account

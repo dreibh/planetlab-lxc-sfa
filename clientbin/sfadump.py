@@ -4,7 +4,6 @@ from __future__ import with_statement
 import sys
 import os, os.path
 import tempfile
-from types import StringTypes, ListType
 from argparse import ArgumentParser
 
 from sfa.util.sfalogging import logger

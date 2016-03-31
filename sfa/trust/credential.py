@@ -30,11 +30,12 @@ from __future__ import print_function
 
 import os, os.path
 import subprocess
-from types import StringTypes
 import datetime
 from StringIO import StringIO
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
+
+from sfa.util.py23 import StringType
 
 HAVELXML = False
 try:
@@ -285,7 +286,7 @@ class Credential(object):
         self.version = None
 
         if cred:
-            if isinstance(cred, StringTypes):
+            if isinstance(cred, StringType):
                 string = cred
                 self.type = Credential.SFA_CREDENTIAL_TYPE
                 self.version = '3'
@@ -301,7 +302,7 @@ class Credential(object):
                 str = file(filename).read()
                 
             # if this is a legacy credential, write error and bail out
-            if isinstance (str, StringTypes) and str.strip().startswith("-----"):
+            if isinstance (str, StringType) and str.strip().startswith("-----"):
                 logger.error("Legacy credentials not supported any more - giving up with %s..."%str[:10])
                 return
             else:

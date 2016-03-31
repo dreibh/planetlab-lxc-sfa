@@ -2,13 +2,13 @@
 # SfaAPI authentication 
 #
 import sys
-from types import StringTypes
 
 from sfa.util.faults import InsufficientRights, MissingCallerGID, \
     MissingTrustedRoots, PermissionError, BadRequestHash, \
     ConnectionKeyGIDMismatch, SfaPermissionDenied, CredentialNotVerifiable, \
     Forbidden, BadArgs
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import StringType
 from sfa.util.config import Config
 from sfa.util.xrn import Xrn, get_authority
 
@@ -62,7 +62,7 @@ class Auth:
         if xrns is None: xrns = []
         error = (None, None)
         def log_invalid_cred(cred):
-            if not isinstance (cred, StringTypes):
+            if not isinstance (cred, StringType):
                 logger.info("cannot validate credential %s - expecting a string"%cred)
                 error = ('TypeMismatch',
                          "checkCredentials: expected a string, received {} -- {}"

@@ -1,9 +1,10 @@
 #!/usr/bin/python 
-from types import StringTypes
 from lxml import etree
 from StringIO import StringIO
 from sfa.util.faults import InvalidXML
 from sfa.rspecs.elements.element import Element
+
+from sfa.util.py23 import StringType
 
 # helper functions to help build xpaths
 class XpathFilter:
@@ -239,7 +240,7 @@ class XML:
         d=d.copy()
         # looks like iteritems won't stand side-effects
         for k in d.keys():
-            if not isinstance(d[k],StringTypes):
+            if not isinstance(d[k], StringType):
                 del d[k]
 
         element.attrib.update(d)

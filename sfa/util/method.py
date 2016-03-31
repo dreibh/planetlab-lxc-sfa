@@ -4,10 +4,11 @@
 #
 
 import time
-from types import IntType, LongType, StringTypes
+from types import IntType, LongType
 import textwrap
 
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import StringType
 from sfa.util.faults import SfaFault, SfaInvalidAPIMethod, SfaInvalidArgumentCount, SfaInvalidArgument
 
 from sfa.storage.parameter import Parameter, Mixed, python_type, xmlrpc_type
@@ -233,7 +234,7 @@ class Method:
 
         # Strings are a special case. Accept either unicode or str
         # types if a string is expected.
-        if expected_type in StringTypes and isinstance(value, StringTypes):
+        if issubclass(expected_type, StringType) and isinstance(value, StringType):
             pass
 
         # Integers and long integers are also special types. Accept
@@ -247,7 +248,7 @@ class Method:
                                      name)
 
         # If a minimum or maximum (length, value) has been specified
-        if expected_type in StringTypes:
+        if issubclass(expected_type, StringType):
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
                 raise SfaInvalidArgument("%s must be at least %d bytes long" % (name, min))

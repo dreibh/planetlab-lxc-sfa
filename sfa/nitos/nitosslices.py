@@ -1,4 +1,3 @@
-from types import StringTypes
 from collections import defaultdict
 
 from sfa.util.sfatime import utcparse, datetime_to_epoch
