@@ -26,10 +26,10 @@
 
 from __future__ import print_function
 
-import xmlrpclib
-
 from sfa.trust.certificate import Certificate
 from sfa.trust.gid import GID
+
+from sfa.util.py23 import xmlrpc_client
 
 # Ticket is tuple:
 #   (gidCaller, gidObject, attributes, rspec, delegate)
@@ -99,13 +99,13 @@ class SfaTicket(Certificate):
             dict["gidCaller"] = self.gidCaller.save_to_string(save_parents=True)
         if self.gidObject:
             dict["gidObject"] = self.gidObject.save_to_string(save_parents=True)
-        str = "URI:" + xmlrpclib.dumps((dict,), allow_none=True)
+        str = "URI:" + xmlrpc_client.dumps((dict,), allow_none=True)
         self.set_data(str)
 
     def decode(self):
         data = self.get_data()
         if data:
-            dict = xmlrpclib.loads(self.get_data()[4:])[0][0]
+            dict = xmlrpc_client.loads(self.get_data()[4:])[0][0]
         else:
             dict = {}
 

@@ -11,7 +11,6 @@ import socket
 import traceback
 import threading
 from Queue import Queue
-import xmlrpclib
 import SocketServer
 import BaseHTTPServer
 import SimpleXMLRPCServer
@@ -22,6 +21,7 @@ from sfa.util.config import Config
 from sfa.util.cache import Cache 
 from sfa.trust.certificate import Certificate
 from sfa.trust.trustedroots import TrustedRoots
+from sfa.util.py23 import xmlrpc_client
 
 # don't hard code an api class anymore here
 from sfa.generic import Generic
@@ -195,7 +195,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer,SimpleXMLRPCServer.SimpleXMLR
             # can't use format_exc() as it is not available in jython yet
             # (even in trunk).
             type, value, tb = sys.exc_info()
-            raise xmlrpclib.Fault(1,''.join(traceback.format_exception(type, value, tb)))
+            raise xmlrpc_client.Fault(1,''.join(traceback.format_exception(type, value, tb)))
 
     # override this one from the python 2.7 code
     # originally defined in class TCPServer

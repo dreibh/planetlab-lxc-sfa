@@ -1,6 +1,5 @@
-import xmlrpclib
-
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import xmlrpc_client
 
 class FdShell:
     """
@@ -20,9 +19,9 @@ class FdShell:
     def __init__ ( self, config ) :
         url=config.SFA_FEDERICA_URL
         # xxx not sure if java xmlrpc has support for None
-        # self.proxy = xmlrpclib.Server(url, verbose = False, allow_none = True)
+        # self.proxy = xmlrpc_client.ServerProxy(url, verbose = False, allow_none = True)
         # xxx turn on verbosity
-        self.proxy = xmlrpclib.Server(url, verbose = True)
+        self.proxy = xmlrpc_client.ServerProxy(url, verbose = True)
 
     # xxx get credentials from the config ?
     # right now basic auth data goes into the URL

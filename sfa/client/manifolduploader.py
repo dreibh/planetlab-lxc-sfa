@@ -30,8 +30,9 @@ import ssl
 try:    turn_off_server_verify = { 'context' : ssl._create_unverified_context() } 
 except: turn_off_server_verify = {}
 
-import xmlrpclib
 import getpass
+
+from sfa.util.py23 import xmlrpc_client
 
 class ManifoldUploader:
     """A utility class for uploading delegated credentials to a manifold/MySlice infrastructure"""
@@ -79,12 +80,12 @@ class ManifoldUploader:
 #        if not self._proxy:
 #            url=self.url()
 #            self.logger.info("Connecting manifold url %s"%url)
-#            self._proxy = xmlrpclib.ServerProxy(url, allow_none = True)
+#            self._proxy = xmlrpc_client.ServerProxy(url, allow_none = True)
 #        return self._proxy
         url=self.url()
         self.logger.debug("Connecting manifold url %s"%url)
-        proxy = xmlrpclib.ServerProxy(url, allow_none = True,
-                                      **turn_off_server_verify)
+        proxy = xmlrpc_client.ServerProxy(url, allow_none = True,
+                                          **turn_off_server_verify)
 
         return proxy
 

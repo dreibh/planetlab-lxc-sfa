@@ -27,14 +27,14 @@
 
 from __future__ import print_function
 
-import xmlrpclib
 import uuid
 
 from sfa.trust.certificate import Certificate
 
 from sfa.util.faults import GidInvalidParentHrn, GidParentHrn
-from sfa.util.sfalogging import logger
 from sfa.util.xrn import hrn_to_urn, urn_to_hrn, hrn_authfor_hrn
+from sfa.util.sfalogging import logger
+from sfa.util.py23 import xmlrpc_client
 
 ##
 # Create a new uuid. Returns the UUID as a string.
@@ -176,7 +176,7 @@ class GID(Certificate):
         dict = {}
         if data:
             if data.lower().startswith('uri:http://<params>'):
-                dict = xmlrpclib.loads(data[11:])[0][0]
+                dict = xmlrpc_client.loads(data[11:])[0][0]
             else:
                 spl = data.split(', ')
                 for val in spl:

@@ -19,7 +19,7 @@ from sfa.storage.alchemy import alchemy
 ####################
 class SfaApi (XmlrpcApi): 
     """
-    An SfaApi instance is a basic xmlrcp service
+    An SfaApi instance is a basic xmlrpc service
     augmented with the local cryptographic material and hrn
 
     It also has the notion of its own interface (a string describing

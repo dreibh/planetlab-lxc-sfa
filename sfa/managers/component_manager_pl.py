@@ -1,7 +1,6 @@
-import xmlrpclib
-
 from sfa.util.faults import SliverDoesNotExist
 from sfa.util.version import version_core
+from sfa.util.py23 import xmlrpc_client
 
 from sfa.trust.sfaticket import SfaTicket
 
@@ -66,7 +65,7 @@ def redeem_ticket(api, ticket_string):
         raise SliverDoesNotExist(slicename)
 
     # convert ticket to format nm is used to
-    nm_ticket = xmlrpclib.dumps((ticket.attributes,), methodresponse=True)
+    nm_ticket = xmlrpc_client.dumps((ticket.attributes,), methodresponse=True)
     api.driver.nodemanager.AdminTicket(nm_ticket)
     
 

@@ -1,9 +1,9 @@
 import sys
-import xmlrpclib
 import socket
 from urlparse import urlparse
 
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import xmlrpc_client
 
 class DummyShell:
     """
@@ -21,7 +21,7 @@ class DummyShell:
 
     def __init__ ( self, config ) :
         url = config.SFA_DUMMY_URL
-        self.proxy = xmlrpclib.Server(url, verbose = False, allow_none = True)
+        self.proxy = xmlrpc_client.ServerProxy(url, verbose = False, allow_none = True)
 
     def __getattr__(self, name):
         def func(*args, **kwds):

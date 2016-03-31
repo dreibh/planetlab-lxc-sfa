@@ -1,3 +1,4 @@
+# our own simplistic replacement for six
 try:
     StringType = basestring
 except:
@@ -7,3 +8,13 @@ try:
     from StringIO import StringIO
 except:
     from io import StringIO
+
+try:
+    import xmlrpclib as xmlrpc_client
+except:
+    from xmlrpc import client as xmlrpc_client
+
+try:
+    import ConfigParser
+except:
+    import configparser as ConfigParser

@@ -23,7 +23,7 @@
 import sys, pprint
 import modulefinder
 
-focus=[ 'sfa' , 'OpenSSL', 'M2Crypto', 'xmlrpclib', 'threading' ]
+focus = [ 'sfa' , 'OpenSSL', 'M2Crypto', 'xmlrpclib', 'threading' ]
 
 class mymf(modulefinder.ModuleFinder):
     def __init__(self,*args,**kwargs):

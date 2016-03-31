@@ -3,7 +3,6 @@
 #
 
 import string
-import xmlrpclib
 
 # SOAP support is optional
 try:
@@ -19,6 +18,7 @@ except ImportError:
 #from sfa.util.faults import SfaNotImplemented, SfaAPIError, SfaInvalidAPIMethod, SfaFault
 from sfa.util.faults import SfaInvalidAPIMethod, SfaAPIError, SfaFault
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import xmlrpc_client
 
 ####################
 # See "2.2 Characters" in the XML specification:
@@ -76,7 +76,9 @@ def xmlrpclib_dump(self, value, write):
         f(*args)
 
 # You can't hide from me!
-xmlrpclib.Marshaller._Marshaller__dump = xmlrpclib_dump
+# Note: not quite  sure if this will still cause
+# the expected behaviour under python3
+xmlrpc_client.Marshaller._Marshaller__dump = xmlrpclib_dump
 
 class XmlrpcApi:
     """
@@ -131,9 +133,9 @@ class XmlrpcApi:
         """
         # Parse request into method name and arguments
         try:
-            interface = xmlrpclib
-            self.protocol = 'xmlrpclib'
-            (args, method) = xmlrpclib.loads(data)
+            interface = xmlrpc_client
+            self.protocol = 'xmlrpc'
+            (args, method) = xmlrpc_client.loads(data)
             if method_map.has_key(method):
                 method = method_map[method]
             methodresponse = True
@@ -168,10 +170,10 @@ class XmlrpcApi:
         convert result to a valid xmlrpc or soap response
         """   
  
-        if self.protocol == 'xmlrpclib':
+        if self.protocol == 'xmlrpc':
             if not isinstance(result, SfaFault):
                 result = (result,)
-            response = xmlrpclib.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
+            response = xmlrpc_client.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
         elif self.protocol == 'soap':
             if isinstance(result, Exception):
                 result = faultParameter(NS.ENV_T + ":Server", "Method Failed", method)

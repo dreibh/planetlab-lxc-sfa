@@ -24,6 +24,8 @@ class NodeManager:
         (fd, filename) = tempfile.mkstemp(dir=path)        
         scriptname = script_path + os.sep + filename.split(os.sep)[-1:][0]
         # define the script to execute
+        # when providing support for python3 wrt xmlrpclib
+        # looks safer to keep things as-is
         script = """
 #!%(python)s
 import xmlrpclib

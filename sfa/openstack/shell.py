@@ -1,5 +1,4 @@
 import sys
-import xmlrpclib
 import socket
 import gettext
 from urlparse import urlparse

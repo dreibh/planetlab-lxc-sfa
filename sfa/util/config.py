@@ -2,11 +2,11 @@
 import sys
 import os
 import time
-import ConfigParser
 import tempfile
 import codecs
 from sfa.util.xml import XML
 from sfa.util.py23 import StringIO
+from sfa.util.py23 import ConfigParser
 
 default_config = \
 """
