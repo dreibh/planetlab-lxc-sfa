@@ -1,7 +1,6 @@
 import sys
 import time
 import traceback
-from StringIO import StringIO
 from copy import copy
 from lxml import etree
 

@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 from copy import deepcopy
-from StringIO import StringIO
 from sfa.util.xrn import Xrn
 from sfa.rspecs.version import RSpecVersion
 from sfa.rspecs.elements.versions.pgv2Link import PGv2Link
