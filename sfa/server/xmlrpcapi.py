@@ -138,7 +138,7 @@ class XmlrpcApi:
                 method = method_map[method]
             methodresponse = True
             
-        except Exception, e:
+        except Exception as e:
             if SOAPpy is not None:
                 self.protocol = 'soap'
                 interface = SOAPpy
@@ -151,10 +151,10 @@ class XmlrpcApi:
 
         try:
             result = self.call(source, method, *args)
-        except SfaFault, fault:
+        except SfaFault as fault:
             result = fault
             self.logger.log_exc("XmlrpcApi.handle has caught Exception") 
-        except Exception, fault:
+        except Exception as fault:
             self.logger.log_exc("XmlrpcApi.handle has caught Exception")
             result = SfaAPIError(fault)
 

@@ -211,14 +211,14 @@ def verify_speaks_for(cred, tool_gid, speaking_for_urn,
         # User certificate must validate against trusted roots
         try:
             user_gid.verify_chain(trusted_roots)
-        except Exception, e:
+        except Exception as e:
             return False, None, \
                 "Cred signer (user) cert not trusted: %s" % e
 
         # Tool certificate must validate against trusted roots
         try:
             tool_gid.verify_chain(trusted_roots)
-        except Exception, e:
+        except Exception as e:
             return False, None, \
                 "Tool cert not trusted: %s" % e
 

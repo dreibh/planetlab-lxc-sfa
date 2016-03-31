@@ -79,7 +79,7 @@ class EucaInstance(SQLObject):
                 self.instance_id = instance.id
 
         # If there is an error, destroy itself.
-        except EC2ResponseError, ec2RespErr:
+        except EC2ResponseError as ec2RespErr:
             errTree = ET.fromstring(ec2RespErr.body)
             msg = errTree.find('.//Message')
             logger.error(msg.text)
@@ -524,7 +524,7 @@ class AggregateManagerEucalyptus:
                     instList.append(instInfoDict)
                 AggregateManagerEucalyptus.cloud['instances'] = instancesDict
     
-        except EC2ResponseError, ec2RespErr:
+        except EC2ResponseError as ec2RespErr:
             errTree = ET.fromstring(ec2RespErr.body)
             errMsgE = errTree.find('.//Message')
             logger.error(errMsgE.text)
@@ -661,7 +661,7 @@ class AggregateManagerEucalyptus:
     
         try:
             os.makedirs(outdir)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
     

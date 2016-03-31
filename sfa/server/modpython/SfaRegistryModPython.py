@@ -50,7 +50,7 @@ def handler(req):
 
         return apache.OK
 
-    except Exception, err:
+    except Exception as err:
         # Log error in /var/log/httpd/(ssl_)?error_log
         logger.log_exc('%r'%err)
         return apache.HTTP_INTERNAL_SERVER_ERROR

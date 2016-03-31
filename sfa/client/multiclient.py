@@ -17,7 +17,7 @@ def ThreadedMethod(callable, results, errors):
             def run(self):
                 try:
                     results.put(callable(*args, **kwds))
-                except Exception, e:
+                except Exception as e:
                     logger.log_exc('MultiClient: Error in thread: ')
                     errors.put(traceback.format_exc())
                     

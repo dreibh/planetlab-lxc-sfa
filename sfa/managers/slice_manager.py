@@ -73,7 +73,7 @@ class SliceManager:
             stats_elements = rspec.xml.xpath('//statistics')
             for node in stats_elements:
                 node.getparent().remove(node)
-        except Exception, e:
+        except Exception as e:
             logger.warn("drop_slicemgr_stats failed: %s " % (str(e)))
     
     def add_slicemgr_stat(self, rspec, callname, aggname, elapsed, status, exc_info=None):
@@ -99,7 +99,7 @@ class SliceManager:
                     exc_frame = exc_tag.add_element("tb_frame", filename=str(item[0]), 
                                                     line=str(item[1]), func=str(item[2]), code=str(item[3]))
 
-        except Exception, e:
+        except Exception as e:
             logger.warn("add_slicemgr_stat failed on  %s: %s" %(aggname, str(e)))
     
     def ListResources(self, api, creds, options):
@@ -117,7 +117,7 @@ class SliceManager:
                 forward_options['geni_rspec_version'] = options.get('geni_rspec_version')
                 result = server.ListResources(credential, forward_options)
                 return {"aggregate": aggregate, "result": result, "elapsed": time.time()-tStart, "status": "success"}
-            except Exception, e:
+            except Exception as e:
                 api.logger.log_exc("ListResources failed at %s" %(server.url))
                 return {"aggregate": aggregate, "elapsed": time.time()-tStart, "status": "exception", "exc_info": sys.exc_info()}
     

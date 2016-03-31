@@ -160,7 +160,8 @@ class Hierarchy:
         try:
             os.makedirs(directory)
         # if the path already exists then pass
-        except OSError, (errno, strerr):
+        except OSError as xxx_todo_changeme:
+            (errno, strerr) = xxx_todo_changeme.args
             if errno == 17:
                 pass
 

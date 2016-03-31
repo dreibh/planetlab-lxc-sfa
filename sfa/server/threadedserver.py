@@ -119,7 +119,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
             remote_addr = (remote_ip, remote_port) = self.connection.getpeername()
             self.api.remote_addr = remote_addr            
             response = self.api.handle(remote_addr, request, self.server.method_map)
-        except Exception, fault:
+        except Exception as fault:
             # This should only happen if the module is buggy
             # internal error, report as HTTP server error
             logger.log_exc("server.do_POST")

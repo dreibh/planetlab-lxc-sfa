@@ -395,7 +395,7 @@ class OSAggregate:
                                                             meta=metadata, 
                                                             name=instance_name)
                     slivers.append(server)
-                except Exception, err:    
+                except Exception as err:    
                     logger.log_exc(err)                                
                            
         return slivers        

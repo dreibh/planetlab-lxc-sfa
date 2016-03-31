@@ -63,7 +63,7 @@ class policy_server(object):
         try:
             while True:
                 thread.start_new_thread(self.handle, self.sock.accept())
-        except socket.error, e:
+        except socket.error as e:
             self.log('Error accepting connection: %s' % (e[1],))
     def handle(self, conn, addr):
         addrstr = '%s:%s' % (addr[0],addr[1])
@@ -79,9 +79,9 @@ class policy_server(object):
                 self.log('Valid request received from %s' % (addrstr,))
                 conn.sendall(self.policy)
                 self.log('Sent policy file to %s' % (addrstr,))
-        except socket.error, e:
+        except socket.error as e:
             self.log('Error handling connection from %s: %s' % (addrstr, e[1]))
-        except Exception, e:
+        except Exception as e:
             self.log('Error handling connection from %s: %s' % (addrstr, e[1]))
     def log(self, str):
         print >>sys.stderr, str
@@ -105,7 +105,7 @@ def main():
         if opts.daemon:
             daemon()
         policy_server(opts.port, opts.path).run()
-    except Exception, e:
+    except Exception as e:
         print >> sys.stderr, e
         sys.exit(1)
     except KeyboardInterrupt:

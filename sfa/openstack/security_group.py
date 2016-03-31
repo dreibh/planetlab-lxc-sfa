@@ -9,7 +9,7 @@ class SecurityGroup:
     def create_security_group(self, name):
         try:
             self.client.security_groups.create(name=name, description=name)
-        except Exception, ex:
+        except Exception as ex:
             logger.log_exc("Failed to add security group")
             raise
 
@@ -17,7 +17,7 @@ class SecurityGroup:
         try:
             security_group = self.client.security_groups.find(name=name)
             self.client.security_groups.delete(security_group.id)
-        except Exception, ex:
+        except Exception as ex:
             logger.log_exc("Failed to delete security group")
 
 
@@ -58,7 +58,7 @@ class SecurityGroup:
             group = self.client.security_groups.find(name=group_name)
             self.client.security_group_rules.create(group.id, \
                                 protocol, from_port, to_port,cidr_ip)
-        except Exception, ex:
+        except Exception as ex:
             logger.log_exc("Failed to add rule to group %s" % group_name)
 
 
@@ -81,6 +81,6 @@ class SecurityGroup:
             rule = self.client.security_group_rules.find(**filter)
             if rule:
                 self.client.security_group_rules.delete(rule)
-        except Exception, ex:
+        except Exception as ex:
             logger.log_exc("Failed to remove rule from group %s" % group_name) 
              

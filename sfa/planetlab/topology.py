@@ -25,6 +25,6 @@ class Topology(set):
                 tup = line.split()
                 if len(tup) > 1:
                     self.add((tup[0], tup[1]))    
-        except Exception, e:
+        except Exception as e:
             logger.log_exc("Could not find or load the configuration file: %s" % config_file)
             raise

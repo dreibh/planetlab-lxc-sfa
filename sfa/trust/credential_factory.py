@@ -62,7 +62,7 @@ class CredentialFactory:
         if credFile:
             try:
                 credString = open(credFile).read()
-            except Exception, e:
+            except Exception as e:
                 logger.info("Error opening credential file %s: %s" % credFile, e)
                 return None
 
@@ -72,7 +72,7 @@ class CredentialFactory:
             if credO.has_key('geni_value') and credO.has_key('geni_type'):
                 cred_type = credO['geni_type']
                 credString = credO['geni_value']
-        except Exception, e:
+        except Exception as e:
             # It wasn't a struct. So the credString is XML. Pull the type directly from the string
             logger.debug("Credential string not JSON: %s" % e)
             cred_type = CredentialFactory.getType(credString)
@@ -81,7 +81,7 @@ class CredentialFactory:
             try:
                 cred = Credential(string=credString)
                 return cred
-            except Exception, e:
+            except Exception as e:
                 if credFile:
                     msg = "credString started: %s" % credString[:50]
                     raise Exception("%s not a parsable SFA credential: %s. " % (credFile, e) + msg)
@@ -92,7 +92,7 @@ class CredentialFactory:
             try:
                 cred = ABACCredential(string=credString)
                 return cred
-            except Exception, e:
+            except Exception as e:
                 if credFile:
                     raise Exception("%s not a parsable ABAC credential: %s" % (credFile, e))
                 else:

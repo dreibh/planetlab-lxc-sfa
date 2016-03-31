@@ -191,7 +191,7 @@ class Signature(object):
 
         try:
             doc = parseString(self.xml)
-        except ExpatError,e:
+        except ExpatError as e:
             logger.log_exc ("Failed to parse credential, %s"%self.xml)
             raise
         sig = doc.getElementsByTagName("Signature")[0]
@@ -730,7 +730,7 @@ class Credential(object):
         doc = None
         try:
             doc = parseString(self.xml)
-        except ExpatError,e:
+        except ExpatError as e:
             raise CredentialNotVerifiable("Malformed credential")
         doc = parseString(self.xml)
         sigs = []
@@ -860,7 +860,7 @@ class Credential(object):
                     # or non PEM files
                     trusted_cert_objects.append(GID(filename=f))
                     ok_trusted_certs.append(f)
-                except Exception, exc:
+                except Exception as exc:
                     logger.error("Failed to load trusted cert from %s: %r"%( f, exc))
             trusted_certs = ok_trusted_certs
 

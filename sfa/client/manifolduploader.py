@@ -113,7 +113,7 @@ class ManifoldUploader:
             try:
                 self.logger.debug("Using new v2 method forward+annotation@%s %s"%(platform,message))
                 retcod2=manifold.forward (query, annotation)
-            except Exception,e:
+            except Exception as e:
                 # xxx we need a constant constant for UNKNOWN, how about using 1
                 MANIFOLD_UNKNOWN=1
                 retcod2={'code':MANIFOLD_UNKNOWN,'description':"%s"%e}
@@ -129,7 +129,7 @@ class ManifoldUploader:
             self.logger.debug("****** full retcod2")
             for (k,v) in retcod2.items(): self.logger.debug("**** %s: %s"%(k,v))
             return False
-        except Exception, e:
+        except Exception as e:
             if message: self.logger.error("Could not upload %s %s"%(message,e))
             else:        self.logger.error("Could not upload credential %s"%e)
             if self.logger.debugEnabled():

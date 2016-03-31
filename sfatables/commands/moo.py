@@ -122,7 +122,7 @@ class Command:
                 try:
                     self.type_check(name, value, item, args)
                     return
-                except SfaInvalidArgument, fault:
+                except SfaInvalidArgument as fault:
                     pass
             raise fault
 
