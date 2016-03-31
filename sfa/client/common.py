@@ -1,5 +1,7 @@
 # a few utilities common to sfi and sfaadmin
 
+from __future__ import print_function
+
 def optparse_listvalue_callback(option, opt, value, parser):
     former=getattr(parser.values,option.dest)
     if not former: former=[]
@@ -41,37 +43,37 @@ def terminal_render_plural (how_many, name,names=None):
     else: return "%d %s"%(how_many,names)
 
 def terminal_render_default (record,options):
-    print "%s (%s)" % (record['hrn'], record['type'])
+    print("%s (%s)" % (record['hrn'], record['type']))
 def terminal_render_user (record, options):
-    print "%s (User)"%record['hrn'],
+    print("%s (User)"%record['hrn'], end=' ')
     if options.verbose and record.get('email', None):
-        print "email='{}'".format(record['email']),
+        print("email='{}'".format(record['email']), end=' ')
     if record.get('reg-pi-authorities', None):
-        print " [PI at %s]"%(" and ".join(record['reg-pi-authorities'])),
+        print(" [PI at %s]"%(" and ".join(record['reg-pi-authorities'])), end=' ')
     if record.get('reg-slices', None):
-        print " [IN slices %s]"%(" and ".join(record['reg-slices'])),
+        print(" [IN slices %s]"%(" and ".join(record['reg-slices'])), end=' ')
     user_keys=record.get('reg-keys',[])
     if not options.verbose:
-        print " [has %s]"%(terminal_render_plural(len(user_keys),"key"))
+        print(" [has %s]"%(terminal_render_plural(len(user_keys),"key")))
     else:
-        print ""
-        for key in user_keys: print 8*' ',key.strip("\n")
+        print("")
+        for key in user_keys: print(8*' ',key.strip("\n"))
         
 def terminal_render_slice (record, options):
-    print "%s (Slice)"%record['hrn'],
+    print("%s (Slice)"%record['hrn'], end=' ')
     if record.get('reg-researchers', None):
-        print " [USERS %s]"%(" and ".join(record['reg-researchers'])),
+        print(" [USERS %s]"%(" and ".join(record['reg-researchers'])), end=' ')
 #    print record.keys()
-    print ""
+    print("")
 def terminal_render_authority (record, options):
-    print "%s (Authority)"%record['hrn'],
+    print("%s (Authority)"%record['hrn'], end=' ')
     if options.verbose and record.get('name'):
-        print "name='{}'".format(record['name'])
+        print("name='{}'".format(record['name']))
     if record.get('reg-pis', None):
-        print " [PIS %s]"%(" and ".join(record['reg-pis'])),
-    print ""
+        print(" [PIS %s]"%(" and ".join(record['reg-pis'])), end=' ')
+    print("")
 def terminal_render_node (record, options):
-    print "%s (Node)"%record['hrn']
+    print("%s (Node)"%record['hrn'])
 
 
 ### used in sfi list

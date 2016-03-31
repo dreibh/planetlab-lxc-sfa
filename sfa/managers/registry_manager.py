@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import types
 # for get_key_from_incoming_ip
 import tempfile
@@ -503,7 +505,7 @@ class RegistryManager:
         # record.__dict__ as received by the driver seems to be off
         # anyway the driver should receive an object
         # (and then extract __dict__ itself if needed)
-        print "DO NOT REMOVE ME before driver.update, record={}".format(record)
+        print("DO NOT REMOVE ME before driver.update, record={}".format(record))
         # as of June 2015: I suspect we could remove that print line above and replace it with
         # augment_with_sfa_builtins(record)
         # instead, that checks for these fields, like it is done above in List()

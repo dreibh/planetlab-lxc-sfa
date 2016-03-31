@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from copy import deepcopy
 from lxml import etree
 
@@ -237,4 +239,4 @@ if __name__ == '__main__':
     from sfa.rspecs.rspec_elements import *
     r = RSpec('/tmp/resources.rspec')
     r.load_rspec_elements(SFAv1.elements)
-    print r.get(RSpecElements.NODE)
+    print(r.get(RSpecElements.NODE))

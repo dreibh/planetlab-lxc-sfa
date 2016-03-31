@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 ### utility to match command-line args to names
 class Candidates:
     def __init__ (self, names):
@@ -43,8 +45,8 @@ def test_candidates ():
         names=names.split()
         for (input,expected) in tuples:
             got=Candidates(names).only_match(input)
-            if got==expected: print '.',
-            else: print 'X FAIL','names[',names,'] input',input,'expected',expected,'got',got
+            if got==expected: print('.', end=' ')
+            else: print('X FAIL','names[',names,'] input',input,'expected',expected,'got',got)
 
 if __name__ == '__main__':
     test_candidates()

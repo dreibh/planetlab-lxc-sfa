@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import threading
 import traceback
 import time
@@ -95,14 +97,14 @@ if __name__ == '__main__':
     def f(name, n, sleep=1):
         nums = []
         for i in range(n, n+5):
-            print "%s: %s" % (name, i)
+            print("%s: %s" % (name, i))
             nums.append(i)
             time.sleep(sleep)
         return nums
     def e(name, n, sleep=1):
         nums = []
         for i in range(n, n+3) + ['n', 'b']:
-            print "%s: 1 + %s:" % (name, i)
+            print("%s: 1 + %s:" % (name, i))
             nums.append(i + 1)
             time.sleep(sleep)
         return nums      

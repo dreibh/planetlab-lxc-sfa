@@ -21,6 +21,8 @@
 # IN THE WORK.
 #----------------------------------------------------------------------
 
+from __future__ import print_function
+
 from sfa.trust.credential import Credential, append_sub, DEFAULT_CREDENTIAL_LIFETIME
 from sfa.util.sfalogging import logger
 from sfa.util.sfatime import SFATIME_FORMAT
@@ -179,7 +181,7 @@ class ABACCredential(Credential):
                 result += "\nEnd XML\n"
             except:
                 import traceback
-                print "exc. Credential.dump_string / XML"
+                print("exc. Credential.dump_string / XML")
                 traceback.print_exc()
         return result
 

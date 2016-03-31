@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from sfa.util.sfatime import utcparse, datetime_to_string
 from types import StringTypes
 from datetime import datetime
@@ -82,15 +84,15 @@ class Record:
         if format == 'text':
             self.dump_text(dump_parents,sort=sort)
         elif format == 'xml':
-            print self.save_as_xml()
+            print(self.save_as_xml())
         elif format == 'simple':
-            print self.dump_simple()
+            print(self.dump_simple())
         else:
             raise Exception, "Invalid format %s" % format
 
     def dump_text(self, dump_parents=False, sort=False):
-        print 40*'='
-        print "RECORD"
+        print(40*'=')
+        print("RECORD")
         # print remaining fields
         fields = self.fields()
         if sort: fields.sort()
@@ -102,12 +104,12 @@ class Record:
             if callable (attrib):               continue
             # handle gid 
             if attrib_name == 'gid':
-                print "    gid:"      
-                print GID(string=attrib).dump_string(8, dump_parents)
+                print("    gid:")      
+                print(GID(string=attrib).dump_string(8, dump_parents))
             elif attrib_name in ['date created', 'last updated']:
-                print "    %s: %s" % (attrib_name, self.date_repr(attrib_name))
+                print("    %s: %s" % (attrib_name, self.date_repr(attrib_name)))
             else:
-                print "    %s: %s" % (attrib_name, attrib)
+                print("    %s: %s" % (attrib_name, attrib))
 
     def dump_simple(self):
         return "%s"%self    

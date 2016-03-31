@@ -1,7 +1,9 @@
 # Thierry Parmentelat -- INRIA
-#
-# a minimal library for writing "lightweight" SFA clients
-#
+"""
+a minimal library for writing "lightweight" SFA clients
+"""
+
+from __future__ import print_function
 
 # xxx todo
 # this library should probably check for the expiration date of the various
@@ -217,9 +219,9 @@ class SfaClientBootstrap:
         openssl_command += [ "-in",    self.my_gid_filename()]
         openssl_command += [ "-out",   filename ]
         if subprocess.call(openssl_command) ==0:
-            print "Successfully created %s"%filename
+            print("Successfully created %s"%filename)
         else:
-            print "Failed to create %s"%filename
+            print("Failed to create %s"%filename)
 
     # Returns True if credential file is valid. Otherwise return false.
     def validate_credential(self, filename):

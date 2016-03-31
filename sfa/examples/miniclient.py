@@ -3,6 +3,8 @@
 # this is designed to use a totally empty new directory
 # so we demonstrate how to bootstrap the whole thing
 
+from __future__ import print_function
+
 # init logging on console
 import logging
 console = logging.StreamHandler()
@@ -17,7 +19,7 @@ def unique_call_id(): return uuid.uuid4().urn
 import sys
 args=sys.argv[1:]
 if len(args)!=1:
-    print "Usage: %s directory"%sys.argv[0]
+    print("Usage: %s directory"%sys.argv[0])
     sys.exit(1)
 dir=args[0]
 logger.debug('sfaclientsample: Using directory %s'%dir)
@@ -62,8 +64,8 @@ def get_version (url):
     bootstrap.self_signed_cert()
     server_proxy = bootstrap.server_proxy_simple(url)
     server_version = server_proxy.GetVersion()
-    print "miniclient: GetVersion at %s returned:"%(url)
-    for (k,v) in server_version.iteritems(): print "miniclient: \tversion[%s]=%s"%(k,truncate(v))
+    print("miniclient: GetVersion at %s returned:"%(url))
+    for (k,v) in server_version.iteritems(): print("miniclient: \tversion[%s]=%s"%(k,truncate(v)))
 
 # version_dict = {'type': 'SFA', 'version': '1', }
 
@@ -79,7 +81,7 @@ def list_resources ():
     options [ 'geni_rspec_version' ] = version_dict
     options [ 'call_id' ] = unique_call_id()
     list_resources = bootstrap.server_proxy (aggregate_url).ListResources(credentials,options)
-    print "miniclient: ListResources at %s returned : %s"%(aggregate_url,truncate(list_resources))
+    print("miniclient: ListResources at %s returned : %s"%(aggregate_url,truncate(list_resources)))
 
 def list_slice_resources ():
     bootstrap.bootstrap_my_gid()
@@ -90,7 +92,7 @@ def list_slice_resources ():
     options [ 'geni_slice_urn' ] = slice_urn
     options [ 'call_id' ] = unique_call_id()
     list_resources = bootstrap.server_proxy (aggregate_url).ListResources(credentials,options)
-    print "miniclient: ListResources at %s for slice %s returned : %s"%(aggregate_url,slice_urn,truncate(list_resources))
+    print("miniclient: ListResources at %s for slice %s returned : %s"%(aggregate_url,slice_urn,truncate(list_resources)))
     
     
 

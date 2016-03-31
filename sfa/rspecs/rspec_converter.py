@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+
 from sfa.rspecs.pg_rspec_converter import PGRSpecConverter
 from sfa.rspecs.sfa_rspec_converter import SfaRSpecConverter
 from sfa.rspecs.rspec import RSpec
@@ -39,8 +41,8 @@ if __name__ == '__main__':
     pg_rspec = 'test/protogeni.rspec'
     sfa_rspec = 'test/nodes.rspec'  
 
-    print "converting pg rspec to sfa rspec"
-    print RSpecConverter.to_sfa_rspec(pg_rspec)
+    print("converting pg rspec to sfa rspec")
+    print(RSpecConverter.to_sfa_rspec(pg_rspec))
     
-    print "converting sfa rspec to pg rspec"
-    print RSpecConverter.to_pg_rspec(sfa_rspec)                   
+    print("converting sfa rspec to pg rspec")
+    print(RSpecConverter.to_pg_rspec(sfa_rspec))                   

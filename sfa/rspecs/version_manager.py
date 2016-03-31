@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 from sfa.util.faults import InvalidRSpec, UnsupportedRSpecVersion
 from sfa.rspecs.version import RSpecVersion 
@@ -78,19 +80,19 @@ class VersionManager:
 
     def show_by_string(self, string):
         try:
-            print self.get_version(string)
+            print(self.get_version(string))
         except Exception as e:
-            print e
+            print(e)
 
     def show_by_schema(self, string):
         try:
-            print self.get_version_by_schema(string)
+            print(self.get_version_by_schema(string))
         except Exception as e:
-            print e
+            print(e)
 
 if __name__ == '__main__':
     manager = VersionManager()
-    print manager
+    print(manager)
     manager.show_by_string('sfa 1') 
     manager.show_by_string('protogeni 2') 
     manager.show_by_string('protogeni 2 advertisement') 

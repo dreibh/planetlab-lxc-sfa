@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 # specialized Xrn class for PlanetLab
 import re
 from sfa.util.xrn import Xrn, get_authority
@@ -114,4 +116,4 @@ tests = [
 
 if __name__ == '__main__':
     for test in tests:
-        print("{} - hash_loginbase -> {}".format(test, hash_loginbase(test)))
+        print(("{} - hash_loginbase -> {}".format(test, hash_loginbase(test))))

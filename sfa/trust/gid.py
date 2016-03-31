@@ -25,6 +25,8 @@
 # descendant of the certificate class.
 ##
 
+from __future__ import print_function
+
 import xmlrpclib
 import uuid
 
@@ -201,7 +203,7 @@ class GID(Certificate):
     # @param dump_parents If true, also dump the parents of the GID
 
     def dump(self, *args, **kwargs):
-        print self.dump_string(*args,**kwargs)
+        print(self.dump_string(*args,**kwargs))
 
     def dump_string(self, indent=0, dump_parents=False):
         result=" "*(indent-2) + "GID\n"

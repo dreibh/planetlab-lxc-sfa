@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
 # IN THE WORK.
 #----------------------------------------------------------------------
+from __future__ import print_function
+
 from types import StringTypes
 import time
 import datetime
@@ -98,9 +100,9 @@ def add_datetime(input, days=0, hours=0, minutes=0, seconds=0):
 
 if __name__ == '__main__':
         # checking consistency
-    print 20*'X'
-    print ("Should be close to zero: %s"%(datetime_to_epoch(datetime.datetime.utcnow())-time.time()))
-    print 20*'X'
+    print(20*'X')
+    print(("Should be close to zero: %s"%(datetime_to_epoch(datetime.datetime.utcnow())-time.time())))
+    print(20*'X')
     for input in [
             '+2d',
             '+3w',
@@ -112,4 +114,4 @@ if __name__ == '__main__':
             '2014-05-28T15:18',
             '2014-05-28T15:18:30',
     ]:
-        print "input=%20s -> parsed %s"%(input,datetime_to_string(utcparse(input)))
+        print("input=%20s -> parsed %s"%(input,datetime_to_string(utcparse(input))))

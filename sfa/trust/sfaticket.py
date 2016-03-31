@@ -24,6 +24,8 @@
 # implements SFA tickets
 #
 
+from __future__ import print_function
+
 import xmlrpclib
 
 from sfa.trust.certificate import Certificate
@@ -124,25 +126,25 @@ class SfaTicket(Certificate):
             self.gidObject = None
 
     def dump(self, dump_parents=False):
-        print "TICKET", self.get_subject()
+        print("TICKET", self.get_subject())
 
-        print "  gidCaller:"
+        print("  gidCaller:")
         gidCaller = self.get_gid_caller()
         if gidCaller:
             gidCaller.dump(8, dump_parents)
 
-        print "  gidObject:"
+        print("  gidObject:")
         gidObject = self.get_gid_object()
         if gidObject:
             gidObject.dump(8, dump_parents)
 
-        print "  attributes:"
+        print("  attributes:")
         for attrname in self.get_attributes().keys():
-            print "        ", attrname, self.get_attributes()[attrname]
+            print("        ", attrname, self.get_attributes()[attrname])
 
-        print "       rspec:"
-        print "        ", self.get_rspec()
+        print("       rspec:")
+        print("        ", self.get_rspec())
 
         if self.parent and dump_parents:
-           print "PARENT",
+           print("PARENT", end=' ')
            self.parent.dump(dump_parents)

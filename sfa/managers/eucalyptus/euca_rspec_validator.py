@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from __future__ import with_statement 
+from __future__ import print_function
+
 import sys
 import os
 from lxml import etree as ET
@@ -19,9 +20,9 @@ def main():
         if not rspecValidator(rspecXML):
             error = rspecValidator.error_log.last_error
             message = '%s (line %s)' % (error.message, error.line) 
-            print message
+            print(message)
         else:
-            print 'It is valid'
+            print('It is valid')
 
 if __name__ == "__main__":
     main()

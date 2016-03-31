@@ -1,4 +1,6 @@
 #!/usr/bin/python 
+from __future__ import print_function
+
 from lxml import etree
 from StringIO import StringIO
 from sfa.util.xrn import Xrn, urn_to_hrn
@@ -91,4 +93,4 @@ class PGRSpecConverter:
 if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1:        
-        print PGRSpecConverter.to_sfa_rspec(sys.argv[1])  
+        print(PGRSpecConverter.to_sfa_rspec(sys.argv[1]))  

@@ -26,6 +26,8 @@
 # Credentials are signed XML files that assign a subject gid privileges to an object gid
 ##
 
+from __future__ import print_function
+
 import os, os.path
 import subprocess
 from types import StringTypes
@@ -1154,7 +1156,7 @@ class Credential(object):
     #
     # @param dump_parents If true, also dump the parent certificates
     def dump (self, *args, **kwargs):
-        print self.dump_string(*args, **kwargs)
+        print(self.dump_string(*args, **kwargs))
 
     # SFA code ignores show_xml and disables printing the cred xml
     def dump_string(self, dump_parents=False, show_xml=False):
@@ -1197,7 +1199,7 @@ class Credential(object):
                 result += "\nEnd XML\n"
             except:
                 import traceback
-                print "exc. Credential.dump_string / XML"
+                print("exc. Credential.dump_string / XML")
                 traceback.print_exc()
 
         return result

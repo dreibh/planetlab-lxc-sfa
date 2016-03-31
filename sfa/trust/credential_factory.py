@@ -21,6 +21,8 @@
 # IN THE WORK.
 #----------------------------------------------------------------------
 
+from __future__ import print_function
+
 from sfa.util.sfalogging import logger
 from sfa.trust.credential import Credential
 from sfa.trust.abac_credential import ABACCredential
@@ -103,8 +105,8 @@ if __name__ == "__main__":
     cred1 = CredentialFactory.createCred(credFile='/tmp/cred.xml')
     cred2 = CredentialFactory.createCred(credString=c2)
 
-    print "C1 = %s" % cred1
-    print "C2 = %s" % cred2
+    print("C1 = %s" % cred1)
+    print("C2 = %s" % cred2)
     c1s = cred1.dump_string()
-    print "C1 = %s" % c1s
+    print("C1 = %s" % c1s)
 #    print "C2 = %s" % cred2.dump_string()

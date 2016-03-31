@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 from copy import deepcopy
 from lxml import etree
 
@@ -231,7 +233,7 @@ if __name__ == '__main__':
     import pprint
     from sfa.rspecs.rspec import RSpec
     from sfa.rspecs.rspec_elements import *
-    print "main ofeliav1"
+    print("main ofeliav1")
     if len(sys.argv)!=2:
         r = RSpec('/tmp/resources.rspec')
     else:

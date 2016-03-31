@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from copy import deepcopy
 
 
@@ -78,10 +80,10 @@ class Iotlabv1(RSpecVersion):
     # Slivers
 
     def get_sliver_attributes(self, hostname, node, network=None):
-        print>>sys.stderr, "\r\n \r\n \r\n \t\t SLABV1.PY  get_sliver_attributes hostname %s " %(hostname)
+        print("\r\n \r\n \r\n \t\t SLABV1.PY  get_sliver_attributes hostname %s " %(hostname), file=sys.stderr)
         nodes = self.get_nodes({'component_id': '*%s*' %hostname})
         attribs = []
-        print>>sys.stderr, "\r\n \r\n \r\n \t\t SLABV1.PY  get_sliver_attributes-----------------nodes %s  " %(nodes)
+        print("\r\n \r\n \r\n \t\t SLABV1.PY  get_sliver_attributes-----------------nodes %s  " %(nodes), file=sys.stderr)
         if nodes is not None and isinstance(nodes, list) and len(nodes) > 0:
             node = nodes[0]
         #if node :
@@ -93,7 +95,7 @@ class Iotlabv1(RSpecVersion):
                 sliver = sliver[0]
                 attribs = sliver
                 #attribs = self.attributes_list(sliver)
-                print>>sys.stderr, "\r\n \r\n \r\n \t\t SLABV1.PY  get_sliver_attributes----------NN------- sliver %s self.namespaces %s attribs %s " %(sliver, self.namespaces,attribs)
+                print("\r\n \r\n \r\n \t\t SLABV1.PY  get_sliver_attributes----------NN------- sliver %s self.namespaces %s attribs %s " %(sliver, self.namespaces,attribs), file=sys.stderr)
         return attribs
 
     def get_slice_attributes(self, network=None):
@@ -143,7 +145,7 @@ class Iotlabv1(RSpecVersion):
         if attributes is None: attributes=[]
         # all nodes hould already be present in the rspec. Remove all
         # nodes that done have slivers
-        print>>sys.stderr, "\r\n \r\n \r\n \t\t\t Iotlabv1.PY add_slivers  ----->get_node "
+        print("\r\n \r\n \r\n \t\t\t Iotlabv1.PY add_slivers  ----->get_node ", file=sys.stderr)
         for hostname in hostnames:
             node_elems = self.get_nodes({'component_id': '*%s*' % hostname})
             if not node_elems:
@@ -163,7 +165,7 @@ class Iotlabv1(RSpecVersion):
                 continue
             sliver = {'type': requested_sliver_type,
                      'pl_tags': attributes}
-            print>>sys.stderr, "\r\n \r\n \r\n \t\t\t Iotlabv1.PY add_slivers  node_elem %s sliver_type %s \r\n \r\n " %(node_elem, sliver_type)
+            print("\r\n \r\n \r\n \t\t\t Iotlabv1.PY add_slivers  node_elem %s sliver_type %s \r\n \r\n " %(node_elem, sliver_type), file=sys.stderr)
             # remove available element
             for available_elem in node_elem.xpath('./default:available | ./available'):
                 node_elem.remove(available_elem)
@@ -303,4 +305,4 @@ if __name__ == '__main__':
     r = RSpec('/tmp/iotlab.rspec')
     r.load_rspec_elements(Iotlabv1.elements)
     r.namespaces = Iotlabv1.namespaces
-    print r.get(RSpecElements.NODE)
+    print(r.get(RSpecElements.NODE))

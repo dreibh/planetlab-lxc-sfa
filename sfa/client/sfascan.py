@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys, os.path
 import pickle
 import time
@@ -8,7 +10,7 @@ from urlparse import urlparse
 try:
     import pygraphviz
 except:
-    print 'Warning, could not import pygraphviz, test mode only'
+    print('Warning, could not import pygraphviz, test mode only')
 
 from optparse import OptionParser
 
@@ -73,7 +75,7 @@ class VersionCache:
 
     def show (self):
         entries=len(self.url2version)
-        print "version cache from file %s has %d entries"%(self.filename,entries)
+        print("version cache from file %s has %d entries"%(self.filename,entries))
         key_values=self.url2version.items()
         def old_first (kv1,kv2): return int(kv1[1][0]-kv2[1][0])
         key_values.sort(old_first)
@@ -82,9 +84,9 @@ class VersionCache:
             (timestamp,version) = tuple
             how_old = time.time()-timestamp
             if how_old<=self.expires:
-                print url,"-- %d seconds ago"%how_old
+                print(url,"-- %d seconds ago"%how_old)
             else:
-                print "OUTDATED",url,"(%d seconds ago, expires=%d)"%(how_old,self.expires)
+                print("OUTDATED",url,"(%d seconds ago, expires=%d)"%(how_old,self.expires))
     
     # turns out we might have trailing slashes or not
     def normalize (self, url):
@@ -366,5 +368,5 @@ class SfaScan:
         # test mode when pygraphviz is not available
         except:
             entry=entries[0]
-            print "GetVersion at %s returned %s"%(entry.url(),entry.get_version())
+            print("GetVersion at %s returned %s"%(entry.url(),entry.get_version()))
 

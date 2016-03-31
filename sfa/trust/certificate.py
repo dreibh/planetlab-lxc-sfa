@@ -35,6 +35,8 @@
 ##
 #
 
+from __future__ import print_function
+
 import functools
 import os
 import tempfile
@@ -280,7 +282,7 @@ class Keypair:
         return getattr(self,'filename',None)
 
     def dump (self, *args, **kwargs):
-        print self.dump_string(*args, **kwargs)
+        print(self.dump_string(*args, **kwargs))
 
     def dump_string (self):
         result=""
@@ -837,7 +839,7 @@ class Certificate:
         return getattr(self,'filename',None)
 
     def dump (self, *args, **kwargs):
-        print self.dump_string(*args, **kwargs)
+        print(self.dump_string(*args, **kwargs))
 
     def dump_string (self,show_extensions=False):
         result = ""

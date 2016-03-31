@@ -23,6 +23,8 @@
 # IN THE WORK.
 #----------------------------------------------------------------------
 
+from __future__ import print_function
+
 import os, sys
 import traceback
 import logging, logging.handlers
@@ -183,14 +185,14 @@ def profile(logger):
 
 
 if __name__ == '__main__': 
-    print 'testing sfalogging into logger.log'
+    print('testing sfalogging into logger.log')
     logger1=_SfaLogger('logger.log', loggername='std(info)')
     logger2=_SfaLogger('logger.log', loggername='error', level=logging.ERROR)
     logger3=_SfaLogger('logger.log', loggername='debug', level=logging.DEBUG)
     
     for (logger,msg) in [ (logger1,"std(info)"),(logger2,"error"),(logger3,"debug")]:
         
-        print "====================",msg, logger.logger.handlers
+        print("====================",msg, logger.logger.handlers)
    
         logger.enable_console()
         logger.critical("logger.critical")

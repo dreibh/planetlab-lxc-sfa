@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 import traceback
 
@@ -62,10 +64,10 @@ class DBSchema:
 
     def drop_table (self, tablename):
         if self.table_exists (tablename):
-            print >>sys.stderr, "%s: Dropping table %s"%(DBSchema.header,tablename)
+            print("%s: Dropping table %s"%(DBSchema.header,tablename), file=sys.stderr)
             self.engine.execute ("drop table %s cascade"%tablename)
         else:
-            print >>sys.stderr, "%s: no need to drop table %s"%(DBSchema.header,tablename)
+            print("%s: no need to drop table %s"%(DBSchema.header,tablename), file=sys.stderr)
         
     def handle_old_releases (self):
         try:
@@ -75,7 +77,7 @@ class DBSchema:
                 # (.) we've just created the db, so it's either a fresh install, or
                 # (.) we come from a 'very old' depl.
                 # in either case, an import is required but there's nothing to clean up
-                print >> sys.stderr,"%s: make sure to run import"%(DBSchema.header,)
+                print("%s: make sure to run import"%(DBSchema.header,), file=sys.stderr)
             elif self.table_exists ('sfa_db_version'):
                 # we come from an 'old' version
                 self.drop_table ('records')
@@ -85,7 +87,7 @@ class DBSchema:
                 # we should be good here
                 pass
         except:
-            print >> sys.stderr, "%s: unknown exception"%(DBSchema.header,)
+            print("%s: unknown exception"%(DBSchema.header,), file=sys.stderr)
             traceback.print_exc ()
 
     # after this call the db schema and the version as known by migrate should 

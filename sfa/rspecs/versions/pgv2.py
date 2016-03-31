@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from copy import deepcopy
 from StringIO import StringIO
 from sfa.util.xrn import Xrn
@@ -262,4 +264,4 @@ if __name__ == '__main__':
     r = RSpec('/tmp/pg.rspec')
     r.load_rspec_elements(PGv2.elements)
     r.namespaces = PGv2.namespaces
-    print r.get(RSpecElements.NODE)
+    print(r.get(RSpecElements.NODE))

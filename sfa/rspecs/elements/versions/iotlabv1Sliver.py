@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from sfa.rspecs.elements.element import Element
 from sfa.rspecs.elements.sliver import Sliver
 
@@ -50,7 +52,7 @@ class Iotlabv1Sliver:
                 sliver['type'] = sliver_elem.attrib['name']
             #sliver['images'] = Iotlabv1DiskImage.get_images(sliver_elem)
 
-            print>>sys.stderr, "\r\n \r\n SLABV1SLIVER.PY  \t\t\t  get_slivers sliver %s " %( sliver)
+            print("\r\n \r\n SLABV1SLIVER.PY  \t\t\t  get_slivers sliver %s " %( sliver), file=sys.stderr)
             slivers.append(sliver)
         return slivers
 

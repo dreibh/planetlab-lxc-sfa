@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 # specialized Xrn class for NITOS
 import re
 from sfa.util.xrn import Xrn
@@ -110,4 +112,4 @@ if __name__ == '__main__':
         #slice_name = NitosXrn(xrn="omf.nitos.aminesl",type='slice').nitos_slicename()
         slicename = "giorgos_n"
         hrn = slicename_to_hrn("pla", "nitos", slicename)
-        print hrn  
+        print(hrn)  

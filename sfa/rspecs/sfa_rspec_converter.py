@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+
 from sfa.util.xrn import hrn_to_urn
 from sfa.rspecs.rspec import RSpec
 from sfa.rspecs.version_manager import VersionManager
@@ -83,4 +85,4 @@ class SfaRSpecConverter:
 if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1:    
-        print SfaRSpecConverter.to_pg_rspec(sys.argv[1])
+        print(SfaRSpecConverter.to_pg_rspec(sys.argv[1]))

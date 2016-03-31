@@ -1,4 +1,6 @@
 #!/usr/bin/python
+from __future__ import print_function
+
 import os
 import sys
 import copy
@@ -130,15 +132,15 @@ class RegistryCommands(Commands):
             hrn = Xrn(xrn).get_hrn()
             db_query = db_query.filter_by(hrn=hrn)
         elif all and xrn:
-            print "Use either -a or -x <xrn>, not both !!!"
+            print("Use either -a or -x <xrn>, not both !!!")
             sys.exit(1)
         elif not all and not xrn:
-            print "Use either -a or -x <xrn>, one of them is mandatory !!!"
+            print("Use either -a or -x <xrn>, one of them is mandatory !!!")
             sys.exit(1)
 
         records = db_query.all()
         if not records:
-            print "No Record found"
+            print("No Record found")
             sys.exit(1)
 
         OK = []
@@ -171,15 +173,15 @@ class RegistryCommands(Commands):
                  NOK.append(record.hrn)
 
         if not verbose:
-            print "Users NOT having a PubKey: %s\n\
+            print("Users NOT having a PubKey: %s\n\
 Users having a non RSA PubKey: %s\n\
 Users having a GID/PubKey correpondence OK: %s\n\
-Users having a GID/PubKey correpondence Not OK: %s\n"%(len(NOKEY), len(ERROR), len(OK), len(NOK))
+Users having a GID/PubKey correpondence Not OK: %s\n"%(len(NOKEY), len(ERROR), len(OK), len(NOK)))
         else:
-            print "Users NOT having a PubKey: %s and are: \n%s\n\n\
+            print("Users NOT having a PubKey: %s and are: \n%s\n\n\
 Users having a non RSA PubKey: %s and are: \n%s\n\n\
 Users having a GID/PubKey correpondence OK: %s and are: \n%s\n\n\
-Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n"%(len(NOKEY),NOKEY, len(ERROR), ERROR, len(OK), OK, len(NOK), NOK)
+Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n"%(len(NOKEY),NOKEY, len(ERROR), ERROR, len(OK), OK, len(NOK), NOK))
 
 
 
@@ -252,7 +254,7 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n"%(len(NOKEY
     def credential(self, xrn, type=None):
         """Invoke GetCredential"""
         cred = self.api.manager.GetCredential(self.api, xrn, type, self.api.hrn)
-        print cred
+        print(cred)
    
 
     def import_registry(self):
@@ -337,7 +339,7 @@ class CertCommands(Commands):
                 auth_info = hierarchy.get_auth_info(hrn)
                 gid = auth_info.gid_object
             except:
-                print "Record: %s not found" % hrn
+                print("Record: %s not found" % hrn)
                 sys.exit(1)
         # save to file
         if not outfile:
@@ -349,7 +351,7 @@ class CertCommands(Commands):
         """Print contents of a GID file"""
         gid_path = os.path.abspath(gidfile)
         if not gid_path or not os.path.isfile(gid_path):
-            print "No such gid file: %s" % gidfile
+            print("No such gid file: %s" % gidfile)
             sys.exit(1)
         gid = GID(filename=gid_path)
         gid.dump(dump_parents=True)
@@ -377,9 +379,9 @@ class AggregateCommands(Commands):
     def resources(self, rspec_version='GENI'):
         """Display the available resources at an aggregate"""  
         options = {'geni_rspec_version': rspec_version}
-        print options
+        print(options)
         resources = self.api.manager.ListResources(self.api, [], options)
-        print resources
+        print(resources)
         
 
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='slice hrn/urn (mandatory)')
@@ -391,7 +393,7 @@ class AggregateCommands(Commands):
         rspec_string = open(rspec).read()
         options={}
         manifest = self.api.manager.Allocate(self.api, slice_urn, [], rspec_string, options)
-        print manifest
+        print(manifest)
 
 
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='slice hrn/urn (mandatory)')
@@ -401,7 +403,7 @@ class AggregateCommands(Commands):
         slice_urn=xrn.get_urn()
         options={}
         manifest = self.api.manager.provision(self.api, [slice_urn], [], options)
-        print manifest
+        print(manifest)
 
 
 
@@ -433,14 +435,14 @@ class SfaAdmin:
         return (full_name,SfaAdmin.CATEGORIES[full_name])
 
     def summary_usage (self, category=None):
-        print "Usage:", self.script_name + " category command [<options>]"
+        print("Usage:", self.script_name + " category command [<options>]")
         if category and category in SfaAdmin.CATEGORIES: 
             categories=[category]
         else:
             categories=SfaAdmin.CATEGORIES
         for c in categories:
             cls=SfaAdmin.CATEGORIES[c]
-            print "==================== category=%s"%c
+            print("==================== category=%s"%c)
             names=cls.__dict__.keys()
             names.sort()
             for name in names:
@@ -448,15 +450,15 @@ class SfaAdmin:
                 if name.startswith('_'): continue
                 margin=15
                 format="%%-%ds"%margin
-                print "%-15s"%name,
+                print("%-15s"%name, end=' ')
                 doc=getattr(method,'__doc__',None)
                 if not doc: 
-                    print "<missing __doc__>"
+                    print("<missing __doc__>")
                     continue
                 lines=[line.strip() for line in doc.split("\n")]
                 line1=lines.pop(0)
-                print line1
-                for extra_line in lines: print margin*" ",extra_line
+                print(line1)
+                for extra_line in lines: print(margin*" ",extra_line)
         sys.exit(2)
 
     def main(self):
@@ -509,14 +511,14 @@ class SfaAdmin:
             command(*cmd_args, **cmd_kwds)
             sys.exit(0)
         except TypeError:
-            print "Possible wrong number of arguments supplied"
+            print("Possible wrong number of arguments supplied")
             #import traceback
             #traceback.print_exc()
-            print command.__doc__
+            print(command.__doc__)
             parser.print_help()
             sys.exit(1)
             #raise
         except Exception:
-            print "Command failed, please check log for more info"
+            print("Command failed, please check log for more info")
             raise
             sys.exit(1)

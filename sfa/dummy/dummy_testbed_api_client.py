@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import xmlrpclib
 from datetime import datetime
 import time
@@ -11,6 +13,6 @@ my_user_id = dummy_api.AddUser({'email': 'john.doe@test.net', 'user_name': 'john
 dummy_api.AddUserToSlice({'slice_id': 2, 'user_id': my_user_id})
 
 # Display the list of users
-print dummy_api.GetUsers()
+print(dummy_api.GetUsers())
 # Display the list of slices
-print dummy_api.GetSlices()
+print(dummy_api.GetSlices())

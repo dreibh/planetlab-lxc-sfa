@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 class prefixNode:
 
     def __init__(self, prefix):
@@ -88,10 +90,10 @@ class prefixTree:
         """
         if not node:
             node = self.root
-            print node.prefix
+            print(node.prefix)
 
         for child in node.children:
-            print child.prefix, 
+            print(child.prefix, end=' ') 
          
         for child in node.children:
             self.dump(child)

@@ -1,4 +1,6 @@
 #!/usr/bin/python
+from __future__ import print_function
+
 import sys
 import os
 import tempfile
@@ -24,7 +26,7 @@ def handle_gid_mismatch_exception(f):
         try: return f(*args, **kwds)
         except ConnectionKeyGIDMismatch:
             # clean regen server keypair and try again
-            print "cleaning keys and trying again"
+            print("cleaning keys and trying again")
             clean_key_cred()
             return f(args, kwds)
 
@@ -48,7 +50,7 @@ def server_proxy(url=None, port=None, keyfile=None, certfile=None,verbose=False)
         url = "http://%(addr)s:%(port)s" % locals()
 
     if verbose:
-        print "Contacting registry at: %(url)s" % locals()
+        print("Contacting registry at: %(url)s" % locals())
 
     server = SfaServerProxy(url, keyfile, certfile)
     return server    
@@ -125,11 +127,11 @@ def GetCredential(registry=None, force=False, verbose=False):
     # check for existing credential
     if not force and os.path.exists(credfile):
         if verbose:
-            print "Loading Credential from %(credfile)s " % locals()  
+            print("Loading Credential from %(credfile)s " % locals())  
         cred = Credential(filename=credfile).save_to_string(save_parents=True)
     else:
         if verbose:
-            print "Getting credential from registry" 
+            print("Getting credential from registry") 
         # make sure node private key exists
         node_pkey_file = config_dir + os.sep + "node.key"
         node_gid_file = config_dir + os.sep + "node.gid"
@@ -177,7 +179,7 @@ def get_trusted_certs(registry=None, verbose=False):
     registry = server_proxy(url=registry, keyfile=keyfile, certfile=certfile)
     # get the trusted certs and save them in the right place
     if verbose:
-        print "Getting trusted certs from registry"
+        print("Getting trusted certs from registry")
     trusted_certs = registry.get_trusted_certs(cred)
     trusted_gid_names = [] 
     for gid_str in trusted_certs:
@@ -187,7 +189,7 @@ def get_trusted_certs(registry=None, verbose=False):
         trusted_gid_names.append(relative_filename)
         gid_filename = trusted_certs_dir + os.sep + relative_filename
         if verbose:
-            print "Writing GID for %s as %s" % (gid.get_hrn(), gid_filename) 
+            print("Writing GID for %s as %s" % (gid.get_hrn(), gid_filename)) 
         gid.save_to_file(gid_filename, save_parents=True)
 
     # remove old certs
@@ -195,7 +197,7 @@ def get_trusted_certs(registry=None, verbose=False):
     for gid_name in all_gids_names:
         if gid_name not in trusted_gid_names:
             if verbose:
-                print "Removing old gid ", gid_name
+                print("Removing old gid ", gid_name)
             os.unlink(trusted_certs_dir + os.sep + gid_name)                     
 
 @handle_gid_mismatch_exception
@@ -222,7 +224,7 @@ def get_gids(registry=None, verbose=False):
     registry = server_proxy(url=registry, keyfile=keyfile, certfile=certfile)
             
     if verbose:
-        print "Getting current slices on this node"
+        print("Getting current slices on this node")
     # get a list of slices on this node
     from sfa.generic import Generic
     generic=Generic.the_flavour()
@@ -247,7 +249,7 @@ def get_gids(registry=None, verbose=False):
         return
         
     if verbose:
-        print "Getting gids for slices on this node from registry"  
+        print("Getting gids for slices on this node from registry")  
     # get the gids
     # and save them in the right palce
     records = registry.GetGids(hrns, cred)
@@ -265,12 +267,12 @@ def get_gids(registry=None, verbose=False):
         gid = record['gid']
         slice_gid_filename = os.sep.join([vserver_path, "etc", "slice.gid"])
         if verbose:
-            print "Saving GID for %(slicename)s as %(slice_gid_filename)s" % locals()
+            print("Saving GID for %(slicename)s as %(slice_gid_filename)s" % locals())
         GID(string=gid).save_to_file(slice_gid_filename, save_parents=True)
         # save the node gid in /etc/sfa
         node_gid_filename = os.sep.join([vserver_path, "etc", "node.gid"])
         if verbose:
-            print "Saving node GID for %(slicename)s as %(node_gid_filename)s" % locals()
+            print("Saving node GID for %(slicename)s as %(node_gid_filename)s" % locals())
         node_gid.save_to_file(node_gid_filename, save_parents=True) 
                 
 
@@ -279,15 +281,15 @@ def dispatch(options, args):
     create_default_dirs()
     if options.key:
         if options.verbose:
-            print "Getting the component's pkey"
+            print("Getting the component's pkey")
         get_node_key(registry=options.registry, verbose=options.verbose)
     if options.certs:
         if options.verbose:
-            print "Getting the component's trusted certs"
+            print("Getting the component's trusted certs")
         get_trusted_certs(verbose=options.verbose)
     if options.gids:        
         if options.verbose:
-            print "Geting the component's GIDs"
+            print("Geting the component's GIDs")
         get_gids(verbose=options.verbose)
 
 def main():
