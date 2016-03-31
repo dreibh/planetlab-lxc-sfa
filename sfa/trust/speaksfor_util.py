@@ -31,7 +31,6 @@ import subprocess
 import sys
 import tempfile
 from xml.dom.minidom import *
-from StringIO import StringIO
 
 from sfa.util.sfatime import SFATIME_FORMAT
 
@@ -41,6 +40,7 @@ from sfa.trust.abac_credential import ABACCredential, ABACElement
 from sfa.trust.credential_factory import CredentialFactory
 from sfa.trust.gid import GID
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import StringIO
 
 # Routine to validate that a speaks-for credential 
 # says what it claims to say:

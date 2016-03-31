@@ -1,10 +1,10 @@
 #!/usr/bin/python 
 from lxml import etree
-from StringIO import StringIO
 from sfa.util.faults import InvalidXML
 from sfa.rspecs.elements.element import Element
 
 from sfa.util.py23 import StringType
+from sfa.util.py23 import StringIO
 
 # helper functions to help build xpaths
 class XpathFilter:

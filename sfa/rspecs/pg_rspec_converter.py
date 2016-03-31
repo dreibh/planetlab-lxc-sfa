@@ -2,10 +2,11 @@
 from __future__ import print_function
 
 from lxml import etree
-from StringIO import StringIO
 from sfa.util.xrn import Xrn, urn_to_hrn
 from sfa.rspecs.rspec import RSpec
 from sfa.rspecs.version_manager import VersionManager
+
+from sfa.util.py23 import StringIO
 
 xslt='''<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="xml" indent="no"/>

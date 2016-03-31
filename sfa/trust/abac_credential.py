@@ -27,8 +27,9 @@ from sfa.trust.credential import Credential, append_sub, DEFAULT_CREDENTIAL_LIFE
 from sfa.util.sfalogging import logger
 from sfa.util.sfatime import SFATIME_FORMAT
 
-from StringIO import StringIO
 from xml.dom.minidom import Document, parseString
+
+from sfa.util.py23 import StringIO
 
 HAVELXML = False
 try:

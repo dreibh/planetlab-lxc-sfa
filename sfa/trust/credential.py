@@ -31,11 +31,11 @@ from __future__ import print_function
 import os, os.path
 import subprocess
 import datetime
-from StringIO import StringIO
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 
 from sfa.util.py23 import StringType
+from sfa.util.py23 import StringIO
 
 HAVELXML = False
 try:

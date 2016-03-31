@@ -5,8 +5,8 @@ import time
 import ConfigParser
 import tempfile
 import codecs
-from StringIO import StringIO
 from sfa.util.xml import XML
+from sfa.util.py23 import StringIO
 
 default_config = \
 """
