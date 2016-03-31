@@ -4,18 +4,21 @@ import sys
 import os
 from optparse import OptionParser
 from pprint import pprint
-from types import StringTypes
 
 def create_parser():
     command = sys.argv[0]
     argv = sys.argv[1:]
     usage = "%(command)s [options]" % locals()
     description = """getNodes will open a rspec file and print all key/values, or filter results based on a given key or set of keys."""
-    parser = OptionParser(usage=usage,description=description)
-    parser.add_option("-i", "--infile", dest="infile", default=None,  help = "input rspec file")
-    parser.add_option("-t", "--tag", dest="tag", default=None,  help = "filter rspec for this tag")
-    parser.add_option("-a", "--attribute", dest="attribute", default=None,  help = "comma separated list of attributes to display")
-    parser.add_option("-r", "--recursive", dest="print_children", default=False,  action="store_true", help = "print the tag's child nodes")
+    parser = OptionParser(usage=usage, description=description)
+    parser.add_option("-i", "--infile", dest="infile", default=None,
+                      help = "input rspec file")
+    parser.add_option("-t", "--tag", dest="tag", default=None,
+                      help = "filter rspec for this tag")
+    parser.add_option("-a", "--attribute", dest="attribute", default=None,
+                      help = "comma separated list of attributes to display")
+    parser.add_option("-r", "--recursive", dest="print_children", default=False,  action="store_true",
+                      help = "print the tag's child nodes")
 
     return parser    
 
