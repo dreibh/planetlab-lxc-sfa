@@ -642,7 +642,7 @@ class Certificate:
         # pyOpenSSL only allows us to add extensions, so if we try to set the
         # same extension more than once, it will not work
         if self.data.has_key(field):
-            raise "Cannot set ", field, " more than once"
+            raise Exception("Cannot set {} more than once".format(field))
         self.data[field] = str
         self.add_extension(field, 0, str)
 
