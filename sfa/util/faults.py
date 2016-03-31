@@ -24,14 +24,18 @@
 # SFA API faults
 #
 
-import xmlrpclib
+try:
+    from xmlrpc.client import Fault as xmlrpcFault
+except:
+    from xmlrpclib import Fault as xmlrpcFault
+    
 from sfa.util.genicode import GENICODE
 
-class SfaFault(xmlrpclib.Fault):
+class SfaFault(xmlrpcFault):
     def __init__(self, faultCode, faultString, extra = None):
         if extra:
             faultString += ": " + str(extra)
-        xmlrpclib.Fault.__init__(self, faultCode, faultString)
+        xmlrpcFault.__init__(self, faultCode, faultString)
 
 class Forbidden(SfaFault):
     def __init__(self,  extra = None):
@@ -272,10 +276,10 @@ class SliverDoesNotExist(SfaFault):
     def __str__(self):
         return repr(self.value)
 
-class BadRequestHash(xmlrpclib.Fault):
+class BadRequestHash(xmlrpcFault):
     def __init__(self, hash = None, extra = None):
         faultString = "bad request hash: " + str(hash)
-        xmlrpclib.Fault.__init__(self, GENICODE.ERROR, faultString)
+        xmlrpcFault.__init__(self, GENICODE.ERROR, faultString)
 
 class MissingTrustedRoots(SfaFault):
     def __init__(self, value, extra = None):
