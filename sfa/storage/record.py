@@ -88,7 +88,7 @@ class Record:
         elif format == 'simple':
             print(self.dump_simple())
         else:
-            raise Exception, "Invalid format %s" % format
+            raise Exception("Invalid format %s" % format)
 
     def dump_text(self, dump_parents=False, sort=False):
         print(40*'=')

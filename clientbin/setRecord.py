@@ -47,9 +47,9 @@ def editDict(args, recordDict, options):
             if vect in recordDict:
                 del recordDict[vect]
             else:
-                raise TypeError, "Argument error: Records are updated with \n" \
+                raise TypeError("Argument error: Records are updated with \n" \
                             "key=val1,val2,valN or\n" \
-                            "key+=val1,val2,valN \n%s Unknown key/val" % vect
+                            "key+=val1,val2,valN \n%s Unknown key/val" % vect)
 
 
 def replaceDict(newval, recordDict, options):

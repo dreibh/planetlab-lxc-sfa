@@ -19,8 +19,8 @@ class SimpleStorage(dict):
             db_file = open(self.db_filename, 'r')
             dict.__init__(self, eval(db_file.read()))
         elif os.path.exists(self.db_filename) and not os.path.isfile(self.db_filename):
-            raise IOError, '%s exists but is not a file. please remove it and try again' \
-                           % self.db_filename
+            raise IOError('%s exists but is not a file. please remove it and try again' \
+                           % self.db_filename)
         else:
             self.write()
             self.load()
@@ -49,8 +49,8 @@ class XmlStorage(SimpleStorage):
             xml = XML(self.db_filename)
             dict.__init__(self, xml.todict())
         elif os.path.exists(self.db_filename) and not os.path.isfile(self.db_filename):
-            raise IOError, '%s exists but is not a file. please remove it and try again' \
-                           % self.db_filename
+            raise IOError('%s exists but is not a file. please remove it and try again' \
+                           % self.db_filename)
         else:
             self.write()
             self.load()

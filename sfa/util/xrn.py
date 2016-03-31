@@ -162,7 +162,7 @@ class Xrn:
     def get_hrn_type(self): return (self.hrn, self.type)
 
     def _normalize(self):
-        if self.hrn is None: raise SfaAPIError, "Xrn._normalize"
+        if self.hrn is None: raise SfaAPIError("Xrn._normalize")
         if not hasattr(self,'leaf'): 
             self.leaf=Xrn.hrn_split(self.hrn)[-1]
         # self.authority keeps a list
@@ -211,7 +211,7 @@ class Xrn:
         
 #        if not self.urn or not self.urn.startswith(Xrn.URN_PREFIX):
         if not Xrn.is_urn(self.urn):
-            raise SfaAPIError, "Xrn.urn_to_hrn"
+            raise SfaAPIError("Xrn.urn_to_hrn")
 
         parts = Xrn.urn_split(self.urn)
         type=parts.pop(2)
@@ -249,7 +249,7 @@ class Xrn:
 
 #        if not self.hrn or self.hrn.startswith(Xrn.URN_PREFIX):
         if Xrn.is_urn(self.hrn):
-            raise SfaAPIError, "Xrn.hrn_to_urn, hrn=%s"%self.hrn
+            raise SfaAPIError("Xrn.hrn_to_urn, hrn=%s"%self.hrn)
 
         if self.type and self.type.startswith('authority'):
             self.authority = Xrn.hrn_auth_list(self.hrn)

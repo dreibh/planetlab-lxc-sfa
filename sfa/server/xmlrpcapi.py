@@ -71,7 +71,7 @@ def xmlrpclib_dump(self, value, write):
             if isinstance(value, Type):
                 f(*args)
                 return
-        raise TypeError, "cannot marshal %s objects" % type(value)
+        raise TypeError("cannot marshal %s objects" % type(value))
     else:
         f(*args)
 
@@ -102,7 +102,7 @@ class XmlrpcApi:
         """
         # Look up method
         if method not in self.methods:
-            raise SfaInvalidAPIMethod, method
+            raise SfaInvalidAPIMethod(method)
         
         # Get new instance of method
         try:
@@ -112,7 +112,7 @@ class XmlrpcApi:
             return getattr(module, classname)(self)
         except (ImportError, AttributeError):
             self.logger.log_exc("Error importing method: %s" % method)
-            raise SfaInvalidAPIMethod, method
+            raise SfaInvalidAPIMethod(method)
 
     def call(self, source, method, *args):
         """

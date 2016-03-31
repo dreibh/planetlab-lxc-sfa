@@ -200,7 +200,7 @@ class SfaClientBootstrap:
         records = registry_proxy.Resolve (hrn, credential_string)
         records=[record for record in records if record['type']==type]
         if not records:
-            raise RecordNotFound, "hrn %s (%s) unknown to registry %s"%(hrn,type,self.registry_url)
+            raise RecordNotFound("hrn %s (%s) unknown to registry %s"%(hrn,type,self.registry_url))
         record=records[0]
         self.plain_write (output, record['gid'])
         self.logger.debug("SfaClientBootstrap: Wrote GID for %s (%s) in %s"% (hrn,type,output))
@@ -316,7 +316,7 @@ class SfaClientBootstrap:
 
     def assert_filename (self, filename, kind):
         if not os.path.isfile (filename):
-            raise IOError,"Missing %s file %s"%(kind,filename)
+            raise IOError("Missing %s file %s"%(kind,filename))
         return True
         
     def assert_private_key (self):
@@ -354,7 +354,7 @@ class SfaClientBootstrap:
                     message="Could not produce/retrieve %s (%s -- %s)"%\
                         (filename,error[0],error[1])
                     self.logger.log_exc(message)
-                    raise Exception, message
+                    raise Exception(message)
             return wrapped
         return wrap
 

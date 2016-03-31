@@ -33,7 +33,7 @@ class NitosShell:
             actual_name=None
             if name in NitosShell.direct_calls: actual_name=name
             if not actual_name:
-                raise Exception, "Illegal method call %s for NITOS driver"%(name)
+                raise Exception("Illegal method call %s for NITOS driver"%(name))
             actual_name = "scheduler.server." + actual_name
             result=getattr(self.proxy, actual_name)(*args, **kwds)
             logger.debug('NitosShell %s (%s) returned ... '%(name,actual_name))

@@ -170,20 +170,20 @@ class Command:
         if expected_type in StringTypes:
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
-                raise SfaInvalidArgument, "%s must be at least %d bytes long" % (name, min)
+                raise SfaInvalidArgument("%s must be at least %d bytes long" % (name, min))
             if max is not None and \
                len(value.encode(self.api.encoding)) > max:
-                raise SfaInvalidArgument, "%s must be at most %d bytes long" % (name, max)
+                raise SfaInvalidArgument("%s must be at most %d bytes long" % (name, max))
         elif expected_type in (list, tuple, set):
             if min is not None and len(value) < min:
-                raise SfaInvalidArgument, "%s must contain at least %d items" % (name, min)
+                raise SfaInvalidArgument("%s must contain at least %d items" % (name, min))
             if max is not None and len(value) > max:
-                raise SfaInvalidArgument, "%s must contain at most %d items" % (name, max)
+                raise SfaInvalidArgument("%s must contain at most %d items" % (name, max))
         else:
             if min is not None and value < min:
-                raise SfaInvalidArgument, "%s must be > %s" % (name, str(min))
+                raise SfaInvalidArgument("%s must be > %s" % (name, str(min)))
             if max is not None and value > max:
-                raise SfaInvalidArgument, "%s must be < %s" % (name, str(max))
+                raise SfaInvalidArgument("%s must be < %s" % (name, str(max)))
 
         # If a list with particular types of items is expected
         if isinstance(expected, (list, tuple, set)):

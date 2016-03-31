@@ -8,7 +8,7 @@ class Ofeliav1Port:
 
     @staticmethod
     def add_portrs(xml, ports):
-        raise Exception, "not implemented yet"
+        raise Exception("not implemented yet")
         if not ports:
             return
         if not isinstance(ports, list):
@@ -22,7 +22,7 @@ class Ofeliav1Port:
 
     @staticmethod
     def add_port_attribute(xml, name, value):
-        raise Exception, "not implemented yet"
+        raise Exception("not implemented yet")
         elem = xml.add_element(name)
         elem.set_text(value)
     

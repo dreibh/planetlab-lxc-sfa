@@ -166,7 +166,7 @@ class WSDLGen:
             return "xsd:string"
         else:
            pdb.set_trace()
-           raise SoapError, "Cannot handle %s objects" % arg_type
+           raise SoapError("Cannot handle %s objects" % arg_type)
 
     def param_type(self, arg):
         return (self.name_complex_type(arg))

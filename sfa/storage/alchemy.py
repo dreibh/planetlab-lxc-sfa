@@ -39,7 +39,7 @@ class Alchemy:
             except:
                 pass
         self.engine=None
-        raise Exception,"Could not connect to database %s as %s with psycopg2"%(dbname,config.SFA_DB_USER)
+        raise Exception("Could not connect to database %s as %s with psycopg2"%(dbname,config.SFA_DB_USER))
 
 
     # expects boolean True: debug is ON or False: debug is OFF

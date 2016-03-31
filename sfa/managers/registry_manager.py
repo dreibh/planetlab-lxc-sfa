@@ -625,7 +625,7 @@ class RegistryManager:
         for command in all_commands:
             (status, output) = commands.getstatusoutput(command)
             if status:
-                raise Exception, output
+                raise Exception(output)
 
         for filename in [key_filename, gid_filename]:
             os.unlink(filename)

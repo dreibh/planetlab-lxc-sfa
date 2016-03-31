@@ -668,7 +668,7 @@ class NitosDriver (Driver):
     # xxx this code is quite old and has not run for ages
     # it is obviously totally broken and needs a rewrite
     def get_ticket (self, slice_urn, slice_hrn, creds, rspec_string, options):
-        raise SfaNotImplemented,"NitosDriver.get_ticket needs a rewrite"
+        raise SfaNotImplemented("NitosDriver.get_ticket needs a rewrite")
 # please keep this code for future reference
 #        slices = PlSlices(self)
 #        peer = slices.get_peer(slice_hrn)

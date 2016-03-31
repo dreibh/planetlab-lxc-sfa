@@ -90,11 +90,11 @@ def test_passphrase(string, passphrase):
 def convert_public_key(key):
     keyconvert_path = "/usr/bin/keyconvert.py"
     if not os.path.isfile(keyconvert_path):
-        raise IOError, "Could not find keyconvert in %s" % keyconvert_path
+        raise IOError("Could not find keyconvert in %s" % keyconvert_path)
 
     # we can only convert rsa keys
     if "ssh-dss" in key:
-        raise Exception, "keyconvert: dss keys are not supported"
+        raise Exception("keyconvert: dss keys are not supported")
 
     (ssh_f, ssh_fn) = tempfile.mkstemp()
     ssl_fn = tempfile.mktemp()
@@ -108,7 +108,7 @@ def convert_public_key(key):
     # that it can be expected to see why it failed.
     # TODO: for production, cleanup the temporary files
     if not os.path.exists(ssl_fn):
-        raise Exception, "keyconvert: generated certificate not found. keyconvert may have failed."
+        raise Exception("keyconvert: generated certificate not found. keyconvert may have failed.")
 
     k = Keypair()
     try:
@@ -570,7 +570,7 @@ class Certificate:
 
         if self.isCA != None:
             # Can't double set properties
-            raise Exception, "Cannot set basicConstraints CA:?? more than once. Was %s, trying to set as %s" % (self.isCA, val)
+            raise Exception("Cannot set basicConstraints CA:?? more than once. Was %s, trying to set as %s" % (self.isCA, val))
 
         self.isCA = val
         if val:

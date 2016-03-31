@@ -27,7 +27,7 @@ class ManagerWrapper:
             # that's what happens when there's something wrong with the db
             # or any bad stuff of that kind at startup time
             logger.log_exc("Failed to create a manager, startup sequence is broken")
-            raise SfaAPIError,"Argument to ManagerWrapper must be a module or class"
+            raise SfaAPIError("Argument to ManagerWrapper must be a module or class")
         self.interface = interface
         
     def __getattr__(self, method):

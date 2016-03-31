@@ -30,7 +30,7 @@ class Ofelia(RSpecVersion):
 
     # Network 
     def get_networks(self):
-        raise Exception, "Not implemented"
+        raise Exception("Not implemented")
         network_elems = self.xml.xpath('//network')
         networks = [network_elem.get_instance(fields=['name', 'slice']) for \
                     network_elem in network_elems]
@@ -38,7 +38,7 @@ class Ofelia(RSpecVersion):
 
 
     def add_network(self, network):
-        raise Exception, "Not implemented"
+        raise Exception("Not implemented")
         network_tags = self.xml.xpath('//network[@name="%s"]' % network)
         if not network_tags:
             network_tag = self.xml.add_element('network', name=network)

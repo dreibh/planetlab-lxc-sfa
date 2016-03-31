@@ -89,7 +89,7 @@ class PlShell:
             if name in PlShell.direct_calls: actual_name=name
             if name in PlShell.alias_calls: actual_name=PlShell.alias_calls[name]
             if not actual_name:
-                raise Exception, "Illegal method call %s for PL driver"%(name)
+                raise Exception("Illegal method call %s for PL driver"%(name))
             result=getattr(self.proxy, actual_name)(self.plauth, *args, **kwds)
             logger.debug('PlShell %s (%s) returned ... '%(name,actual_name))
             return result

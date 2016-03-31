@@ -30,7 +30,7 @@ class FdShell:
     def __getattr__(self, name):
         def func(*args, **kwds):
             if name not in FdShell.direct_calls:
-                raise Exception, "Illegal method call %s for FEDERICA driver"%(name)
+                raise Exception("Illegal method call %s for FEDERICA driver"%(name))
             logger.info("Issuing %s args=%s kwds=%s to federica"%\
                             (name,args,kwds))
 #            result=getattr(self.proxy, "AggregateManager.%s"%name)(credential, *args, **kwds)
