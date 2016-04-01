@@ -55,7 +55,7 @@ class Describe(Method):
         self.api.logger.debug("ListResources: sfatables on chain %s"%chain_name)
         desc['geni_rspec'] = run_sfatables(chain_name, '', origin_hrn, desc['geni_rspec']) 
  
-        if options.has_key('geni_compressed') and options['geni_compressed'] == True:
+        if 'geni_compressed' in options and options['geni_compressed'] == True:
             desc['geni_rspec'] = zlib.compress(desc['geni_rspec']).encode('base64')
 
         return desc  

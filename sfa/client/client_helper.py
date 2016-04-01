@@ -41,7 +41,7 @@ def sfa_users_arg (records, slice_record):
         extra_fields = list ( set(pl_fields).union(set(nitos_fields)))
         # try to fill all these in
         for field in extra_fields:
-            if record.has_key(field): user[field]=record[field]
+            if field in record: user[field]=record[field]
         users.append(user)
 
     return users

@@ -43,7 +43,7 @@ class pydepgraphdot:
         # normalise our input data
         for k,d in p.items():
             for v in d.keys():
-                if not p.has_key(v):
+                if v not in p:
                     p[v] = {}
                     
         f = self.get_output_file()                    

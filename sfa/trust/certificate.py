@@ -641,7 +641,7 @@ class Certificate:
     def set_data(self, str, field='subjectAltName'):
         # pyOpenSSL only allows us to add extensions, so if we try to set the
         # same extension more than once, it will not work
-        if self.data.has_key(field):
+        if field in self.data:
             raise Exception("Cannot set {} more than once".format(field))
         self.data[field] = str
         self.add_extension(field, 0, str)
@@ -650,7 +650,7 @@ class Certificate:
     # Return the data string that was previously set with set_data
 
     def get_data(self, field='subjectAltName'):
-        if self.data.has_key(field):
+        if field in self.data:
             return self.data[field]
 
         try:

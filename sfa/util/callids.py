@@ -44,7 +44,7 @@ class _call_ids_impl (dict):
             logger.warning("_call_ids_impl.should_handle_call_id: could not acquire lock")
             return False
         # we're good to go
-        if self.has_key(call_id):
+        if call_id in self:
             self._purge()
             self._lock.release()
             return True

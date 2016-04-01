@@ -214,7 +214,7 @@ class PGv2(RSpecVersion):
             if not node['component_name']:
                 # this node element is part of a lease
                 continue
-            if not node.has_key('sliver') or not node['sliver']:
+            if 'sliver' not in node or not node['sliver']:
                 node['sliver'] = {'name': 'plab-vserver'}
                 main_nodes.append(node)
         self.add_nodes(main_nodes)

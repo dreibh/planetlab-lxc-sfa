@@ -190,7 +190,7 @@ class WSDLGen:
             in_el.setAttribute("name", method + "_in")
 
             for service_name in function.interfaces:
-                if (self.services.has_key(service_name)):
+                if (service_name in self.services):
                     if (not method in self.services[service_name]):
                         self.services[service_name].append(method)
                 else:

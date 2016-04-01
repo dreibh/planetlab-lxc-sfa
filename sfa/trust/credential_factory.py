@@ -69,7 +69,7 @@ class CredentialFactory:
         # Try to treat the file as JSON, getting the cred_type from the struct
         try:
             credO = json.loads(credString, encoding='ascii')
-            if credO.has_key('geni_value') and credO.has_key('geni_type'):
+            if 'geni_value' in credO and 'geni_type' in credO:
                 cred_type = credO['geni_type']
                 credString = credO['geni_value']
         except Exception as e:

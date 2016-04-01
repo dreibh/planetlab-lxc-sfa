@@ -136,7 +136,7 @@ class XmlrpcApi:
             interface = xmlrpc_client
             self.protocol = 'xmlrpc'
             (args, method) = xmlrpc_client.loads(data)
-            if method_map.has_key(method):
+            if method in method_map:
                 method = method_map[method]
             methodresponse = True
             

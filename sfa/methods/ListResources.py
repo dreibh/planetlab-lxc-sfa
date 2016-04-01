@@ -50,7 +50,7 @@ class ListResources(Method):
         self.api.logger.debug("ListResources: sfatables on chain %s"%chain_name)
         filtered_rspec = run_sfatables(chain_name, '', origin_hrn, rspec) 
  
-        if options.has_key('geni_compressed') and options['geni_compressed'] == True:
+        if 'geni_compressed' in options and options['geni_compressed'] == True:
             filtered_rspec = zlib.compress(filtered_rspec).encode('base64')
 
         return filtered_rspec  

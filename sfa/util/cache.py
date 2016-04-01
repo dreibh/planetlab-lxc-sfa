@@ -75,7 +75,7 @@ class Cache:
    
     def add(self, key, value, ttl = DEFAULT_CACHE_TTL):
         with self.lock:
-            if self.cache.has_key(key):
+            if key in self.cache:
                 self.cache[key].set_data(value, ttl=ttl)
             else:
                 self.cache[key] = CacheData(value, ttl)

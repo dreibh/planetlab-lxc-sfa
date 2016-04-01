@@ -41,7 +41,7 @@ def get_tc_rate(s):
     if m is None:
         return -1
     suffix = m.group(2).lower()
-    if suffixes.has_key(suffix):
+    if suffix in suffixes:
         return int(float(m.group(1)) * suffixes[suffix])
     else:
         return -1
