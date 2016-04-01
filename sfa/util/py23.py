@@ -15,6 +15,11 @@ except:
     from xmlrpc import client as xmlrpc_client
 
 try:
+    import httplib as http_client
+except:
+    from http import client as http_client
+    
+try:
     import ConfigParser
 except:
     import configparser as ConfigParser

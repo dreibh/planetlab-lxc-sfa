@@ -5,9 +5,8 @@ import ssl
 try:    turn_off_server_verify = { 'context' : ssl._create_unverified_context() } 
 except: turn_off_server_verify = {}
 
-from httplib import HTTPS, HTTPSConnection
-
 from sfa.util.py23 import xmlrpc_client
+from sfa.util.py23 import http_client
 
 try:
     from sfa.util.sfalogging import logger
@@ -50,9 +49,9 @@ class XMLRPCTransport(xmlrpc_client.Transport):
         # create a HTTPS connection object from a host descriptor
         # host may be a string, or a (host, x509-dict) tuple
         host, extra_headers, x509 = self.get_host_info(host)
-        conn = HTTPSConnection(host, None, key_file = self.key_file,
-                               cert_file = self.cert_file,
-                               **turn_off_server_verify)
+        conn = http_client.HTTPSConnection(host, None, key_file = self.key_file,
+                                           cert_file = self.cert_file,
+                                           **turn_off_server_verify)
 
         # Some logic to deal with timeouts. It appears that some (or all) versions
         # of python don't set the timeout after the socket is created. We'll do it
