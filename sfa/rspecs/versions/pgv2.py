@@ -8,6 +8,7 @@ from sfa.rspecs.elements.versions.pgv2Node import PGv2Node
 from sfa.rspecs.elements.versions.pgv2SliverType import PGv2SliverType
 from sfa.rspecs.elements.versions.pgv2Lease import PGv2Lease
 from sfa.util.sfalogging import logger
+from sfa.util.py23 import StringType
 
 class PGv2(RSpecVersion):
     type = 'ProtoGENI'
@@ -204,7 +205,7 @@ class PGv2(RSpecVersion):
         """
         from sfa.rspecs.rspec import RSpec
         # just copy over all the child elements under the root element
-        if isinstance(in_rspec, basestring):
+        if isinstance(in_rspec, StringType):
             in_rspec = RSpec(in_rspec)
 
         nodes = in_rspec.version.get_nodes()

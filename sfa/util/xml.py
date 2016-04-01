@@ -164,7 +164,7 @@ class XML:
         self.namespaces = namespaces
         self.default_namespace = None
         self.schema = None
-        if isinstance(xml, basestring):
+        if isinstance(xml, StringType):
             self.parse_xml(xml)
         if isinstance(xml, XmlElement):
             self.root = xml
@@ -227,7 +227,7 @@ class XML:
                     if isinstance(val, dict):
                         child_element = etree.SubElement(element, key)
                         self.parse_dict(val, key, child_element)
-                    elif isinstance(val, basestring):
+                    elif isinstance(val, StringType):
                         child_element = etree.SubElement(element, key).text = val
 
             elif isinstance(value, int):
