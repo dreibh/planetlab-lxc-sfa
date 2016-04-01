@@ -21,7 +21,7 @@ class RSpecVersion:
             'version': self.version,
             'schema': self.schema,
             'namespace': self.namespace,
-            'extensions': self.extensions.values()
+            'extensions': list(self.extensions.values()),
         }
 
     def __str__(self):
