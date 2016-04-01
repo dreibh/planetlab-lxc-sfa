@@ -85,10 +85,10 @@ class XMLRPCServerProxy(xmlrpc_client.ServerProxy):
         self.url = url
         xmlrpc_client.ServerProxy.__init__(self, url, transport, allow_none=allow_none,
                                            verbose=verbose,
-                                       **turn_off_server_verify)
+                                           **turn_off_server_verify)
 
     def __getattr__(self, attr):
-        logger.debug ("xml-rpc %s method:%s" % (self.url, attr))
+        logger.debug("xml-rpc %s method:%s" % (self.url, attr))
         return xmlrpc_client.ServerProxy.__getattr__(self, attr)
 
 ########## the object on which we can send methods that get sent over xmlrpc
