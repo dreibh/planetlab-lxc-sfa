@@ -224,6 +224,8 @@ BINS =	./config/sfa-config-tty ./config/gen-sfa-cm-config.py \
 
 synclib: synccheck
 	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/lib\*/python2.\*/site-packages/
+synclib3: synccheck
+	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/lib\*/python3.\*/site-packages/
 synclibdeb: synccheck
 	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/share/pyshared/
 syncmigrations:
