@@ -108,9 +108,9 @@ class Cache:
         return self.__str()    
 
     def save_to_file(self, filename):
-        f = open(filename, 'w')
+        f = open(filename, 'wb')
         pickle.dump(self.cache, f)
 
     def load_from_file(self, filename):
-        f = open(filename, 'r')
+        f = open(filename, 'rb')
         self.cache = pickle.load(f)
