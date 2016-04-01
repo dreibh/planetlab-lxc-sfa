@@ -1,2 +1,0 @@
-include xmlbuild/docs *.rst
-include . LICENSE
