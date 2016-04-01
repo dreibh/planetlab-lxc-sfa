@@ -1776,7 +1776,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             filename = os.path.join( self.options.sfi_dir,
                                       "{}.{}_for_{}.{}.cred"\
                                       .format(hrn, htype, delegatee_hrn, delegatee_type))
-            with file(filename, 'w') as f:
+            with open(filename, 'w') as f:
                 f.write(delegated_credential)
             self.logger.debug("(Over)wrote {}".format(filename))
             hrn_delegated_credentials.append((hrn, htype, delegated_credential, filename, ))

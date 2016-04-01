@@ -306,15 +306,12 @@ class SfaClientBootstrap:
 #        return Credential(filename=self.my_credential()).save_to_string()
 # but in order to make it simpler to other implementations/languages..
     def plain_read(self, filename):
-        infile = file(filename, "r")
-        result = infile.read()
-        infile.close()
-        return result
+        with open(filename) as infile:
+            return infile.read()
 
     def plain_write(self, filename, contents):
-        outfile = file(filename, "w")
-        result = outfile.write(contents)
-        outfile.close()
+        with open(filename, "w") as outfile:
+            outfile.write(contents)
 
     def assert_filename(self, filename, kind):
         if not os.path.isfile(filename):
@@ -337,7 +334,7 @@ class SfaClientBootstrap:
         def wrap(f):
             def wrapped(self, *args, **kw):
                 filename = filename_method(self, *args, **kw)
-                if os.path.isfile( filename ):
+                if os.path.isfile(filename):
                     if not validate_method:
                         return filename
                     elif validate_method(self, filename): 

@@ -164,7 +164,7 @@ def main ():
                                  logger=sfi_logger)
 
     for filename in args.credential_files:
-        with file(filename) as f:
+        with open(filename) as f:
             result=uploader.upload (f.read(),filename)
             sfi_logger.info('... result=%s'%result)
 

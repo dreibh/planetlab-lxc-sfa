@@ -51,7 +51,7 @@ class VersionCache:
 
     def load (self):
         try:
-            infile=file(self.filename,'r')
+            infile=open(self.filename,'r')
             self.url2version=pickle.load(infile)
             infile.close()
         except:
@@ -61,7 +61,7 @@ class VersionCache:
 
     def save (self):
         try:
-            outfile=file(self.filename,'w')
+            outfile=open(self.filename,'w')
             pickle.dump(self.url2version,outfile)
             outfile.close()
         except:

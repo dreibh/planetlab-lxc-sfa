@@ -50,7 +50,7 @@ class policy_server(object):
         self.sock.bind(('', port))
         self.sock.listen(5)
     def read_policy(self, path):
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             policy = f.read(10001)
             if len(policy) > 10000:
                 raise exceptions.RuntimeError('File probably too large to be a policy file',

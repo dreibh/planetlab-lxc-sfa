@@ -299,7 +299,8 @@ class Credential(object):
             if string:                
                 str = string
             elif filename:
-                str = file(filename).read()
+                with open(filename) as infile:
+                    str = infile.read()
                 
             # if this is a legacy credential, write error and bail out
             if isinstance (str, StringType) and str.strip().startswith("-----"):

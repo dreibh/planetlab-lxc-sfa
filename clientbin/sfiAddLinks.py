@@ -21,15 +21,15 @@ if not command.opts.linkfile:
     sys.exit(1)
     
 if command.opts.infile:
-    infile=file(command.opts.infile)
+    infile = open(command.opts.infile)
 else:
-    infile=sys.stdin
+    infile = sys.stdin
 if command.opts.outfile:
-    outfile=file(command.opts.outfile,"w")
+    outfile = open(command.opts.outfile, "w")
 else:
-    outfile=sys.stdout
+    outfile = sys.stdout
 ad_rspec = RSpec(infile)
-links = file(command.opts.linkfile).read().split('\n')
+links = open(command.opts.linkfile).read().split('\n')
 link_tuples = map(lambda x: tuple(x.split()), links)
 
 version_manager = VersionManager()

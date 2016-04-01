@@ -21,15 +21,15 @@ if not command.opts.nodefile:
     sys.exit(1)
     
 if command.opts.infile:
-    infile=file(command.opts.infile)
+    infile = open(command.opts.infile)
 else:
-    infile=sys.stdin
+    infile = sys.stdin
 if command.opts.outfile:
-    outfile=file(command.opts.outfile,"w")
+    outfile = open(command.opts.outfile,"w")
 else:
-    outfile=sys.stdout
+    outfile = sys.stdout
 ad_rspec = RSpec(infile)
-nodes = file(command.opts.nodefile).read().split()
+nodes = open(command.opts.nodefile).read().split()
 version_manager = VersionManager()
 try:
     type = ad_rspec.version.type
