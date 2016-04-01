@@ -32,7 +32,7 @@ class Iotlabv1(RSpecVersion):
         'flack': "http://www.protogeni.net/resources/rspec/ext/flack/1",
         'planetlab': "http://www.planet-lab.org/resources/sfa/ext/planetlab/1",
     }
-    namespaces = dict(extensions.items() + [('default', namespace)])
+    namespaces = dict(list(extensions.items()) + [('default', namespace)])
     elements = []
 
     # Network

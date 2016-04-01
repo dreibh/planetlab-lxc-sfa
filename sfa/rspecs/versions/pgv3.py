@@ -11,7 +11,7 @@ class GENIv3(PGv2):
         'planetlab': "http://www.planet-lab.org/resources/sfa/ext/planetlab/1",
         'plos': "http://www.planet-lab.org/resources/sfa/ext/plos/1",
     }
-    namespaces = dict(extensions.items() + [('default', namespace)])
+    namespaces = dict(list(extensions.items()) + [('default', namespace)])
     elements = []
 
 

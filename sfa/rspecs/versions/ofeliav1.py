@@ -24,7 +24,7 @@ class Ofelia(RSpecVersion):
     schema = 'https://github.com/fp7-ofelia/ocf/blob/ocf.rspecs/openflow/schemas/ad.xsd'
     namespace = 'openflow'
     extensions = {}
-    namespaces = dict(extensions.items() + [('default', namespace)])
+    namespaces = dict(list(extensions.items()) + [('default', namespace)])
     #template = '<RSpec type="%s"></RSpec>' % type
     template = '<rspec></rspec>'
 

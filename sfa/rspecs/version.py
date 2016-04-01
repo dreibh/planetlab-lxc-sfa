@@ -8,7 +8,7 @@ class RSpecVersion:
     schema = None
     namespace = None
     extensions = {}
-    namespaces = dict(extensions.items() + [('default', namespace)])
+    namespaces = dict(list(extensions.items()) + [('default', namespace)])
     elements = []
     enabled = False
 
