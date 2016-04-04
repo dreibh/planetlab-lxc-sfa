@@ -43,9 +43,9 @@ import tempfile
 import base64
 from tempfile import mkstemp
 
-from OpenSSL import crypto
-import M2Crypto
-from M2Crypto import X509
+import OpenSSL
+# M2Crypto is imported on the fly to minimize crashes
+#import M2Crypto
 
 from sfa.util.faults import CertExpired, CertMissingParent, CertNotSignedByParent
 from sfa.util.sfalogging import logger
@@ -82,7 +82,7 @@ def set_passphrase(passphrase):
 
 def test_passphrase(string, passphrase):
     try:
-        crypto.load_privatekey(crypto.FILETYPE_PEM, string, (lambda x: passphrase))
+        OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, string, (lambda x: passphrase))
         return True
     except:
         return False
@@ -152,8 +152,8 @@ class Keypair:
     # Create a RSA public/private key pair and store it inside the keypair object
 
     def create(self):
-        self.key = crypto.PKey()
-        self.key.generate_key(crypto.TYPE_RSA, 2048)
+        self.key = OpenSSL.crypto.PKey()
+        self.key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
 
     ##
     # Save the private key to a file
@@ -175,19 +175,21 @@ class Keypair:
     # Load the private key from a string. Implicitly the private key includes the public key.
 
     def load_from_string(self, string):
+        import M2Crypto
         if glo_passphrase_callback:
-            self.key = crypto.load_privatekey(
-                crypto.FILETYPE_PEM, string, functools.partial(glo_passphrase_callback, self, string))
+            self.key = OpenSSL.crypto.load_privatekey(
+                OpenSSL.crypto.FILETYPE_PEM, string, functools.partial(glo_passphrase_callback, self, string))
             self.m2key = M2Crypto.EVP.load_key_string(
                 string, functools.partial(glo_passphrase_callback, self, string))
         else:
-            self.key = crypto.load_privatekey(crypto.FILETYPE_PEM, string)
+            self.key = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, string)
             self.m2key = M2Crypto.EVP.load_key_string(string)
 
     ##
     #  Load the public key from a string. No private key is loaded.
 
     def load_pubkey_from_file(self, filename):
+        import M2Crypto
         # load the m2 public key
         m2rsakey = M2Crypto.RSA.load_pub_key(filename)
         self.m2key = M2Crypto.EVP.PKey()
@@ -213,7 +215,7 @@ class Keypair:
 
         # convert the m2 x509 cert to a pyopenssl x509
         m2pem = m2x509.as_pem()
-        pyx509 = crypto.load_certificate(crypto.FILETYPE_PEM, m2pem)
+        pyx509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, m2pem)
 
         # get the pyopenssl pkey from the pyopenssl x509
         self.key = pyx509.get_pubkey()
@@ -233,12 +235,13 @@ class Keypair:
     # Return the private key in PEM format.
 
     def as_pem(self):
-        return crypto.dump_privatekey(crypto.FILETYPE_PEM, self.key)
+        return OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, self.key)
 
     ##
     # Return an M2Crypto key object
 
     def get_m2_pubkey(self):
+        import M2Crypto
         if not self.m2key:
             self.m2key = M2Crypto.EVP.load_key_string(self.as_pem())
         return self.m2key
@@ -269,6 +272,7 @@ class Keypair:
         return base64.b64encode(k.sign_final())
 
     def verify_string(self, data, sig):
+        import M2Crypto
         k = self.get_m2_pubkey()
         k.verify_init()
         k.verify_update(data)
@@ -349,7 +353,7 @@ class Certificate:
     # Create a blank X509 certificate and store it in this object.
 
     def create(self, lifeDays=1825):
-        self.x509 = crypto.X509()
+        self.x509 = OpenSSL.crypto.X509()
         # FIXME: Use different serial #s
         self.x509.set_serial_number(3)
         self.x509.gmtime_adj_notBefore(0) # 0 means now
@@ -398,7 +402,7 @@ class Certificate:
         else:
             parts = string.split(Certificate.separator, 1)
 
-        self.x509 = crypto.load_certificate(crypto.FILETYPE_PEM, parts[0])
+        self.x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, parts[0])
 
         if self.x509 is None:
             logger.warn("Loaded from string but cert is None: {}".format(string))
@@ -427,7 +431,7 @@ class Certificate:
         if self.x509 is None:
             logger.warn("None cert in certificate.save_to_string")
             return ""
-        string = crypto.dump_certificate(crypto.FILETYPE_PEM, self.x509)
+        string = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, self.x509)
         if save_parents and self.parent:
             string = string + self.parent.save_to_string(save_parents)
         return string
@@ -467,7 +471,7 @@ class Certificate:
             # it's a mistake to use subject and cert params at the same time
             assert(not cert)
             if isinstance(subject, dict) or isinstance(subject, str):
-                req = crypto.X509Req()
+                req = OpenSSL.crypto.X509Req()
                 reqSubject = req.get_subject()
                 if isinstance(subject, dict):
                     for key in reqSubject.keys():
@@ -494,7 +498,7 @@ class Certificate:
     # Set the subject name of the certificate
 
     def set_subject(self, name):
-        req = crypto.X509Req()
+        req = OpenSSL.crypto.X509Req()
         subj = req.get_subject()
         if isinstance(name, dict):
             for key in name.keys():
@@ -553,7 +557,8 @@ class Certificate:
     # It is returned in the form of a Keypair object.
 
     def get_pubkey(self):
-        m2x509 = X509.load_cert_string(self.save_to_string())
+        import M2Crypto
+        m2x509 = M2Crypto.X509.load_cert_string(self.save_to_string())
         pkey = Keypair()
         pkey.key = self.x509.get_pubkey()
         pkey.m2key = m2x509.get_pubkey()
@@ -591,6 +596,7 @@ class Certificate:
     # @param value string containing value of the extension
 
     def add_extension(self, name, critical, value):
+        import M2Crypto
         oldExtVal = None
         try:
             oldExtVal = self.get_extension(name)
@@ -610,7 +616,7 @@ class Certificate:
 #        elif oldExtVal:
 #            raise "Cannot add extension {} which had val {} with new val {}".format(name, oldExtVal, value)
 
-        ext = crypto.X509Extension(name, critical, value)
+        ext = OpenSSL.crypto.X509Extension(name, critical, value)
         self.x509.add_extensions([ext])
 
     ##
@@ -618,6 +624,7 @@ class Certificate:
 
     def get_extension(self, name):
 
+        import M2Crypto
         if name is None:
             return None
 
@@ -625,7 +632,7 @@ class Certificate:
         if certstr is None or certstr == "":
             return None
         # pyOpenSSL does not have a way to get extensions
-        m2x509 = X509.load_cert_string(certstr)
+        m2x509 = M2Crypto.X509.load_cert_string(certstr)
         if m2x509 is None:
             logger.warn("No cert loaded in get_extension")
             return None
@@ -680,8 +687,9 @@ class Certificate:
     #     did not sign the certificate, then an exception will be thrown.
 
     def verify(self, pubkey):
+        import M2Crypto
         # pyOpenSSL does not have a way to verify signatures
-        m2x509 = X509.load_cert_string(self.save_to_string())
+        m2x509 = M2Crypto.X509.load_cert_string(self.save_to_string())
         m2pubkey = pubkey.get_m2_pubkey()
         # verify it
         # verify returns -1 or 0 on failure depending on how serious the
@@ -821,9 +829,10 @@ class Certificate:
 
     ### more introspection
     def get_extensions(self):
+        import M2Crypto
         # pyOpenSSL does not have a way to get extensions
         triples = []
-        m2x509 = X509.load_cert_string(self.save_to_string())
+        m2x509 = M2Crypto.X509.load_cert_string(self.save_to_string())
         nb_extensions = m2x509.get_ext_count()
         logger.debug("X509 had {} extensions".format(nb_extensions))
         for i in range(nb_extensions):
