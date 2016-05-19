@@ -579,12 +579,16 @@ class Credential(object):
             f = filep 
         else:
             f = open(filename, "w")
+        if isinstance(self.xml, bytes):
+            self.xml = self.xml.decode()
         f.write(self.xml)
         f.close()
 
     def save_to_string(self, save_parents=True):
         if not self.xml:
             self.encode()
+        if isinstance(self.xml, bytes):
+            self.xml = self.xml.decode()
         return self.xml
 
     def get_refid(self):

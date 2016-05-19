@@ -432,6 +432,8 @@ class Certificate:
             logger.warn("None cert in certificate.save_to_string")
             return ""
         string = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, self.x509)
+        if isinstance(string, bytes):
+            string = string.decode()
         if save_parents and self.parent:
             string = string + self.parent.save_to_string(save_parents)
         return string
@@ -446,6 +448,8 @@ class Certificate:
             f = filep
         else:
             f = open(filename, 'w')
+        if isinstance(string, bytes):
+            string = string.decode()
         f.write(string)
         f.close()
         self.filename = filename
