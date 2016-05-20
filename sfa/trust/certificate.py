@@ -47,6 +47,8 @@ import OpenSSL
 # M2Crypto is imported on the fly to minimize crashes
 #import M2Crypto
 
+from sfa.util.py23 import PY3
+
 from sfa.util.faults import CertExpired, CertMissingParent, CertNotSignedByParent
 from sfa.util.sfalogging import logger
 
@@ -432,7 +434,7 @@ class Certificate:
             logger.warn("None cert in certificate.save_to_string")
             return ""
         string = OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, self.x509)
-        if isinstance(string, bytes):
+        if PY3 and isinstance(string, bytes):
             string = string.decode()
         if save_parents and self.parent:
             string = string + self.parent.save_to_string(save_parents)
@@ -448,7 +450,7 @@ class Certificate:
             f = filep
         else:
             f = open(filename, 'w')
-        if isinstance(string, bytes):
+        if PY3 and isinstance(string, bytes):
             string = string.decode()
         f.write(string)
         f.close()

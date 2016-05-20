@@ -34,8 +34,7 @@ import datetime
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 
-from sfa.util.py23 import StringType
-from sfa.util.py23 import StringIO
+from sfa.util.py23 import PY3, StringType, StringIO
 
 HAVELXML = False
 try:
@@ -579,7 +578,7 @@ class Credential(object):
             f = filep 
         else:
             f = open(filename, "w")
-        if isinstance(self.xml, bytes):
+        if PY3 and isinstance(self.xml, bytes):
             self.xml = self.xml.decode()
         f.write(self.xml)
         f.close()
@@ -587,7 +586,7 @@ class Credential(object):
     def save_to_string(self, save_parents=True):
         if not self.xml:
             self.encode()
-        if isinstance(self.xml, bytes):
+        if PY3 and isinstance(self.xml, bytes):
             self.xml = self.xml.decode()
         return self.xml
 
