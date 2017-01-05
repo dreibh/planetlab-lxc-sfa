@@ -1060,9 +1060,9 @@ class Credential(object):
             message = "Delegated credential {} not signed by parent {}'s caller"\
                 .format(self.pretty_cred(), parent_cred.pretty_cred())
             logger.error(message)
-            logger.error("compare1 parent {}".format(parent_cred.get_gid_caller().pretty_cred()))
+            logger.error("compare1 parent {}".format(parent_cred.get_gid_caller().pretty_cert()))
             logger.error("compare1 parent details {}".format(parent_cred.get_gid_caller().save_to_string()))
-            logger.error("compare2 self {}".format(self.get_signature().get_issuer_gid().pretty_cred()))
+            logger.error("compare2 self {}".format(self.get_signature().get_issuer_gid().pretty_crert()))
             logger.error("compare2 self details {}".format(self.get_signature().get_issuer_gid().save_to_string()))
             raise CredentialNotVerifiable(message)
                 
