@@ -16,8 +16,8 @@ import shutil
 from distutils.core import setup
 
 # check for the correct version of python
-major,minor = sys.version_info [0:2]
-if (major,minor) != (2,7):
+major, minor = sys.version_info [0:2]
+if (major, minor) != (2, 7):
     print ("Sorry, the SFA package is currently available only with python-2.7")
     exit(1)
 
@@ -67,7 +67,8 @@ packages = [
     ]
 
 initscripts = [ 'sfa' ]
-if not os.path.isfile('/etc/redhat-release'): initscripts.append('functions.sfa')
+if not os.path.isfile('/etc/redhat-release'):
+    initscripts.append('functions.sfa')
 
 data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml',
                               'config/registries.xml',

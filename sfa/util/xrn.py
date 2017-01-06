@@ -214,7 +214,7 @@ class Xrn:
             raise SfaAPIError("Xrn.urn_to_hrn")
 
         parts = Xrn.urn_split(self.urn)
-        type=parts.pop(2)
+        type = parts.pop(2)
         # Remove the authority name (e.g. '.sa')
         if type == 'authority':
             name = parts.pop()
