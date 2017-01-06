@@ -1106,29 +1106,36 @@ class Credential(object):
         return getattr(self,'filename',None)
 
     def actual_caller_hrn(self):
-        """a helper method used by some API calls like e.g. Allocate
+        """
+        a helper method used by some API calls like e.g. Allocate
         to try and find out who really is the original caller
 
         This admittedly is a bit of a hack, please USE IN LAST RESORT
 
         This code uses a heuristic to identify a delegated credential
 
-        A first known restriction if for traffic that gets through a slice manager
-        in this case the hrn reported is the one from the last SM in the call graph
-        which is not at all what is meant here"""
+        A first known restriction if for traffic that gets through a
+        slice manager in this case the hrn reported is the one from
+        the last SM in the call graph which is not at all what is
+        meant here
+        """
 
-        caller_hrn = self.get_gid_caller().get_hrn()
-        issuer_hrn = self.get_signature().get_issuer_gid().get_hrn()
+        caller_hrn, caller_type = urn_to_hrn(self.get_gid_caller().get_urn())
+        issuer_hrn, issuer_type = urn_to_hrn(self.get_signature().get_issuer_gid().get_urn())
         subject_hrn = self.get_gid_object().get_hrn()
+        # if the caller is a user and the issuer is not
+        # it's probably the former
+        if caller_type == "user" and issuer_type != "user":
+            actual_caller_hrn = caller_hrn
         # if we find that the caller_hrn is an immediate descendant of the issuer, then
         # this seems to be a 'regular' credential
-        if caller_hrn.startswith(issuer_hrn):
-            actual_caller_hrn=caller_hrn
+        elif caller_hrn.startswith(issuer_hrn):
+            actual_caller_hrn = caller_hrn
         # else this looks like a delegated credential, and the real caller is the issuer
         else:
-            actual_caller_hrn=issuer_hrn
+            actual_caller_hrn = issuer_hrn
         logger.info("actual_caller_hrn: caller_hrn={}, issuer_hrn={}, returning {}"
-                    .format(caller_hrn,issuer_hrn,actual_caller_hrn))
+                    .format(caller_hrn, issuer_hrn, actual_caller_hrn))
         return actual_caller_hrn
 
     ##
