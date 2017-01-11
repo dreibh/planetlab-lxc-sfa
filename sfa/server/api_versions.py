@@ -2,13 +2,14 @@ import os
 from sfa.util.xml import XML
 from sfa.util.config import Config
 
+
 class ApiVersions:
 
     required_fields = ['version', 'url']
-    
+
     template = """<api_versions>
 <api_version name="" version="" url="" />
-</api_versions>""" 
+</api_versions>"""
 
     def __init__(self, string=None, filename=None, create=False):
         self.xml = None
@@ -22,9 +23,10 @@ class ApiVersions:
         else:
             # load the default file
             c = Config()
-            api_versions_file = os.path.sep.join([c.config_path, 'api_versions.xml'])
+            api_versions_file = os.path.sep.join(
+                [c.config_path, 'api_versions.xml'])
             self.load(api_versions_file)
-        
+
     def create(self):
         self.xml = XML(string=ApiVersions.template)
 
@@ -42,6 +44,4 @@ class ApiVersions:
                        set(ApiVersions.required_fields).issubset(item.keys()) and \
                        item['version'] != '' and item['url'] != '':
                         versions[str(item['version'])] = item['url']
-        return versions  
-                
-           
+        return versions

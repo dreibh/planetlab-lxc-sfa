@@ -1,5 +1,6 @@
 from sfa.rspecs.elements.element import Element
 
+
 class Interface(Element):
     fields = ['component_id',
               'role',
@@ -8,5 +9,5 @@ class Interface(Element):
               'bwlimit',
               'node_id',
               'interface_id',
-              'mac_address',  
-    ]    
+              'mac_address',
+              ]

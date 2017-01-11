@@ -25,9 +25,10 @@
 # TODO: Can all three servers use the same "registry" certificate?
 ##
 
-### xxx todo not in the config yet
-component_port=12346
-import os, os.path
+# xxx todo not in the config yet
+component_port = 12346
+import os
+import os.path
 import traceback
 import sys
 from optparse import OptionParser
@@ -46,19 +47,25 @@ from sfa.server.aggregate import Aggregates
 from sfa.client.return_value import ReturnValue
 
 # after http://www.erlenstar.demon.co.uk/unix/faq_2.html
+
+
 def daemon():
     """Daemonize the current process."""
-    if os.fork() != 0: os._exit(0)
+    if os.fork() != 0:
+        os._exit(0)
     os.setsid()
-    if os.fork() != 0: os._exit(0)
+    if os.fork() != 0:
+        os._exit(0)
     os.umask(0)
     devnull = os.open(os.devnull, os.O_RDWR)
     os.dup2(devnull, 0)
-    # xxx fixme - this is just to make sure that nothing gets stupidly lost - should use devnull
-    logdir='/var/log/httpd'
+    # xxx fixme - this is just to make sure that nothing gets stupidly lost -
+    # should use devnull
+    logdir = '/var/log/httpd'
     # when installed in standalone we might not have httpd installed
-    if not os.path.isdir(logdir): os.mkdir('/var/log/httpd')
-    crashlog = os.open('%s/sfa_access_log'%logdir, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
+    if not os.path.isdir(logdir):
+        os.mkdir('/var/log/httpd')
+    crashlog = os.open('%s/sfa_access_log' % logdir, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
     os.dup2(crashlog, 1)
     os.dup2(crashlog, 2)
 
@@ -72,7 +79,7 @@ def install_peer_certs(server_key_file, server_cert_file):
     # There should be a gid file in /etc/sfa/trusted_roots for every
     # peer registry found in in the registries.xml config file. If there
     # are any missing gids, request a new one from the peer registry.
-    api = SfaApi(key_file = server_key_file, cert_file = server_cert_file)
+    api = SfaApi(key_file=server_key_file, cert_file=server_cert_file)
     registries = Registries()
     aggregates = Aggregates()
     interfaces = dict(registries.items() + aggregates.items())
@@ -83,23 +90,27 @@ def install_peer_certs(server_key_file, server_cert_file):
     #gids = self.get_peer_gids(new_hrns) + gids_current
     peer_gids = []
     if not new_hrns:
-        return 
+        return
 
     trusted_certs_dir = api.config.get_trustedroots_dir()
     for new_hrn in new_hrns:
-        if not new_hrn: continue
+        if not new_hrn:
+            continue
         # the gid for this interface should already be installed
-        if new_hrn == api.config.SFA_INTERFACE_HRN: continue
+        if new_hrn == api.config.SFA_INTERFACE_HRN:
+            continue
         try:
             # get gid from the registry
             url = interfaces[new_hrn].get_url()
-            interface = interfaces[new_hrn].server_proxy(server_key_file, server_cert_file, timeout=30)
+            interface = interfaces[new_hrn].server_proxy(
+                server_key_file, server_cert_file, timeout=30)
             # skip non sfa aggregates
             server_version = api.get_cached_server_version(interface)
             if 'sfa' not in server_version:
-                logger.info("get_trusted_certs: skipping non sfa aggregate: %s" % new_hrn)
+                logger.info(
+                    "get_trusted_certs: skipping non sfa aggregate: %s" % new_hrn)
                 continue
-      
+
             trusted_gids = ReturnValue.get_value(interface.get_trusted_certs())
             if trusted_gids:
                 # the gid we want should be the first one in the list,
@@ -112,17 +123,19 @@ def install_peer_certs(server_key_file, server_cert_file):
                     gid = GID(string=trusted_gid)
                     peer_gids.append(gid)
                     if gid.get_hrn() == new_hrn:
-                        gid_filename = os.path.join(trusted_certs_dir, '%s.gid' % new_hrn)
+                        gid_filename = os.path.join(
+                            trusted_certs_dir, '%s.gid' % new_hrn)
                         gid.save_to_file(gid_filename, save_parents=True)
                         message = "installed trusted cert for %s" % new_hrn
                     # log the message
                     api.logger.info(message)
         except:
             message = "interface: %s\tunable to install trusted gid for %s" % \
-                        (api.interface, new_hrn)
+                (api.interface, new_hrn)
             api.logger.log_exc(message)
     # doesnt matter witch one
     update_cert_records(peer_gids)
+
 
 def update_cert_records(gids):
     """
@@ -144,42 +157,43 @@ def update_cert_records(gids):
     # remove old records
     for record in records_found:
         if record.hrn not in hrns_expected and \
-            record.hrn != self.api.config.SFA_INTERFACE_HRN:
+                record.hrn != self.api.config.SFA_INTERFACE_HRN:
             dbsession.delete(record)
 
-    # TODO: store urn in the db so we do this in 1 query 
+    # TODO: store urn in the db so we do this in 1 query
     for gid in gids:
         hrn, type = gid.get_hrn(), gid.get_type()
-        record = dbsession.query(RegRecord).filter_by(hrn=hrn, type=type,pointer=-1).first()
+        record = dbsession.query(RegRecord).filter_by(
+            hrn=hrn, type=type, pointer=-1).first()
         if not record:
-            record = RegRecord (dict= {'type':type,
-                                       'hrn': hrn, 
-                                       'authority': get_authority(hrn),
-                                       'gid': gid.save_to_string(save_parents=True),
-                                       })
+            record = RegRecord(dict={'type': type,
+                                     'hrn': hrn,
+                                     'authority': get_authority(hrn),
+                                     'gid': gid.save_to_string(save_parents=True),
+                                     })
             dbsession.add(record)
     dbsession.commit()
-        
+
+
 def main():
     # Generate command line parser
     parser = OptionParser(usage="sfa-start.py [options]")
     parser.add_option("-r", "--registry", dest="registry", action="store_true",
-         help="run registry server", default=False)
+                      help="run registry server", default=False)
     parser.add_option("-s", "--slicemgr", dest="sm", action="store_true",
-         help="run slice manager", default=False)
+                      help="run slice manager", default=False)
     parser.add_option("-a", "--aggregate", dest="am", action="store_true",
-         help="run aggregate manager", default=False)
+                      help="run aggregate manager", default=False)
     parser.add_option("-c", "--component", dest="cm", action="store_true",
-         help="run component server", default=False)
+                      help="run component server", default=False)
     parser.add_option("-t", "--trusted-certs", dest="trusted_certs", action="store_true",
-         help="refresh trusted certs", default=False)
+                      help="refresh trusted certs", default=False)
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
-         help="Run as daemon.", default=False)
+                      help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
-    
+
     config = Config()
     logger.setLevelFromOptVerbose(config.SFA_API_LOGLEVEL)
-    
 
     # ge the server's key and cert
     hierarchy = Hierarchy()
@@ -190,20 +204,23 @@ def main():
     # ensure interface cert is present in trusted roots dir
     trusted_roots = TrustedRoots(config.get_trustedroots_dir())
     trusted_roots.add_gid(GID(filename=server_cert_file))
-    if (options.daemon):  daemon()
-    
+    if (options.daemon):
+        daemon()
+
     if options.trusted_certs:
-        install_peer_certs(server_key_file, server_cert_file)   
-    
+        install_peer_certs(server_key_file, server_cert_file)
+
     # start registry server
     if (options.registry):
         from sfa.server.registry import Registry
-        r = Registry("", config.SFA_REGISTRY_PORT, server_key_file, server_cert_file)
+        r = Registry("", config.SFA_REGISTRY_PORT,
+                     server_key_file, server_cert_file)
         r.start()
 
     if (options.am):
         from sfa.server.aggregate import Aggregate
-        a = Aggregate("", config.SFA_AGGREGATE_PORT, server_key_file, server_cert_file)
+        a = Aggregate("", config.SFA_AGGREGATE_PORT,
+                      server_key_file, server_cert_file)
         a.start()
 
     # start slice manager
@@ -214,7 +231,8 @@ def main():
 
     if (options.cm):
         from sfa.server.component import Component
-        c = Component("", config.component_port, server_key_file, server_cert_file)
+        c = Component("", config.component_port,
+                      server_key_file, server_cert_file)
 #        c = Component("", config.SFA_COMPONENT_PORT, server_key_file, server_cert_file)
         c.start()
 

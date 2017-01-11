@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from sfa.util.sfalogging import logger
 
+
 class RSpecVersion:
     type = None
     content_type = None
@@ -26,5 +27,3 @@ class RSpecVersion:
 
     def __str__(self):
         return "%s %s" % (self.type, self.version)
-    
-

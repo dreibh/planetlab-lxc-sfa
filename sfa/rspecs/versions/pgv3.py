@@ -1,5 +1,6 @@
 from sfa.rspecs.versions.pgv2 import PGv2
 
+
 class GENIv3(PGv2):
     type = 'GENI'
     content_type = 'ad'
@@ -41,11 +42,13 @@ class GENIv3Ad(GENIv3):
     </opstate:rspec_opstate>
 </rspec>"""
 
+
 class GENIv3Request(GENIv3):
     enabled = True
     content_type = 'request'
     schema = 'http://www.geni.net/resources/rspec/3/request.xsd'
     template = '<rspec type="request" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.geni.net/resources/rspec/3" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/request.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
+
 
 class GENIv2Manifest(GENIv3):
     enabled = True

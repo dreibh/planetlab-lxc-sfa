@@ -1,27 +1,28 @@
 from sfa.util.sfalogging import logger
 from sfa.util.py23 import xmlrpc_client
 
+
 class FdShell:
     """
     A simple xmlrpc shell to a federica API server
     This class can receive the XMLRPC calls to the federica testbed
     For safety this is limited to a set of hard-coded calls
     """
-    
-    direct_calls = [ 'listAvailableResources',
-                     'listSliceResources',
-                     'createSlice',
-                     'deleteSlice',
-                     'getRSpecVersion',
-                     'listSlices',
+
+    direct_calls = ['listAvailableResources',
+                    'listSliceResources',
+                    'createSlice',
+                    'deleteSlice',
+                    'getRSpecVersion',
+                    'listSlices',
                     ]
 
-    def __init__ ( self, config ) :
-        url=config.SFA_FEDERICA_URL
+    def __init__(self, config):
+        url = config.SFA_FEDERICA_URL
         # xxx not sure if java xmlrpc has support for None
         # self.proxy = xmlrpc_client.ServerProxy(url, verbose = False, allow_none = True)
         # xxx turn on verbosity
-        self.proxy = xmlrpc_client.ServerProxy(url, verbose = True)
+        self.proxy = xmlrpc_client.ServerProxy(url, verbose=True)
 
     # xxx get credentials from the config ?
     # right now basic auth data goes into the URL
@@ -29,12 +30,13 @@ class FdShell:
     def __getattr__(self, name):
         def func(*args, **kwds):
             if name not in FdShell.direct_calls:
-                raise Exception("Illegal method call %s for FEDERICA driver"%(name))
-            logger.info("Issuing %s args=%s kwds=%s to federica"%\
-                            (name,args,kwds))
+                raise Exception(
+                    "Illegal method call %s for FEDERICA driver" % (name))
+            logger.info("Issuing %s args=%s kwds=%s to federica" %
+                        (name, args, kwds))
 #            result=getattr(self.proxy, "AggregateManager.%s"%name)(credential, *args, **kwds)
-            result=getattr(self.proxy, "AggregateManager.%s"%name)(*args, **kwds)
-            logger.debug('FdShell %s (%s) returned ... '%(name,name))
+            result = getattr(self.proxy, "AggregateManager.%s" %
+                             name)(*args, **kwds)
+            logger.debug('FdShell %s (%s) returned ... ' % (name, name))
             return result
         return func
-

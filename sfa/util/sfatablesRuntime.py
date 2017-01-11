@@ -11,10 +11,11 @@ try:
         information that sfatables is requesting. But for now, we just return
         the basic information needed in a dict.
         """
-        base_context = {'sfa':{'user':{'hrn':user_hrn}, 'slice':{'hrn':slice_hrn}}}
+        base_context = {
+            'sfa': {'user': {'hrn': user_hrn}, 'slice': {'hrn': slice_hrn}}}
         return base_context
 
-    def run_sfatables(chain, hrn, origin_hrn, rspec, context_callback = None ):
+    def run_sfatables(chain, hrn, origin_hrn, rspec, context_callback=None):
         """
         Run the rspec through sfatables
         @param chain Name of rule chain
@@ -22,7 +23,7 @@ try:
         @param origin_hrn Original caller's hrn
         @param rspec Incoming rspec
         @param context_callback Callback used to generate the request context  
-        
+
         @return rspec
         """
         if not context_callback:
@@ -40,8 +41,10 @@ try:
         return newrspec
 
 except:
-    
+
     from sfa.util.sfalogging import logger
-    def run_sfatables (_,__,___, rspec, ____=None):
-        logger.warning("Cannot import sfatables.runtime, please install package sfa-sfatables")
+
+    def run_sfatables(_, __, ___, rspec, ____=None):
+        logger.warning(
+            "Cannot import sfatables.runtime, please install package sfa-sfatables")
         return rspec

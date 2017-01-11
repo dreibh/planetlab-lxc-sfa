@@ -9,26 +9,28 @@ from sfa.util.py23 import StringIO
 from sfa.util.py23 import ConfigParser
 
 default_config = \
+    """
 """
-"""
+
 
 def isbool(v):
     return v.lower() in ("true", "false")
 
+
 def str2bool(v):
-    return v.lower() in ("true", "1")             
+    return v.lower() in ("true", "1")
+
 
 class Config:
-  
+
     def __init__(self, config_file='/etc/sfa/sfa_config'):
         self._files = []
         self.config_path = os.path.dirname(config_file)
-        self.config = ConfigParser.ConfigParser()  
+        self.config = ConfigParser.ConfigParser()
         self.filename = config_file
         if not os.path.isfile(self.filename):
             self.create(self.filename)
         self.load(self.filename)
-        
 
     def _header(self):
         header = """
@@ -47,7 +49,6 @@ DO NOT EDIT. This file was automatically generated at
         configfile = open(filename, 'w')
         configfile.write(default_config)
         configfile.close()
-        
 
     def load(self, filename):
         if filename:
@@ -75,7 +76,7 @@ DO NOT EDIT. This file was automatically generated at
                 if not value:
                     value = ""
                 self.config.set(section_name, option_name, value)
-         
+
     def load_shell(self, filename):
         f = open(filename, 'r')
         for line in f:
@@ -86,13 +87,13 @@ DO NOT EDIT. This file was automatically generated at
                 if len(parts) < 2:
                     continue
                 option = parts[0]
-                value = parts[1].replace('"', '').replace("'","")
+                value = parts[1].replace('"', '').replace("'", "")
                 section, var = self.locate_varname(option, strict=False)
                 if section and var:
                     self.set(section, var, value)
             except:
                 pass
-        f.close()               
+        f.close()
 
     def locate_varname(self, varname, strict=True):
         varname = varname.lower()
@@ -105,7 +106,7 @@ DO NOT EDIT. This file was automatically generated at
                 var_name = varname.replace(section_name, "")[1:]
         if strict and not self.config.has_option(section_name, var_name):
             raise ConfigParser.NoOptionError(var_name, section_name)
-        return (section_name, var_name)             
+        return (section_name, var_name)
 
     def set_attributes(self):
         sections = self.config.sections()
@@ -116,7 +117,7 @@ DO NOT EDIT. This file was automatically generated at
                 if isbool(value):
                     value = str2bool(value)
                 elif value.isdigit():
-                    value = int(value)    
+                    value = int(value)
                 setattr(self, name, value)
                 setattr(self, name.upper(), value)
 
@@ -150,7 +151,7 @@ DO NOT EDIT. This file was automatically generated at
             }
             variable_list = {}
             for item in self.config.items(section):
-                var_name = item[0] 
+                var_name = item[0]
                 name = "%s_%s" % (section, var_name)
                 value = item[1]
                 if isbool(value):
@@ -168,7 +169,7 @@ DO NOT EDIT. This file was automatically generated at
                 }
                 variable_list[name] = variable
             variables[section] = (category, variable_list)
-        return variables      
+        return variables
 
     def verify(self, config1, config2, validate_method):
         return True
@@ -180,7 +181,7 @@ DO NOT EDIT. This file was automatically generated at
     def is_xml(config_file):
         try:
             x = Xml(config_file)
-            return True     
+            return True
         except:
             return False
 
@@ -193,23 +194,23 @@ DO NOT EDIT. This file was automatically generated at
         except ConfigParser.MissingSectionHeaderError:
             return False
 
-
     def dump(self, sections=None):
-        if sections is None: sections=[]
+        if sections is None:
+            sections = []
         sys.stdout.write(output_python())
 
-    def output_python(self, encoding = "utf-8"):
+    def output_python(self, encoding="utf-8"):
         buf = codecs.lookup(encoding)[3](StringIO())
-        buf.writelines(["# " + line + os.linesep for line in self._header()]) 
-        
+        buf.writelines(["# " + line + os.linesep for line in self._header()])
+
         for section in self.sections():
             buf.write("[%s]%s" % (section, os.linesep))
-            for (name,value) in self.items(section):
-                buf.write("%s=%s%s" % (name,value,os.linesep))
+            for (name, value) in self.items(section):
+                buf.write("%s=%s%s" % (name, value, os.linesep))
             buf.write(os.linesep)
         return buf.getvalue()
-                
-    def output_shell(self, show_comments = True, encoding = "utf-8"):
+
+    def output_shell(self, show_comments=True, encoding="utf-8"):
         """
         Return variables as a shell script.
         """
@@ -218,18 +219,18 @@ DO NOT EDIT. This file was automatically generated at
         buf.writelines(["# " + line + os.linesep for line in self._header()])
 
         for section in self.sections():
-            for (name,value) in self.items(section):
+            for (name, value) in self.items(section):
                 # bash does not have the concept of NULL
                 if value:
                     option = "%s_%s" % (section.upper(), name.upper())
                     if isbool(value):
                         value = str(str2bool(value))
                     elif not value.isdigit():
-                        value = '"%s"' % value  
+                        value = '"%s"' % value
                     buf.write(option + "=" + value + os.linesep)
-        return buf.getvalue()        
+        return buf.getvalue()
 
-    def output_php(selfi, encoding = "utf-8"):
+    def output_php(selfi, encoding="utf-8"):
         """
         Return variables as a PHP script.
         """
@@ -239,7 +240,7 @@ DO NOT EDIT. This file was automatically generated at
         buf.writelines(["// " + line + os.linesep for line in self._header()])
 
         for section in self.sections():
-            for (name,value) in self.items(section):
+            for (name, value) in self.items(section):
                 option = "%s_%s" % (section, name)
                 buf.write(os.linesep)
                 buf.write("// " + option + os.linesep)
@@ -249,9 +250,9 @@ DO NOT EDIT. This file was automatically generated at
 
         buf.write("?>" + os.linesep)
 
-        return buf.getvalue()    
+        return buf.getvalue()
 
-    def output_xml(self, encoding = "utf-8"):
+    def output_xml(self, encoding="utf-8"):
         pass
 
     def output_variables(self, encoding="utf-8"):
@@ -261,39 +262,38 @@ DO NOT EDIT. This file was automatically generated at
 
         buf = codecs.lookup(encoding)[3](StringIO())
         for section in self.sections():
-            for (name,value) in self.items(section):
-                option = "%s_%s" % (section,name) 
+            for (name, value) in self.items(section):
+                option = "%s_%s" % (section, name)
                 buf.write(option + os.linesep)
 
         return buf.getvalue()
-        pass 
-        
+        pass
+
     def write(self, filename=None):
         if not filename:
             filename = self.filename
-        configfile = open(filename, 'w') 
+        configfile = open(filename, 'w')
         self.config.write(configfile)
-    
+
     def save(self, filename=None):
         self.write(filename)
-
 
     def get_trustedroots_dir(self):
         return self.config_path + os.sep + 'trusted_roots'
 
     def get_openflow_aggrMgr_info(self):
         aggr_mgr_ip = 'localhost'
-        if (hasattr(self,'openflow_aggregate_manager_ip')):
+        if (hasattr(self, 'openflow_aggregate_manager_ip')):
             aggr_mgr_ip = self.OPENFLOW_AGGREGATE_MANAGER_IP
 
         aggr_mgr_port = 2603
-        if (hasattr(self,'openflow_aggregate_manager_port')):
+        if (hasattr(self, 'openflow_aggregate_manager_port')):
             aggr_mgr_port = self.OPENFLOW_AGGREGATE_MANAGER_PORT
 
-        return (aggr_mgr_ip,aggr_mgr_port)
+        return (aggr_mgr_ip, aggr_mgr_port)
 
     def get_interface_hrn(self):
-        if (hasattr(self,'sfa_interface_hrn')):
+        if (hasattr(self, 'sfa_interface_hrn')):
             return self.SFA_INTERFACE_HRN
         else:
             return "plc"
@@ -306,7 +306,6 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         filename = sys.argv[1]
         config = Config(filename)
-    else:    
+    else:
         config = Config()
     config.dump()
-    

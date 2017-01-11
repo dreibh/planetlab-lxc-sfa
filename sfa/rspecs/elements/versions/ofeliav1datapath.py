@@ -22,21 +22,23 @@ class Ofeliav1Datapath:
 
     @staticmethod
     def get_datapaths(xml, filter=None):
-        if filter is None: filter = {}
+        if filter is None:
+            filter = {}
         #xpath = '//datapath%s | //default:datapath%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
-        xpath = '//datapath%s | //openflow:datapath%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
+        xpath = '//datapath%s | //openflow:datapath%s' % (
+            XpathFilter.xpath(filter), XpathFilter.xpath(filter))
         datapath_elems = xml.xpath(xpath)
         return Ofeliav1Datapath.get_datapath_objs(datapath_elems)
 
     @staticmethod
     def get_datapath_objs(datapath_elems):
-        datapaths = []    
+        datapaths = []
         for datapath_elem in datapath_elems:
             datapath = Datapath(datapath_elem.attrib, datapath_elem)
             # get ports
-            datapath['ports'] =  Ofeliav1Port.get_ports(datapath_elem)
+            datapath['ports'] = Ofeliav1Port.get_ports(datapath_elem)
             datapaths.append(datapath)
-        return datapaths            
+        return datapaths
 
 #    @staticmethod
 #    def add_nodes(xml, nodes, rspec_content_type=None):
@@ -49,14 +51,14 @@ class Ofeliav1Datapath:
 #        else:
 #            network_elem = xml
 #
-#        node_elems = []       
+#        node_elems = []
 #        for node in nodes:
 #            node_fields = ['component_manager_id', 'component_id', 'boot_state']
 #            node_elem = network_elem.add_instance('node', node, node_fields)
 #            node_elems.append(node_elem)
 #
 #            # determine network hrn
-#            network_hrn = None 
+#            network_hrn = None
 #            if 'component_manager_id' in node and node['component_manager_id']:
 #                network_hrn = Xrn(node['component_manager_id']).get_hrn()
 #
@@ -90,8 +92,8 @@ class Ofeliav1Datapath:
 #
 #            if isinstance(node.get('interfaces'), list):
 #                for interface in node.get('interfaces', []):
-#                    node_elem.add_instance('interface', interface, ['component_id', 'client_id', 'ipv4']) 
-#            
+#                    node_elem.add_instance('interface', interface, ['component_id', 'client_id', 'ipv4'])
+#
 #            #if 'bw_unallocated' in node and node['bw_unallocated']:
 #            #    bw_unallocated = etree.SubElement(node_elem, 'bw_unallocated', units='kbps').text = str(int(node['bw_unallocated'])/1000)
 #
@@ -115,9 +117,9 @@ class Ofeliav1Datapath:
 #
 #            # add sliver tag in Request Rspec
 #            if rspec_content_type == "request":
-#                node_elem.add_instance('sliver', '', []) 
+#                node_elem.add_instance('sliver', '', [])
 #
-#    @staticmethod 
+#    @staticmethod
 #    def add_slivers(xml, slivers):
 #        component_ids = []
 #        for sliver in slivers:
@@ -128,7 +130,7 @@ class Ofeliav1Datapath:
 #            elif 'component_id' in sliver and sliver['component_id']:
 #                filter['component_id'] = '*%s*' % sliver['component_id']
 #            if not filter:
-#                continue 
+#                continue
 #            nodes = SFAv1Node.get_nodes(xml, filter)
 #            if not nodes:
 #                continue
@@ -143,7 +145,7 @@ class Ofeliav1Datapath:
 #                slivers = SFAv1Sliver.get_slivers(node.element)
 #                for sliver in slivers:
 #                    node.element.remove(sliver.element)
-#        
+#
 #    @staticmethod
 #    def get_nodes(xml, filter={}):
 #        xpath = '//node%s | //default:node%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
@@ -152,7 +154,7 @@ class Ofeliav1Datapath:
 #
 #    @staticmethod
 #    def get_nodes_with_slivers(xml):
-#        xpath = '//node[count(sliver)>0] | //default:node[count(default:sliver)>0]' 
+#        xpath = '//node[count(sliver)>0] | //default:node[count(default:sliver)>0]'
 #        node_elems = xml.xpath(xpath)
 #        return SFAv1Node.get_node_objs(node_elems)
 #

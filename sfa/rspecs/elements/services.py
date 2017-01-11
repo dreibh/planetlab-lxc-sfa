@@ -1,5 +1,6 @@
 from sfa.rspecs.elements.element import Element
 
+
 class ServicesElement(Element):
 
     fields = [
@@ -8,4 +9,3 @@ class ServicesElement(Element):
         'login',
         'services_user',
     ]
-

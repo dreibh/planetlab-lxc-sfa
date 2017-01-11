@@ -12,24 +12,23 @@ except:
     has_nova = False
 
 
-
 class Shell:
     """
     A simple native shell to a nova backend. 
     This class can receive all nova calls to the underlying testbed
     """
-    
-    # dont care about limiting calls yet 
+
+    # dont care about limiting calls yet
     direct_calls = []
     alias_calls = {}
 
-
-    # use the 'capability' auth mechanism for higher performance when the PLC db is local    
-    def __init__ ( self, config=None) :
+    # use the 'capability' auth mechanism for higher performance when the PLC
+    # db is local
+    def __init__(self, config=None):
         if not config:
             config = Config()
         if has_nova:
-            # instantiate managers 
+            # instantiate managers
             self.auth_manager = KeystoneClient(config=config)
             self.image_manager = GlanceClient(config=config)
             self.nova_manager = NovaClient(config=config)

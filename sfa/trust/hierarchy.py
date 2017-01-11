@@ -26,6 +26,7 @@ from sfa.trust.sfaticket import SfaTicket
 # The AuthInfo class contains the information for an authority. This information
 # includes the GID, private key, and database connection information.
 
+
 class AuthInfo:
     hrn = None
     gid_object = None
@@ -64,14 +65,14 @@ class AuthInfo:
 
     def get_gid_object(self):
         if not self.gid_object:
-            self.gid_object = GID(filename = self.gid_filename)
+            self.gid_object = GID(filename=self.gid_filename)
         return self.gid_object
 
     ##
     # Get the private key in the form of a Keypair object
 
     def get_pkey_object(self):
-        return Keypair(filename = self.privkey_filename)
+        return Keypair(filename=self.privkey_filename)
 
     ##
     # Replace the GID with a new one. The file specified by gid_filename is
@@ -92,13 +93,14 @@ class AuthInfo:
 # contains the GID and pkey files for that authority (as well as
 # subdirectories for each sub-authority)
 
+
 class Hierarchy:
     ##
     # Create the hierarchy object.
     #
     # @param basedir the base directory to store the hierarchy in
 
-    def __init__(self, basedir = None):
+    def __init__(self, basedir=None):
         self.config = Config()
         if not basedir:
             basedir = os.path.join(self.config.SFA_DATA_DIR, "authorities")
@@ -119,8 +121,8 @@ class Hierarchy:
         parent_hrn = get_authority(hrn)
         directory = os.path.join(self.basedir, hrn.replace(".", "/"))
 
-        gid_filename = os.path.join(directory, leaf+".gid")
-        privkey_filename = os.path.join(directory, leaf+".pkey")
+        gid_filename = os.path.join(directory, leaf + ".gid")
+        privkey_filename = os.path.join(directory, leaf + ".pkey")
 
         return (directory, gid_filename, privkey_filename)
 
@@ -131,30 +133,30 @@ class Hierarchy:
     # @param the human readable name of the authority to check
 
     def auth_exists(self, xrn):
-        hrn, type = urn_to_hrn(xrn) 
+        hrn, type = urn_to_hrn(xrn)
         (directory, gid_filename, privkey_filename) = \
             self.get_auth_filenames(hrn)
-        
-        return os.path.exists(gid_filename) and os.path.exists(privkey_filename) 
+
+        return os.path.exists(gid_filename) and os.path.exists(privkey_filename)
 
     ##
     # Create an authority. A private key for the authority and the associated
     # GID are created and signed by the parent authority.
     #
-    # @param xrn the human readable name of the authority to create (urn will be converted to hrn) 
+    # @param xrn the human readable name of the authority to create (urn will be converted to hrn)
     # @param create_parents if true, also create the parents if they do not exist
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(str(xrn))
-        logger.debug("Hierarchy: creating authority: %s"% hrn)
+        logger.debug("Hierarchy: creating authority: %s" % hrn)
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
         parent_urn = hrn_to_urn(parent_hrn, 'authority')
         if (parent_hrn) and (not self.auth_exists(parent_urn)) and (create_parents):
             self.create_auth(parent_urn, create_parents)
-        (directory, gid_filename, privkey_filename,) = \
-            self.get_auth_filenames(hrn)
+        directory, gid_filename, privkey_filename = self.get_auth_filenames(
+            hrn)
 
         # create the directory to hold the files
         try:
@@ -166,10 +168,11 @@ class Hierarchy:
                 pass
 
         if os.path.exists(privkey_filename):
-            logger.debug("using existing key %r for authority %r"%(privkey_filename,hrn))
-            pkey = Keypair(filename = privkey_filename)
+            logger.debug("using existing key %r for authority %r"
+                         % (privkey_filename, hrn))
+            pkey = Keypair(filename=privkey_filename)
         else:
-            pkey = Keypair(create = True)
+            pkey = Keypair(create=True)
             pkey.save_to_file(privkey_filename)
 
         gid = self.create_gid(xrn, create_uuid(), pkey)
@@ -182,13 +185,12 @@ class Hierarchy:
         # create the authority if it doesnt alrady exist
         if not self.auth_exists(hrn):
             self.create_auth(hrn, create_parents=True)
-            
-        
+
     def get_interface_auth_info(self, create=True):
         hrn = self.config.SFA_INTERFACE_HRN
         if not self.auth_exists(hrn):
-            if create==True:
-                self.create_top_level_auth(hrn) 
+            if create == True:
+                self.create_top_level_auth(hrn)
             else:
                 raise MissingAuthority(hrn)
         return self.get_auth_info(hrn)
@@ -202,7 +204,8 @@ class Hierarchy:
     def get_auth_info(self, xrn):
         hrn, type = urn_to_hrn(xrn)
         if not self.auth_exists(hrn):
-            logger.warning("Hierarchy: missing authority - xrn=%s, hrn=%s"%(xrn,hrn))
+            logger.warning(
+                "Hierarchy: missing authority - xrn=%s, hrn=%s" % (xrn, hrn))
             raise MissingAuthority(hrn)
 
         (directory, gid_filename, privkey_filename, ) = \
@@ -234,12 +237,12 @@ class Hierarchy:
         parent_hrn = force_parent if force_parent else get_authority(hrn)
         # Using hrn_to_urn() here to make sure the urn is in the right format
         # If xrn was a hrn instead of a urn, then the gid's urn will be
-        # of type None 
+        # of type None
         urn = hrn_to_urn(hrn, type)
         gid = GID(subject=hrn, uuid=uuid, hrn=hrn, urn=urn, email=email)
         # is this a CA cert
         if hrn == self.config.SFA_INTERFACE_HRN or not parent_hrn:
-            # root or sub authority  
+            # root or sub authority
             gid.set_intermediate_ca(True)
         elif type and 'authority' in type:
             # authority type
@@ -257,7 +260,8 @@ class Hierarchy:
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            gid.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
+            gid.set_issuer(parent_auth_info.get_pkey_object(),
+                           parent_auth_info.hrn)
             gid.set_parent(parent_auth_info.get_gid_object())
 
         gid.set_pubkey(pkey)
@@ -282,7 +286,7 @@ class Hierarchy:
 
         # update the gid if we need to
         if gid_is_expired or xrn or uuid or pubkey:
-            
+
             if not xrn:
                 xrn = gid.get_urn()
             if not uuid:
@@ -303,7 +307,7 @@ class Hierarchy:
     # @param authority type of credential to return (authority | sa | ma)
 
     def get_auth_cred(self, xrn, kind="authority"):
-        hrn, type = urn_to_hrn(xrn) 
+        hrn, type = urn_to_hrn(xrn)
         auth_info = self.get_auth_info(hrn)
         gid = auth_info.get_gid_object()
 
@@ -312,19 +316,20 @@ class Hierarchy:
         cred.set_gid_object(gid)
         cred.set_privileges(kind)
         cred.get_privileges().delegate_all_privileges(True)
-        #cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
+        # cred.set_pubkey(auth_info.get_gid_object().get_pubkey())
 
         parent_hrn = get_authority(hrn)
         if not parent_hrn or hrn == self.config.SFA_INTERFACE_HRN:
             # if there is no parent hrn, then it must be self-signed. this
             # is where we terminate the recursion
-            cred.set_issuer_keys(auth_info.get_privkey_filename(), auth_info.get_gid_filename())
+            cred.set_issuer_keys(
+                auth_info.get_privkey_filename(), auth_info.get_gid_filename())
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            cred.set_issuer_keys(parent_auth_info.get_privkey_filename(), parent_auth_info.get_gid_filename())
+            cred.set_issuer_keys(parent_auth_info.get_privkey_filename(
+            ), parent_auth_info.get_gid_filename())
 
-            
             cred.set_parent(self.get_auth_cred(parent_hrn, kind))
 
         cred.encode()
@@ -361,11 +366,11 @@ class Hierarchy:
         else:
             # we need the parent's private key in order to sign this GID
             parent_auth_info = self.get_auth_info(parent_hrn)
-            ticket.set_issuer(parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
+            ticket.set_issuer(
+                parent_auth_info.get_pkey_object(), parent_auth_info.hrn)
             ticket.set_parent(self.get_auth_cred(parent_hrn))
 
         ticket.encode()
         ticket.sign()
 
         return ticket
-

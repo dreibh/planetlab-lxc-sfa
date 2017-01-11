@@ -1,8 +1,9 @@
 from sfa.util.xrn import Xrn
 from sfa.util.xml import XmlElement
 
-from sfa.rspecs.elements.element    import Element
-from sfa.rspecs.elements.port       import Port
+from sfa.rspecs.elements.element import Element
+from sfa.rspecs.elements.port import Port
+
 
 class Ofeliav1Port:
 
@@ -18,14 +19,15 @@ class Ofeliav1Port:
             tags = port.get('tags', [])
             if tags:
                 for tag in tags:
-                    Ofeliav1Port.add_port_attribute(port_elem, tag['tagname'], tag['value'])
+                    Ofeliav1Port.add_port_attribute(
+                        port_elem, tag['tagname'], tag['value'])
 
     @staticmethod
     def add_port_attribute(xml, name, value):
         raise Exception("not implemented yet")
         elem = xml.add_element(name)
         elem.set_text(value)
-    
+
     @staticmethod
     def get_port_attributes(xml):
         attribs = []
@@ -36,19 +38,19 @@ class Ofeliav1Port:
                 instance['name'] = elem.tag
                 instance['value'] = elem.text
                 attribs.append(instance)
-        return attribs 
-                
+        return attribs
+
     @staticmethod
     def get_ports(xml, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         xpath = './openflow:port | ./port'
         port_elems = xml.xpath(xpath)
         ports = []
         for port_elem in port_elems:
-            port = Port(port_elem.attrib,port_elem)
-            #if 'component_id' in xml.attrib:     
+            port = Port(port_elem.attrib, port_elem)
+            # if 'component_id' in xml.attrib:
             #    port['component_id'] = xml.attrib['component_id']
             #port['tags'] = Ofeliav1Port.get_port_attributes(port_elem)
             ports.append(port)
-        return ports           
-
+        return ports

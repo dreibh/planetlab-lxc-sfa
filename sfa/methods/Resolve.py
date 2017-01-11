@@ -5,6 +5,7 @@ from sfa.trust.credential import Credential
 
 from sfa.storage.parameter import Parameter, Mixed
 
+
 class Resolve(Method):
     """
     Resolve a record.
@@ -15,7 +16,7 @@ class Resolve(Method):
     """
 
     interfaces = ['registry']
-    
+
     # should we not accept an optional 'details' argument ?
     accepts = [
         Mixed(Parameter(str, "Human readable name (hrn or urn)"),
@@ -23,29 +24,33 @@ class Resolve(Method):
         Mixed(Parameter(str, "Credential string"),
               Parameter(list, "List of credentials)")),
         Parameter(dict, "options"),
-        ]
+    ]
 
     # xxx used to be [SfaRecord]
     returns = [Parameter(dict, "registry record")]
-    
+
     def call(self, xrns, creds, options=None):
-        if options is None: options={}
-        # use details=False by default, only when explicitly specified do we want 
+        if options is None:
+            options = {}
+        # use details=False by default, only when explicitly specified do we want
         # to mess with the testbed details
-        if 'details' in options: details=options['details']
-        else:                    details=False
+        if 'details' in options:
+            details = options['details']
+        else:
+            details = False
         type = None
         if not isinstance(xrns, list):
             type = Xrn(xrns).get_type()
-            xrns=[xrns]
+            xrns = [xrns]
         hrns = [urn_to_hrn(xrn)[0] for xrn in xrns]
-        #find valid credentials
+        # find valid credentials
         valid_creds = self.api.auth.checkCredentials(creds, 'resolve')
 
-        #log the call
-        origin_hrn = Credential(string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s"%(self.api.interface, origin_hrn, hrns, self.name))
- 
+        # log the call
+        origin_hrn = Credential(
+            string=valid_creds[0]).get_gid_caller().get_hrn()
+        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                             (self.api.interface, origin_hrn, hrns, self.name))
+
         # send the call to the right manager
         return self.api.manager.Resolve(self.api, xrns, type, details=details)
-            

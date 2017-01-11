@@ -7,15 +7,16 @@ import time
 import sys
 
 from sfa.server.sfaserver import SfaServer
- 
+
 # GeniLight client support is optional
 try:
     from egeni.geniLight_client import *
 except ImportError:
-    GeniClientLight = None            
+    GeniClientLight = None
 
 ##
 # Component is a SfaServer that serves component operations.
+
 
 class Component(SfaServer):
     ##
@@ -27,4 +28,5 @@ class Component(SfaServer):
     # @param cert_file certificate filename containing public key (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file):
-        SfaServer.__init__(self, ip, port, key_file, cert_file, interface='component')
+        SfaServer.__init__(self, ip, port, key_file,
+                           cert_file, interface='component')

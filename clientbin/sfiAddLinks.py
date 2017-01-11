@@ -19,7 +19,7 @@ if not command.opts.linkfile:
     print "Missing link list -- exiting"
     command.parser.print_help()
     sys.exit(1)
-    
+
 if command.opts.infile:
     infile = open(command.opts.infile)
 else:
@@ -36,7 +36,8 @@ version_manager = VersionManager()
 try:
     type = ad_rspec.version.type
     version_num = ad_rspec.version.version
-    request_version = version_manager._get_version(type, version_num, 'request')    
+    request_version = version_manager._get_version(
+        type, version_num, 'request')
     request_rspec = RSpec(version=request_version)
     request_rspec.version.merge(ad_rspec)
     request_rspec.version.add_link_requests(link_tuples)

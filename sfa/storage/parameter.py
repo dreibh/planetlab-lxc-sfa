@@ -10,6 +10,7 @@ from sfa.util.faults import SfaAPIError
 
 from sfa.util.py23 import StringType
 
+
 class Parameter:
     """
     Typed value wrapper. Use in accepts and returns to document method
@@ -17,11 +18,11 @@ class Parameter:
     sub-parameters (i.e., dict fields).
     """
 
-    def __init__(self, type, doc = "",
-                 min = None, max = None,
-                 optional = None,
-                 ro = False,
-                 nullok = False):
+    def __init__(self, type, doc="",
+                 min=None, max=None,
+                 optional=None,
+                 ro=False,
+                 nullok=False):
         # Basic type of the parameter. Must be a builtin type
         # that can be marshalled by XML-RPC.
         self.type = type
@@ -51,6 +52,7 @@ class Parameter:
     def __repr__(self):
         return repr(self.type)
 
+
 class Mixed(tuple):
     """
     A list (technically, a tuple) of types. Use in accepts and returns
@@ -74,6 +76,7 @@ def python_type(arg):
         return arg
     else:
         return type(arg)
+
 
 def xmlrpc_type(arg):
     """

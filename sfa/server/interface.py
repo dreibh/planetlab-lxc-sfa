@@ -5,37 +5,42 @@ from sfa.util.xml import XML
 try:
     from egeni.geniLight_client import *
 except ImportError:
-    GeniClientLight = None            
+    GeniClientLight = None
+
 
 class Interface:
     """
     Interface to another SFA service, typically a peer, or the local aggregate
     can retrieve a xmlrpclib.ServerProxy object for issuing calls there
     """
+
     def __init__(self, hrn, addr, port, client_type='sfa'):
         self.hrn = hrn
         self.addr = addr
         self.port = port
         self.client_type = client_type
-  
+
     def get_url(self):
         address_parts = self.addr.split('/')
         address_parts[0] = address_parts[0] + ":" + str(self.port)
-        url =  "http://%s" %  "/".join(address_parts)
+        url = "http://%s" % "/".join(address_parts)
         return url
 
     def server_proxy(self, key_file, cert_file, timeout=30):
-        server = None 
-        if  self.client_type ==  'geniclientlight' and GeniClientLight:
+        server = None
+        if self.client_type == 'geniclientlight' and GeniClientLight:
             # xxx url and self.api are undefined
-            server = GeniClientLight(url, self.api.key_file, self.api.cert_file)
+            server = GeniClientLight(
+                url, self.api.key_file, self.api.cert_file)
         else:
-            server = SfaServerProxy(self.get_url(), key_file, cert_file, timeout) 
- 
-        return server       
+            server = SfaServerProxy(
+                self.get_url(), key_file, cert_file, timeout)
+
+        return server
 ##
 # In is a dictionary of registry connections keyed on the registry
 # hrn
+
 
 class Interfaces(dict):
     """
@@ -46,11 +51,11 @@ class Interfaces(dict):
     # fields that must be specified in the config file
     default_fields = {
         'hrn': '',
-        'addr': '', 
-        'port': '', 
+        'addr': '',
+        'port': '',
     }
 
-    # defined by the class 
+    # defined by the class
     default_dict = {}
 
     def __init__(self, conf_file):
@@ -62,14 +67,15 @@ class Interfaces(dict):
             if isinstance(value, list):
                 for record in value:
                     if isinstance(record, dict) and \
-                      required_fields.issubset(record.keys()):
-                        hrn, address, port = record['hrn'], record['addr'], record['port']
+                            required_fields.issubset(record.keys()):
+                        hrn, address, port = record[
+                            'hrn'], record['addr'], record['port']
                         # sometime this is called at a very early stage with no config loaded
                         # avoid to remember this instance in such a case
                         if not address or not port:
-                            continue     
+                            continue
                         interface = Interface(hrn, address, port)
-                        self[hrn] = interface   
+                        self[hrn] = interface
 
     def server_proxy(self, hrn, key_file, cert_file, timeout=30):
         return self[hrn].server_proxy(key_file, cert_file, timeout)

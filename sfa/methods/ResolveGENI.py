@@ -2,6 +2,7 @@ from sfa.util.method import Method
 
 from sfa.storage.parameter import Parameter
 
+
 class ResolveGENI(Method):
     """
     Lookup a URN and return information about the corresponding object.
@@ -12,7 +13,7 @@ class ResolveGENI(Method):
     accepts = [
         Parameter(str, "URN"),
         Parameter(type([str]), "List of credentials"),
-        ]
+    ]
     returns = Parameter(bool, "Success or Failure")
 
     def call(self, xrn):

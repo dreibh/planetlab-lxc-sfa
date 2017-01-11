@@ -5,6 +5,8 @@ from sfa.rspecs.elements.sliver import Sliver
 
 #from sfa.rspecs.elements.versions.pgv2DiskImage import PGv2DiskImage
 import sys
+
+
 class Iotlabv1Sliver:
 
     @staticmethod
@@ -21,30 +23,35 @@ class Iotlabv1Sliver:
             if sliver.get('client_id'):
                 sliver_elem.set('client_id', sliver['client_id'])
             #images = sliver.get('disk_images')
-            #if images and isinstance(images, list):
+            # if images and isinstance(images, list):
                 #Iotlabv1DiskImage.add_images(sliver_elem, images)
-            Iotlabv1Sliver.add_sliver_attributes(sliver_elem, sliver.get('tags', []))
+            Iotlabv1Sliver.add_sliver_attributes(
+                sliver_elem, sliver.get('tags', []))
 
     @staticmethod
     def add_sliver_attributes(xml, attributes):
         if attributes:
             for attribute in attributes:
                 if attribute['name'] == 'initscript':
-                    xml.add_element('{%s}initscript' % xml.namespaces['planetlab'], name=attribute['value'])
+                    xml.add_element('{%s}initscript' % xml.namespaces[
+                                    'planetlab'], name=attribute['value'])
                 elif tag['tagname'] == 'flack_info':
-                    attrib_elem = xml.add_element('{%s}info' % self.namespaces['flack'])
+                    attrib_elem = xml.add_element(
+                        '{%s}info' % self.namespaces['flack'])
                     attrib_dict = eval(tag['value'])
                     for (key, value) in attrib_dict.items():
                         attrib_elem.set(key, value)
+
     @staticmethod
     def get_slivers(xml, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         xpath = './default:sliver | ./sliver'
 
         sliver_elems = xml.xpath(xpath)
         slivers = []
         for sliver_elem in sliver_elems:
-            sliver = Sliver(sliver_elem.attrib,sliver_elem)
+            sliver = Sliver(sliver_elem.attrib, sliver_elem)
 
             if 'component_id' in xml.attrib:
                 sliver['component_id'] = xml.attrib['component_id']
@@ -52,11 +59,13 @@ class Iotlabv1Sliver:
                 sliver['type'] = sliver_elem.attrib['name']
             #sliver['images'] = Iotlabv1DiskImage.get_images(sliver_elem)
 
-            print("\r\n \r\n SLABV1SLIVER.PY  \t\t\t  get_slivers sliver %s " %( sliver), file=sys.stderr)
+            print("\r\n \r\n SLABV1SLIVER.PY  \t\t\t  get_slivers sliver %s " %
+                  (sliver), file=sys.stderr)
             slivers.append(sliver)
         return slivers
 
     @staticmethod
     def get_sliver_attributes(xml, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         return []

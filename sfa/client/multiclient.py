@@ -6,6 +6,7 @@ import time
 from Queue import Queue
 from sfa.util.sfalogging import logger
 
+
 def ThreadedMethod(callable, results, errors):
     """
     A function decorator that returns a running thread. The thread
@@ -13,20 +14,20 @@ def ThreadedMethod(callable, results, errors):
     results queue
     """
     def wrapper(args, kwds):
-        class ThreadInstance(threading.Thread): 
+        class ThreadInstance(threading.Thread):
+
             def run(self):
                 try:
                     results.put(callable(*args, **kwds))
                 except Exception as e:
                     logger.log_exc('MultiClient: Error in thread: ')
                     errors.put(traceback.format_exc())
-                    
+
         thread = ThreadInstance()
         thread.start()
         return thread
     return wrapper
 
- 
 
 class MultiClient:
     """
@@ -39,7 +40,7 @@ class MultiClient:
         self.errors = Queue()
         self.threads = []
 
-    def run (self, method, *args, **kwds):
+    def run(self, method, *args, **kwds):
         """
         Execute a callable in a separate thread.    
         """
@@ -68,11 +69,11 @@ class MultiClient:
         results = []
         if not lenient:
             errors = self.get_errors()
-            if errors: 
+            if errors:
                 raise Exception(errors[0])
 
         while not self.results.empty():
-            results.append(self.results.get())  
+            results.append(self.results.get())
         return results
 
     def get_errors(self):
@@ -90,24 +91,25 @@ class MultiClient:
         Get the value that should be returuned to the client. If there are errors then the
         first error is returned. If there are no errors, then the first result is returned  
         """
-    
-           
+
+
 if __name__ == '__main__':
 
     def f(name, n, sleep=1):
         nums = []
-        for i in range(n, n+5):
+        for i in range(n, n + 5):
             print("%s: %s" % (name, i))
             nums.append(i)
             time.sleep(sleep)
         return nums
+
     def e(name, n, sleep=1):
         nums = []
-        for i in range(n, n+3) + ['n', 'b']:
+        for i in range(n, n + 3) + ['n', 'b']:
             print("%s: 1 + %s:" % (name, i))
             nums.append(i + 1)
             time.sleep(sleep)
-        return nums      
+        return nums
 
     threads = MultiClient()
     threads.run(f, "Thread1", 10, 2)
@@ -116,7 +118,6 @@ if __name__ == '__main__':
 
     #results = threads.get_results()
     #errors = threads.get_errors()
-    #print "Results:", results
-    #print "Errors:", errors
+    # print "Results:", results
+    # print "Errors:", errors
     results_xlenient = threads.get_results(lenient=False)
-

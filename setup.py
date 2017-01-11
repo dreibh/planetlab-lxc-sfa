@@ -103,25 +103,26 @@ for d in processor_subdirs:
 
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
-    site_packages_path = [ os.path.join(p,'sfa') for p in python_path if p.endswith('site-packages')]
-    site_packages_path += [ os.path.join(p,'sfatables') for p in python_path if p.endswith('site-packages')]
+    site_packages_path = [ os.path.join(p, 'sfa') for p in python_path if p.endswith('site-packages')]
+    site_packages_path += [ os.path.join(p, 'sfatables') for p in python_path if p.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/', '/etc/sfatables'] + site_packages_path
     remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in scripts ]
     remove_files = remove_bins + [ "/etc/init.d/%s"%x for x in initscripts ]
 
     # remove files
-    def feedback (file, msg): print ("removing", file, "...",msg)
+    def feedback (file, msg):
+        print ("removing", file, "...", msg)
     for filepath in remove_files:
         try:
             os.remove(filepath)
-            feedback(filepath,"success")
+            feedback(filepath, "success")
         except: 
-            feedback(filepath,"failed")
+            feedback(filepath, "failed")
     # remove directories
     for directory in remove_dirs:
         try:
             shutil.rmtree(directory)
-            feedback (directory,"success")
+            feedback (directory, "success")
         except: 
             feedback (directory, "failed")
 else:
@@ -142,7 +143,7 @@ else:
         packages         = packages,
         data_files       = data_files,
         version          = version_tag,
-        keywords         = ['federation','testbeds','SFA','SfaWrap'],
+        keywords         = ['federation', 'testbeds', 'SFA', 'SfaWrap'],
         url              = "http://svn.planet-lab.org/wiki/SFATutorial",
         author           = "Thierry Parmentelat, Tony Mack, Scott Baker",
         author_email     = "thierry.parmentelat@inria.fr, tmack@princeton.cs.edu, smbaker@gmail.com",

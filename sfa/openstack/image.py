@@ -3,9 +3,10 @@ from sfa.rspecs.elements.disk_image import DiskImage
 
 
 class Image:
-    
+
     def __init__(self, image=None):
-        if image is None: image={}
+        if image is None:
+            image = {}
         self.id = None
         self.container_format = None
         self.kernel_id = None
@@ -21,22 +22,23 @@ class Image:
 
     def parse_image(self, image):
         if isinstance(image, dict):
-            self.id = image['id'] 
+            self.id = image['id']
             self.name = image['name']
             self.container_format = image['container_format']
-            self.properties = image['properties'] 
+            self.properties = image['properties']
             if 'kernel_id' in self.properties:
                 self.kernel_id = self.properties['kernel_id']
             if 'ramdisk_id' in self.properties:
                 self.ramdisk_id = self.properties['ramdisk_id']
-   
+
     def to_rspec_object(self):
         img = DiskImage()
         img['name'] = self.name
         img['description'] = self.name
         img['os'] = self.name
         img['version'] = self.name
-        return img     
+        return img
+
 
 class ImageManager:
 
@@ -68,7 +70,5 @@ class ImageManager:
             elif name:
                 image = self.driver.shell.nova_manager.images.find(name=name)
         except ImageNotFound:
-                pass
+            pass
         return Image(image)
-
-    

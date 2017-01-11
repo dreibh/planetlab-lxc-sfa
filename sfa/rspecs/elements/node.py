@@ -1,7 +1,8 @@
 from sfa.rspecs.elements.element import Element
- 
+
+
 class NodeElement(Element):
-    
+
     fields = [
         'client_id',
         'component_id',
@@ -9,12 +10,12 @@ class NodeElement(Element):
         'component_manager_id',
         'client_id',
         'sliver_id',
-        'authority_id',    
+        'authority_id',
         'exclusive',
         'location',
         'bw_unallocated',
         'bw_limit',
-        'boot_state',    
+        'boot_state',
         'slivers',
         'hardware_types',
         'disk_images',
@@ -23,5 +24,3 @@ class NodeElement(Element):
         'tags',
         'pl_initscripts',
     ]
-                
-      

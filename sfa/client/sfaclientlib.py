@@ -10,13 +10,14 @@ from __future__ import print_function
 # certificates and automatically retrieve fresh ones when expired
 
 import sys
-import os, os.path
+import os
+import os.path
 import subprocess
 from datetime import datetime
 from sfa.util.xrn import Xrn
 
 import sfa.util.sfalogging
-# importing sfa.utils.faults does pull a lot of stuff 
+# importing sfa.utils.faults does pull a lot of stuff
 # OTOH it's imported from Certificate anyways, so..
 from sfa.util.faults import RecordNotFound
 
@@ -26,13 +27,13 @@ from sfa.client.sfaserverproxy import SfaServerProxy
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.gid import GID
-########## 
+##########
 # a helper class to implement the bootstrapping of cryptoa. material
-# assuming we are starting from scratch on the client side 
+# assuming we are starting from scratch on the client side
 # what's needed to complete a full slice creation cycle
-# (**) prerequisites: 
-#  (*) a local private key 
-#  (*) the corresp. public key in the registry 
+# (**) prerequisites:
+#  (*) a local private key
+#  (*) the corresp. public key in the registry
 # (**) step1: a self-signed certificate
 #      default filename is <hrn>.sscert
 # (**) step2: a user credential
@@ -47,88 +48,91 @@ from sfa.trust.gid import GID
 # From that point on, the GID is used as the SSL certificate
 # and the following can be done
 #
-# (**) retrieve a slice (or authority) credential 
+# (**) retrieve a slice (or authority) credential
 #      obtained at the registry with GetCredential
 #      using the (step2) user-credential as credential
 #      default filename is <hrn>.<type>.cred
-# (**) retrieve a slice (or authority) GID 
+# (**) retrieve a slice (or authority) GID
 #      obtained at the registry with Resolve
 #      using the (step2) user-credential as credential
 #      default filename is <hrn>.<type>.cred
 #
-# (**) additionnally, it might make sense to upgrade a GID file 
+# (**) additionnally, it might make sense to upgrade a GID file
 # into a pkcs12 certificate usable in a browser
 # this bundled format allows for embedding the private key
-# 
+#
 
-########## Implementation notes
+# Implementation notes
 #
 # (*) decorators
 #
-# this implementation is designed as a guideline for 
+# this implementation is designed as a guideline for
 # porting to other languages
 #
-# the decision to go for decorators aims at focusing 
+# the decision to go for decorators aims at focusing
 # on the core of what needs to be done when everything
-# works fine, and to take caching and error management 
+# works fine, and to take caching and error management
 # out of the way
-# 
-# for non-pythonic developers, it should be enough to 
+#
+# for non-pythonic developers, it should be enough to
 # implement the bulk of this code, namely the _produce methods
-# and to add caching and error management by whichever means 
-# is available, including inline 
+# and to add caching and error management by whichever means
+# is available, including inline
 #
 # (*) self-signed certificates
-# 
+#
 # still with other languages in mind, we've tried to keep the
 # dependencies to the rest of the code as low as possible
-# 
+#
 # however this still relies on the sfa.trust.certificate module
 # for the initial generation of a self-signed-certificate that
 # is associated to the user's ssh-key
-# (for user-friendliness, and for smooth operations with planetlab, 
+# (for user-friendliness, and for smooth operations with planetlab,
 # the usage model is to reuse an existing keypair)
-# 
+#
 # there might be a more portable, i.e. less language-dependant way, to
 # implement this step by exec'ing the openssl command.
-# a known successful attempt at this approach that worked 
+# a known successful attempt at this approach that worked
 # for Java is documented below
 # http://nam.ece.upatras.gr/fstoolkit/trac/wiki/JavaSFAClient
 #
 # (*) pkcs12
-# 
+#
 # the implementation of the pkcs12 wrapping, which is a late addition,
 # is done through direct calls to openssl
 #
 ####################
 
-class SfaClientException(Exception): pass
+
+class SfaClientException(Exception):
+    pass
+
 
 class SfaClientBootstrap:
 
     # dir is mandatory but defaults to '.'
-    def __init__(self, user_hrn, registry_url, dir=None, 
+    def __init__(self, user_hrn, registry_url, dir=None,
                  verbose=False, timeout=None, logger=None):
         self.hrn = user_hrn
         self.registry_url = registry_url
         if dir is None:
-            dir="."
+            dir = "."
         self.dir = dir
         self.verbose = verbose
         self.timeout = timeout
         # default for the logger is to use the global sfa logger
-        if logger is None: 
+        if logger is None:
             logger = sfa.util.sfalogging.logger
         self.logger = logger
 
-    ######################################## *_produce methods
-    ### step1
+    # *_produce methods
+    # step1
     # unconditionnally create a self-signed certificate
     def self_signed_cert_produce(self, output):
         self.assert_private_key()
         private_key_filename = self.private_key_filename()
         keypair = Keypair(filename=private_key_filename)
-        self_signed = Certificate(subject = self.hrn)
+        self_signed = Certificate(subject=self.hrn)
         self_signed.set_pubkey(keypair)
         self_signed.set_issuer(keypair, self.hrn)
         self_signed.sign()
@@ -137,7 +141,7 @@ class SfaClientBootstrap:
                           .format(self.hrn, output))
         return output
 
-    ### step2 
+    # step2
     # unconditionnally retrieve my credential (GetSelfCredential)
     # we always use the self-signed-cert as the SSL cert
     def my_credential_produce(self, output):
@@ -149,21 +153,25 @@ class SfaClientBootstrap:
                                         self.private_key_filename(),
                                         certificate_filename)
         try:
-            credential_string = registry_proxy.GetSelfCredential(certificate_string, self.hrn, "user")
+            credential_string = registry_proxy.GetSelfCredential(
+                certificate_string, self.hrn, "user")
         except:
-            # some urns hrns may replace non hierarchy delimiters '.' with an '_' instead of escaping the '.'
-            hrn = Xrn(self.hrn).get_hrn().replace('\.', '_') 
-            credential_string = registry_proxy.GetSelfCredential(certificate_string, hrn, "user")
+            # some urns hrns may replace non hierarchy delimiters '.' with an
+            # '_' instead of escaping the '.'
+            hrn = Xrn(self.hrn).get_hrn().replace('\.', '_')
+            credential_string = registry_proxy.GetSelfCredential(
+                certificate_string, hrn, "user")
         self.plain_write(output, credential_string)
-        self.logger.debug("SfaClientBootstrap: Wrote result of GetSelfCredential in {}".format(output))
+        self.logger.debug(
+            "SfaClientBootstrap: Wrote result of GetSelfCredential in {}".format(output))
         return output
 
-    ### step3
-    # unconditionnally retrieve my GID - use the general form 
+    # step3
+    # unconditionnally retrieve my GID - use the general form
     def my_gid_produce(self, output):
         return self.gid_produce(output, self.hrn, "user")
 
-    ### retrieve any credential (GetCredential) unconditionnal form
+    # retrieve any credential (GetCredential) unconditionnal form
     # we always use the GID as the SSL cert
     def credential_produce(self, output, hrn, type):
         self.assert_my_gid()
@@ -173,9 +181,11 @@ class SfaClientBootstrap:
                                         certificate_filename)
         self.assert_my_credential()
         my_credential_string = self.my_credential_string()
-        credential_string = registry_proxy.GetCredential(my_credential_string, hrn, type)
+        credential_string = registry_proxy.GetCredential(
+            my_credential_string, hrn, type)
         self.plain_write(output, credential_string)
-        self.logger.debug("SfaClientBootstrap: Wrote result of GetCredential in {}".format(output))
+        self.logger.debug(
+            "SfaClientBootstrap: Wrote result of GetCredential in {}".format(output))
         return output
 
     def slice_credential_produce(self, output, hrn):
@@ -184,16 +194,16 @@ class SfaClientBootstrap:
     def authority_credential_produce(self, output, hrn):
         return self.credential_produce(output, hrn, "authority")
 
-    ### retrieve any gid(Resolve) - unconditionnal form
+    # retrieve any gid(Resolve) - unconditionnal form
     # use my GID when available as the SSL cert, otherwise the self-signed
-    def gid_produce(self, output, hrn, type ):
+    def gid_produce(self, output, hrn, type):
         try:
             self.assert_my_gid()
             certificate_filename = self.my_gid_filename()
         except:
             self.assert_self_signed_cert()
             certificate_filename = self.self_signed_cert_filename()
-            
+
         self.assert_private_key()
         registry_proxy = SfaServerProxy(self.registry_url, self.private_key_filename(),
                                         certificate_filename)
@@ -201,24 +211,27 @@ class SfaClientBootstrap:
         records = registry_proxy.Resolve(hrn, credential_string)
         records = [record for record in records if record['type'] == type]
         if not records:
-            raise RecordNotFound("hrn {} ({}) unknown to registry {}".format(hrn, type, self.registry_url))
+            raise RecordNotFound("hrn {} ({}) unknown to registry {}".format(
+                hrn, type, self.registry_url))
         record = records[0]
         self.plain_write(output, record['gid'])
-        self.logger.debug("SfaClientBootstrap: Wrote GID for {} ({}) in {}".format(hrn, type, output))
+        self.logger.debug(
+            "SfaClientBootstrap: Wrote GID for {} ({}) in {}".format(hrn, type, output))
         return output
 
 
 # http://trac.myslice.info/wiki/MySlice/Developer/SFALogin
-### produce a pkcs12 bundled certificate from GID and private key
+# produce a pkcs12 bundled certificate from GID and private key
 # xxx for now we put a hard-wired password that's just, well, 'password'
-# when leaving this empty on the mac, result can't seem to be loaded in keychain..
+# when leaving this empty on the mac, result can't seem to be loaded in
+# keychain..
     def my_pkcs12_produce(self, filename):
         password = raw_input("Enter password for p12 certificate: ")
-        openssl_command =  ['openssl', 'pkcs12', "-export"]
-        openssl_command += [ "-password", "pass:{}".format(password) ]
-        openssl_command += [ "-inkey", self.private_key_filename()]
-        openssl_command += [ "-in",    self.my_gid_filename()]
-        openssl_command += [ "-out",   filename ]
+        openssl_command = ['openssl', 'pkcs12', "-export"]
+        openssl_command += ["-password", "pass:{}".format(password)]
+        openssl_command += ["-inkey", self.private_key_filename()]
+        openssl_command += ["-in",    self.my_gid_filename()]
+        openssl_command += ["-out",   filename]
         if subprocess.call(openssl_command) == 0:
             print("Successfully created {}".format(filename))
         else:
@@ -232,10 +245,9 @@ class SfaClientBootstrap:
         if cred.get_expiration() < datetime.utcnow():
             valid = False
         return valid
-    
 
-    #################### public interface
-    
+    # public interface
+
     # return my_gid, run all missing steps in the bootstrap sequence
     def bootstrap_my_gid(self):
         self.self_signed_cert()
@@ -268,41 +280,49 @@ class SfaClientBootstrap:
             os.chmod(private_key_filename, os.stat(user_private_key).st_mode)
             self.logger.debug("SfaClientBootstrap: Copied private key from {} into {}"
                               .format(user_private_key, private_key_filename))
-        
-    #################### private details
+
+    # private details
     # stupid stuff
     def fullpath(self, file):
         return os.path.join(self.dir, file)
 
     # the expected filenames for the various pieces
-    def private_key_filename(self): 
+    def private_key_filename(self):
         return self.fullpath("{}.pkey".format(Xrn.unescape(self.hrn)))
-    def self_signed_cert_filename(self): 
+
+    def self_signed_cert_filename(self):
         return self.fullpath("{}.sscert".format(self.hrn))
+
     def my_credential_filename(self):
         return self.credential_filename(self.hrn, "user")
     # the tests use sfi -u <pi-user>; meaning that the slice credential filename
     # needs to keep track of the user too
-    def credential_filename(self, hrn, type): 
+
+    def credential_filename(self, hrn, type):
         if type in ['user']:
             basename = "{}.{}.cred".format(hrn, type)
         else:
             basename = "{}-{}.{}.cred".format(self.hrn, hrn, type)
         return self.fullpath(basename)
-    def slice_credential_filename(self, hrn): 
+
+    def slice_credential_filename(self, hrn):
         return self.credential_filename(hrn, 'slice')
-    def authority_credential_filename(self, hrn): 
+
+    def authority_credential_filename(self, hrn):
         return self.credential_filename(hrn, 'authority')
+
     def my_gid_filename(self):
         return self.gid_filename(self.hrn, "user")
-    def gid_filename(self, hrn, type): 
+
+    def gid_filename(self, hrn, type):
         return self.fullpath("{}.{}.gid".format(hrn, type))
+
     def my_pkcs12_filename(self):
         return self.fullpath("{}.p12".format(self.hrn))
 
 # optimizing dependencies
-# originally we used classes GID or Credential or Certificate 
-# like e.g. 
+# originally we used classes GID or Credential or Certificate
+# like e.g.
 #        return Credential(filename=self.my_credential()).save_to_string()
 # but in order to make it simpler to other implementations/languages..
     def plain_read(self, filename):
@@ -317,16 +337,18 @@ class SfaClientBootstrap:
         if not os.path.isfile(filename):
             raise IOError("Missing {} file {}".format(kind, filename))
         return True
-        
+
     def assert_private_key(self):
         return self.assert_filename(self.private_key_filename(), "private key")
+
     def assert_self_signed_cert(self):
         return self.assert_filename(self.self_signed_cert_filename(), "self-signed certificate")
+
     def assert_my_credential(self):
         return self.assert_filename(self.my_credential_filename(), "user's credential")
+
     def assert_my_gid(self):
         return self.assert_filename(self.my_gid_filename(), "user's GID")
-
 
     # decorator to make up the other methods
     def get_or_produce(filename_method, produce_method, validate_method=None):
@@ -337,18 +359,19 @@ class SfaClientBootstrap:
                 if os.path.isfile(filename):
                     if not validate_method:
                         return filename
-                    elif validate_method(self, filename): 
+                    elif validate_method(self, filename):
                         return filename
                     else:
                         # remove invalid file
-                        self.logger.warning("Removing {} - has expired".format(filename))
-                        os.unlink(filename) 
+                        self.logger.warning(
+                            "Removing {} - has expired".format(filename))
+                        os.unlink(filename)
                 try:
                     produce_method(self, filename, *args, **kw)
                     return filename
                 except IOError:
-                    raise 
-                except :
+                    raise
+                except:
                     error = sys.exc_info()[:2]
                     message = "Could not produce/retrieve {} ({} -- {})"\
                               .format(filename, error[0], error[1])
@@ -379,17 +402,18 @@ class SfaClientBootstrap:
     def authority_credential(self, hrn): pass
 
     @get_or_produce(gid_filename, gid_produce)
-    def gid(self, hrn, type ): pass
-
+    def gid(self, hrn, type): pass
 
     # get the credentials as strings, for inserting as API arguments
-    def my_credential_string(self): 
+    def my_credential_string(self):
         self.my_credential()
         return self.plain_read(self.my_credential_filename())
-    def slice_credential_string(self, hrn): 
+
+    def slice_credential_string(self, hrn):
         self.slice_credential(hrn)
         return self.plain_read(self.slice_credential_filename(hrn))
-    def authority_credential_string(self, hrn): 
+
+    def authority_credential_string(self, hrn):
         self.authority_credential(hrn)
         return self.plain_read(self.authority_credential_filename(hrn))
 
@@ -431,5 +455,6 @@ class SfaClientBootstrap:
 #        to_gid = GID(to_gidfile )
 #        to_hrn = delegee_gid.get_hrn()
 #        print 'to_hrn', to_hrn
-        delegated_credential = original_credential.delegate(to_gidfile, self.private_key(), my_gid)
+        delegated_credential = original_credential.delegate(
+            to_gidfile, self.private_key(), my_gid)
         return delegated_credential.save_to_string(save_parents=True)

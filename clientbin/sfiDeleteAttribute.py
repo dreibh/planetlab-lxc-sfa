@@ -28,7 +28,6 @@ if command.opts.infile:
         nodes = f.read().split()
         f.close()
 
-
     for name in attrs:
         print >> sys.stderr, name, attrs[name]
         for value in attrs[name]:
@@ -36,12 +35,15 @@ if command.opts.infile:
                 try:
                     rspec.version.remove_default_sliver_attribute(name, value)
                 except:
-                    logger.log_exc("sfiDeleteAttribute FAILED on all nodes: %s=%s" % (name, value))
+                    logger.log_exc(
+                        "sfiDeleteAttribute FAILED on all nodes: %s=%s" % (name, value))
             else:
                 for node in nodes:
                     try:
-                        rspec.version.remove_sliver_attribute(node, name, value)
+                        rspec.version.remove_sliver_attribute(
+                            node, name, value)
                     except:
-                        logger.log_exc("sfiDeleteAttribute FAILED on node %s: %s=%s" % (node, name, value))
+                        logger.log_exc(
+                            "sfiDeleteAttribute FAILED on node %s: %s=%s" % (node, name, value))
 
     print rspec.toxml()

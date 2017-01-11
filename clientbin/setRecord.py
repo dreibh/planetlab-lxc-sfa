@@ -16,16 +16,17 @@ from optparse import OptionParser
 from pprint import pprint
 from sfa.util.xml import XML
 
+
 def create_parser():
     command = sys.argv[0]
     argv = sys.argv[1:]
     usage = "%(command)s [options]" % locals()
     description = """setRecord will edit a record (from stdin), modify its contents, then print the new record to stdout"""
-    parser = OptionParser(usage=usage,description=description)
+    parser = OptionParser(usage=usage, description=description)
     parser.add_option("-d", "--debug", dest="DEBUG", action="store_true",
-        default=False,  help = "print debug info")
-   
-    return parser    
+                      default=False,  help="print debug info")
+
+    return parser
 
 
 def editDict(args, recordDict, options):
@@ -37,19 +38,19 @@ def editDict(args, recordDict, options):
         if vect.count("+="):
             # append value
             modDict({vect.split("+=")[0]: returnVal(vect.split("+=")[1])},
-                         recordDict, options) 
- 
+                    recordDict, options)
+
         elif vect.count("="):
             # reassign value
             replaceDict({vect.split("=")[0]: returnVal("=".join(vect.split("=")[1:]))},
-                         recordDict, options) 
+                        recordDict, options)
         else:
             if vect in recordDict:
                 del recordDict[vect]
             else:
-                raise TypeError("Argument error: Records are updated with \n" \
-                            "key=val1,val2,valN or\n" \
-                            "key+=val1,val2,valN \n%s Unknown key/val" % vect)
+                raise TypeError("Argument error: Records are updated with \n"
+                                "key=val1,val2,valN or\n"
+                                "key+=val1,val2,valN \n%s Unknown key/val" % vect)
 
 
 def replaceDict(newval, recordDict, options):
@@ -59,6 +60,7 @@ def replaceDict(newval, recordDict, options):
     # Check type of old field matches type of new field
     for (key, val) in newval.iteritems():
         recordDict[key] = val
+
 
 def modDict(newval, recordDict, options):
     """
@@ -86,8 +88,9 @@ def returnVal(arg):
     else:
         return arg
 
+
 def main():
-    parser = create_parser(); 
+    parser = create_parser()
     (options, args) = parser.parse_args()
 
     record = XML(sys.stdin.read())
@@ -96,12 +99,13 @@ def main():
         editDict(args, record_dict, options)
     if options.DEBUG:
         print "New Record:\n%s" % record_dict
-        
+
     record.parse_dict(record_dict)
     s = record.toxml()
     sys.stdout.write(s)
 
 if __name__ == '__main__':
-    try: main()
+    try:
+        main()
     except Exception as e:
         print e

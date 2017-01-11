@@ -11,13 +11,13 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Work.
 #
-# THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, 
-# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-# OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS 
+# THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
 # IN THE WORK.
 #----------------------------------------------------------------------
 ##
@@ -39,6 +39,7 @@ from sfa.util.py23 import xmlrpc_client
 ##
 # Create a new uuid. Returns the UUID as a string.
 
+
 def create_uuid():
     return str(uuid.uuid4().int)
 
@@ -54,7 +55,7 @@ def create_uuid():
 #
 # URN is a human readable identifier of form:
 #   "urn:publicid:IDN+toplevelauthority[:sub-auth.]*[\res. type]\ +object name"
-#   For  example, urn:publicid:IDN+planetlab:us:arizona+user+bakers      
+#   For  example, urn:publicid:IDN+planetlab:us:arizona+user+bakers
 #
 # PUBLIC_KEY is the public key of the principal identified by the UUID/HRN.
 # It is a Keypair object as defined in the cert.py module.
@@ -83,7 +84,7 @@ class GID(Certificate):
         self.uuid = None
         self.hrn = None
         self.urn = None
-        self.email = None # for adding to the SubjectAltName             
+        self.email = None  # for adding to the SubjectAltName
         Certificate.__init__(self, lifeDays, create, subject, string, filename)
 
         if subject:
@@ -123,11 +124,11 @@ class GID(Certificate):
     def set_urn(self, urn):
         self.urn = urn
         self.hrn, type = urn_to_hrn(urn)
- 
+
     def get_urn(self):
         if not self.urn:
             self.decode()
-        return self.urn            
+        return self.urn
 
     # Will be stuffed into subjectAltName
     def set_email(self, email):
@@ -143,7 +144,7 @@ class GID(Certificate):
             self.decode()
         _, t = urn_to_hrn(self.urn)
         return t
-    
+
     ##
     # Encode the GID fields and package them into the subject-alt-name field
     # of the X509 certificate. This must be called prior to signing the
@@ -154,17 +155,16 @@ class GID(Certificate):
             urn = self.urn
         else:
             urn = hrn_to_urn(self.hrn, None)
-            
+
         str = "URI:" + urn
 
         if self.uuid:
             str += ", " + "URI:" + uuid.UUID(int=self.uuid).urn
-        
+
         if self.email:
             str += ", " + "email:" + self.email
 
         self.set_data(str, 'subjectAltName')
-
 
     ##
     # Decode the subject-alt-name field of the X509 certificate into the
@@ -188,7 +188,7 @@ class GID(Certificate):
                         # FIXME: Ensure there isn't cruft in that address...
                         # EG look for email:copy,....
                         dict['email'] = val[6:]
-                    
+
         self.uuid = dict.get("uuid", None)
         self.urn = dict.get("urn", None)
         self.hrn = dict.get("hrn", None)
@@ -203,21 +203,22 @@ class GID(Certificate):
     # @param dump_parents If true, also dump the parents of the GID
 
     def dump(self, *args, **kwargs):
-        print(self.dump_string(*args,**kwargs))
+        print(self.dump_string(*args, **kwargs))
 
     def dump_string(self, indent=0, dump_parents=False):
-        result=" "*(indent-2) + "GID\n"
-        result += " "*indent + "hrn:" + str(self.get_hrn()) +"\n"
-        result += " "*indent + "urn:" + str(self.get_urn()) +"\n"
-        result += " "*indent + "uuid:" + str(self.get_uuid()) + "\n"
+        result = " " * (indent - 2) + "GID\n"
+        result += " " * indent + "hrn:" + str(self.get_hrn()) + "\n"
+        result += " " * indent + "urn:" + str(self.get_urn()) + "\n"
+        result += " " * indent + "uuid:" + str(self.get_uuid()) + "\n"
         if self.get_email() is not None:
-            result += " "*indent + "email:" + str(self.get_email()) + "\n"
-        filename=self.get_filename()
-        if filename: result += "Filename %s\n"%filename
+            result += " " * indent + "email:" + str(self.get_email()) + "\n"
+        filename = self.get_filename()
+        if filename:
+            result += "Filename %s\n" % filename
 
         if self.parent and dump_parents:
-            result += " "*indent + "parent:\n"
-            result += self.parent.dump_string(indent+4, dump_parents)
+            result += " " * indent + "parent:\n"
+            result += self.parent.dump_string(indent + 4, dump_parents)
         return result
 
     ##
@@ -230,10 +231,10 @@ class GID(Certificate):
     # for a principal that is not a member of that authority. For example,
     # planetlab.us.arizona cannot sign a GID for planetlab.us.princeton.foo.
 
-    def verify_chain(self, trusted_certs = None):
+    def verify_chain(self, trusted_certs=None):
         # do the normal certificate verification stuff
-        trusted_root = Certificate.verify_chain(self, trusted_certs)        
-       
+        trusted_root = Certificate.verify_chain(self, trusted_certs)
+
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not hrn_authfor_hrn(self.parent.get_hrn(), self.get_hrn()):
@@ -256,7 +257,7 @@ class GID(Certificate):
             trusted_gid = GID(string=trusted_root.save_to_string())
             trusted_type = trusted_gid.get_type()
             trusted_hrn = trusted_gid.get_hrn()
-            #if trusted_type == 'authority':
+            # if trusted_type == 'authority':
             #    trusted_hrn = trusted_hrn[:trusted_hrn.rindex('.')]
             cur_hrn = self.get_hrn()
             if not hrn_authfor_hrn(trusted_hrn, cur_hrn):

@@ -1,11 +1,11 @@
 from sfa.util.sfalogging import logger
 
+
 class SecurityGroup:
 
     def __init__(self, driver):
         self.client = driver.shell.nova_manager
 
-        
     def create_security_group(self, name):
         try:
             self.client.security_groups.create(name=name, description=name)
@@ -19,7 +19,6 @@ class SecurityGroup:
             self.client.security_groups.delete(security_group.id)
         except Exception as ex:
             logger.log_exc("Failed to delete security group")
-
 
     def _validate_port_range(self, port_range):
         from_port = to_port = None
@@ -44,7 +43,6 @@ class SecurityGroup:
                     logger.error('port must be an integer.')
         return (from_port, to_port)
 
-
     def add_rule_to_group(self, group_name=None, protocol='tcp', cidr_ip='0.0.0.0/0',
                           port_range=None, icmp_type_code=None,
                           source_group_name=None, source_group_owner_id=None):
@@ -56,15 +54,14 @@ class SecurityGroup:
                 from_port, to_port = icmp_type[0], icmp_type[1]
 
             group = self.client.security_groups.find(name=group_name)
-            self.client.security_group_rules.create(group.id, \
-                                protocol, from_port, to_port,cidr_ip)
+            self.client.security_group_rules.create(group.id,
+                                                    protocol, from_port, to_port, cidr_ip)
         except Exception as ex:
             logger.log_exc("Failed to add rule to group %s" % group_name)
 
-
     def remove_rule_from_group(self, group_name=None, protocol='tcp', cidr_ip='0.0.0.0/0',
-                          port_range=None, icmp_type_code=None,
-                          source_group_name=None, source_group_owner_id=None):
+                               port_range=None, icmp_type_code=None,
+                               source_group_name=None, source_group_owner_id=None):
         try:
             from_port, to_port = self._validate_port_range(port_range)
             icmp_type = self._validate_icmp_type_code(icmp_type_code)
@@ -72,15 +69,14 @@ class SecurityGroup:
                 from_port, to_port = icmp_type[0], icmp_type[1]
             group = self.client.security_groups.find(name=group_name)
             filter = {
-                'id': group.id,   
+                'id': group.id,
                 'from_port': from_port,
                 'to_port': to_port,
                 'cidr_ip': ip,
-                'ip_protocol':protocol,
+                'ip_protocol': protocol,
             }
             rule = self.client.security_group_rules.find(**filter)
             if rule:
                 self.client.security_group_rules.delete(rule)
         except Exception as ex:
-            logger.log_exc("Failed to remove rule from group %s" % group_name) 
-             
+            logger.log_exc("Failed to remove rule from group %s" % group_name)
