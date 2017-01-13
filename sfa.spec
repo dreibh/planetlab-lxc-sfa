@@ -187,6 +187,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sfascan.py*
 %{_bindir}/sfascan
 %{_bindir}/sfadump.py*
+%{_bindir}/sfax509.py*
 
 %files plc
 %defattr(-,root,root)

@@ -6,3 +6,4 @@ usr/bin/setRecord.py*
 usr/bin/sfascan.py*
 #usr/bin/sfascan
 usr/bin/sfadump.py*
+usr/bin/sfax509.py*
