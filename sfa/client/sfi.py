@@ -1186,7 +1186,7 @@ use this if you mean an authority instead""")
 
         server = self.sliceapi()
         # set creds
-        creds = [self.my_credential]
+        creds = [self.my_credential_string]
         if options.delegate:
             creds.append(self.delegate_cred(cred, get_authority(self.authority)))
         if options.show_credential:
