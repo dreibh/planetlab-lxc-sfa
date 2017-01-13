@@ -35,6 +35,15 @@
 ##
 #
 
+# Notes on using the openssl command line
+#
+# for verifying the chain in a gid, assuming it is split into pieces p1.pem p2.pem p3.pem
+# you can use openssl to verify the chain using this command
+# openssl verify -verbose -CAfile <(cat p2.pem p3.pem) p1.pem
+# also you can use sfax509 to invoke openssl x509 on all parts of the gid
+#
+
+
 from __future__ import print_function
 
 import functools
