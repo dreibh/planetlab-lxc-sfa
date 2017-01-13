@@ -576,7 +576,7 @@ class Certificate:
         message = "{}".format(self.x509.get_subject())
         parent = self.parent
         while parent:
-            message += " -> {}".format(parent.x509.get_subject())
+            message += "->{}".format(parent.x509.get_subject())
             parent = parent.parent
         return message
 
