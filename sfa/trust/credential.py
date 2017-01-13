@@ -854,11 +854,16 @@ class Credential(object):
         # If caller explicitly passed in None that means skip cert chain validation.
         # - Strange and not typical
         if trusted_certs is not None:
-            # Verify the gids of this cred and of its parents
+            # Verify the caller and object gids of this cred and of its parents
             for cur_cred in self.get_credential_list():
-                cur_cred.get_gid_object().verify_chain(trusted_cert_objects)
-                cur_cred.get_gid_caller().verify_chain(trusted_cert_objects)
-
+                # check both the caller and the subject 
+                for gid in cur_cred.get_gid_object(), cur_cred.get_gid_caller():
+                    logger.debug("Credential.verify: verifying chain {}"
+                                 .format(gid.pretty_cert()))
+                    logger.debug("Credential.verify: against trusted {}"
+                                 .format(" ".join(trusted_certs)))
+                    gid.verify_chain(trusted_cert_objects)
+                        
         refs = []
         refs.append("Sig_{}".format(self.get_refid()))
 

@@ -549,6 +549,17 @@ class Certificate:
         message += "]"
         return message
 
+    def pretty_chain(self):
+        message = "{}".format(self.x509.get_subject())
+        parent = self.parent
+        while parent:
+            message += " -> {}".format(parent.x509.get_subject())
+            parent = parent.parent
+        return message
+
+    def pretty_name(self):
+        return self.get_filename() or self.pretty_chain()
+
     ##
     # Get the public key of the certificate.
     #
@@ -602,7 +613,6 @@ class Certificate:
     # @param value string containing value of the extension
 
     def add_extension(self, name, critical, value):
-        import M2Crypto
         oldExtVal = None
         try:
             oldExtVal = self.get_extension(name)
@@ -698,9 +708,17 @@ class Certificate:
         m2x509 = M2Crypto.X509.load_cert_string(self.save_to_string())
         m2pubkey = pubkey.get_m2_pubkey()
         # verify it
-        # verify returns -1 or 0 on failure depending on how serious the
-        # error conditions are
-        return m2x509.verify(m2pubkey) == 1
+        # https://www.openssl.org/docs/man1.1.0/crypto/X509_verify.html
+        # verify returns
+        # 1  if it checks out
+        # 0  if if does not
+        # -1 if it could not be checked 'for some reason'
+        m2result = m2x509.verify(m2pubkey)
+        result = m2result == 1
+        if debug_verify_chain:
+            logger.debug("Certificate.verify: <- {} (m2={}) ({} x {})"
+                         .format(result, m2result, self.pretty_cert(), m2pubkey))
+        return result
 
         # XXX alternatively, if openssl has been patched, do the much simpler:
         # try:
@@ -723,6 +741,7 @@ class Certificate:
     # @param cert certificate object
 
     def is_signed_by_cert(self, cert):
+        logger.debug("Certificate.is_signed_by_cert -> invoking verify")
         k = cert.get_pubkey()
         result = self.verify(k)
         return result
@@ -767,6 +786,7 @@ class Certificate:
         # the public key contained in it's parent. The chain is recursed
         # until a certificate is found that is signed by a trusted root.
 
+        logger.debug("Certificate.verify_chain {}".format(self.pretty_name()))
         # verify expiration time
         if self.x509.has_expired():
             if debug_verify_chain:
@@ -775,42 +795,47 @@ class Certificate:
             raise CertExpired(self.pretty_cert(), "client cert")
 
         # if this cert is signed by a trusted_cert, then we are set
-        for trusted_cert in trusted_certs:
+        for i, trusted_cert in enumerate(trusted_certs, 1):
+            logger.debug("Certificate.verify_chain - trying trusted #{} : {}"
+                         .format(i, trusted_cert.pretty_name()))
             if self.is_signed_by_cert(trusted_cert):
                 # verify expiration of trusted_cert ?
                 if not trusted_cert.x509.has_expired():
                     if debug_verify_chain:
                         logger.debug("verify_chain: YES. Cert {} signed by trusted cert {}"
-                                     .format(self.pretty_cert(), trusted_cert.pretty_cert()))
+                                     .format(self.pretty_name(), trusted_cert.pretty_name()))
                     return trusted_cert
                 else:
                     if debug_verify_chain:
                         logger.debug("verify_chain: NO. Cert {} is signed by trusted_cert {}, "
                                      "but that signer is expired..."
-                                     .format(self.pretty_cert(),trusted_cert.pretty_cert()))
+                                     .format(self.pretty_name(),trusted_cert.pretty_name()))
                     raise CertExpired("{} signer trusted_cert {}"
-                                      .format(self.pretty_cert(), trusted_cert.pretty_cert()))
+                                      .format(self.pretty_name(), trusted_cert.pretty_name()))
+            else:
+                logger.debug("verify_chain: not a direct descendant of a trusted root".
+                             format(self.pretty_name(), trusted_cert))
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
             if debug_verify_chain:
                 logger.debug("verify_chain: NO. {} has no parent "
                              "and issuer {} is not in {} trusted roots"
-                             .format(self.pretty_cert(), self.get_issuer(), len(trusted_certs)))
+                             .format(self.pretty_name(), self.get_issuer(), len(trusted_certs)))
             raise CertMissingParent("{}: Issuer {} is not one of the {} trusted roots, "
                                     "and cert has no parent."
-                                    .format(self.pretty_cert(), self.get_issuer(), len(trusted_certs)))
+                                    .format(self.pretty_name(), self.get_issuer(), len(trusted_certs)))
 
         # if it wasn't signed by the parent...
         if not self.is_signed_by_cert(self.parent):
             if debug_verify_chain:
-                logger.debug("verify_chain: NO. {} is not signed by parent {}, but by {}"
-                             .format(self.pretty_cert(),
-                                     self.parent.pretty_cert(),
-                                     self.get_issuer()))
+                logger.debug("verify_chain: NO. {} is not signed by parent {}"
+                             .format(self.pretty_name(),
+                                     self.parent.pretty_name()))
+                self.save_to_file("/tmp/xxx-capture.pem", save_parents=True)
             raise CertNotSignedByParent("{}: Parent {}, issuer {}"
-                                        .format(self.pretty_cert(),
-                                                self.parent.pretty_cert(),
+                                        .format(self.pretty_name(),
+                                                self.parent.pretty_name(),
                                                 self.get_issuer()))
 
         # Confirm that the parent is a CA. Only CAs can be trusted as
@@ -821,14 +846,14 @@ class Certificate:
         # extension and hope there are no other basicConstraints
         if not self.parent.isCA and not (self.parent.get_extension('basicConstraints') == 'CA:TRUE'):
             logger.warn("verify_chain: cert {}'s parent {} is not a CA"
-                        .format(self.pretty_cert(), self.parent.pretty_cert()))
+                        .format(self.pretty_name(), self.parent.pretty_name()))
             raise CertNotSignedByParent("{}: Parent {} not a CA"
-                                        .format(self.pretty_cert(), self.parent.pretty_cert()))
+                                        .format(self.pretty_name(), self.parent.pretty_name()))
 
         # if the parent isn't verified...
         if debug_verify_chain:
             logger.debug("verify_chain: .. {}, -> verifying parent {}"
-                         .format(self.pretty_cert(),self.parent.pretty_cert()))
+                         .format(self.pretty_name(),self.parent.pretty_name()))
         self.parent.verify_chain(trusted_certs)
 
         return
