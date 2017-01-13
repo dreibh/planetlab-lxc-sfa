@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Copyright (c) 2008 Board of Trustees, Princeton University
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -19,7 +19,7 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
 # IN THE WORK.
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
 import re
 
@@ -29,21 +29,24 @@ from sfa.util.faults import SfaAPIError
 # functions eventually
 
 
-def get_leaf(hrn): return Xrn(hrn).get_leaf()
+def get_leaf(hrn):
+    return Xrn(hrn).get_leaf()
 
 
-def get_authority(hrn): return Xrn(hrn).get_authority_hrn()
+def get_authority(hrn):
+    return Xrn(hrn).get_authority_hrn()
 
 
-def urn_to_hrn(urn): xrn = Xrn(urn)
-return (xrn.hrn, xrn.type)
+def urn_to_hrn(urn):
+    xrn = Xrn(urn)
+    return (xrn.hrn, xrn.type)
 
 
 def hrn_to_urn(hrn, type): return Xrn(hrn, type=type).urn
 
 
-def hrn_authfor_hrn(
-    parenthrn, hrn): return Xrn.hrn_is_auth_for_hrn(parenthrn, hrn)
+def hrn_authfor_hrn(parenthrn, hrn):
+    return Xrn.hrn_is_auth_for_hrn(parenthrn, hrn)
 
 
 class Xrn:
@@ -54,27 +57,33 @@ class Xrn:
     # e.g. hrn_split ('a\.b.c.d') -> [ 'a\.b','c','d']
     @staticmethod
     def hrn_split(hrn):
-        return [x.replace('--sep--', '\\.') for x in hrn.replace('\\.', '--sep--').split('.')]
+        return [x.replace('--sep--', '\\.')
+                for x in hrn.replace('\\.', '--sep--').split('.')]
 
     # e.g. hrn_leaf ('a\.b.c.d') -> 'd'
     @staticmethod
-    def hrn_leaf(hrn): return Xrn.hrn_split(hrn)[-1]
+    def hrn_leaf(hrn):
+        return Xrn.hrn_split(hrn)[-1]
 
     # e.g. hrn_auth_list ('a\.b.c.d') -> ['a\.b', 'c']
     @staticmethod
-    def hrn_auth_list(hrn): return Xrn.hrn_split(hrn)[0:-1]
+    def hrn_auth_list(hrn):
+        return Xrn.hrn_split(hrn)[0:-1]
 
     # e.g. hrn_auth ('a\.b.c.d') -> 'a\.b.c'
     @staticmethod
-    def hrn_auth(hrn): return '.'.join(Xrn.hrn_auth_list(hrn))
+    def hrn_auth(hrn):
+        return '.'.join(Xrn.hrn_auth_list(hrn))
 
     # e.g. escape ('a.b') -> 'a\.b'
     @staticmethod
-    def escape(token): return re.sub(r'([^\\])\.', r'\1\.', token)
+    def escape(token):
+        return re.sub(r'([^\\])\.', r'\1\.', token)
 
     # e.g. unescape ('a\.b') -> 'a.b'
     @staticmethod
-    def unescape(token): return token.replace('\\.', '.')
+    def unescape(token):
+        return token.replace('\\.', '.')
 
     # Return the HRN authority chain from top to bottom.
     # e.g. hrn_auth_chain('a\.b.c.d') -> ['a\.b', 'a\.b.c']
@@ -298,7 +307,7 @@ class Xrn:
             name = Xrn.hrn_leaf(self.hrn)
             authority_string = self.get_authority_urn()
 
-        if self.type == None:
+        if self.type is None:
             urn = "+".join(['', authority_string, Xrn.unescape(name)])
         else:
             urn = "+".join(['', authority_string,
