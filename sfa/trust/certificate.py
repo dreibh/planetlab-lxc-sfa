@@ -693,13 +693,13 @@ class Certificate:
     # the X509 subject_alt_name extension. Set_data can only be called once, due
     # to limitations in the underlying library.
 
-    def set_data(self, str, field='subjectAltName'):
+    def set_data(self, string, field='subjectAltName'):
         # pyOpenSSL only allows us to add extensions, so if we try to set the
         # same extension more than once, it will not work
         if field in self.data:
             raise Exception("Cannot set {} more than once".format(field))
-        self.data[field] = str
-        self.add_extension(field, 0, str)
+        self.data[field] = string
+        self.add_extension(field, 0, string)
 
     ##
     # Return the data string that was previously set with set_data

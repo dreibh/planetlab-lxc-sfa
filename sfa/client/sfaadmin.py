@@ -54,6 +54,7 @@ class RegistryCommands(Commands):
         version = self.api.manager.GetVersion(self.api, {})
         pprinter.pprint(version)
 
+        
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='authority to list (hrn/urn - mandatory)')
     @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default='all')
     @add_options('-r', '--recursive', dest='recursive', metavar='<recursive>', help='list all child records',
@@ -73,6 +74,7 @@ class RegistryCommands(Commands):
         options = Options()
         options.verbose = verbose
         terminal_render(list, options)
+
 
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
     @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
@@ -121,6 +123,7 @@ class RegistryCommands(Commands):
         if extras:
             record_dict.update(extras)
         return record_dict
+
 
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn', default=None)
     @add_options('-t', '--type', dest='type', metavar='<type>', help='object type (mandatory)')
@@ -187,6 +190,7 @@ Users having a non RSA PubKey: %s and are: \n%s\n\n\
 Users having a GID/PubKey correpondence OK: %s and are: \n%s\n\n\
 Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n" % (len(NOKEY), NOKEY, len(ERROR), ERROR, len(OK), OK, len(NOK), NOK))
 
+
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
     @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
     @add_options('-e', '--email', dest='email', default="",
@@ -216,6 +220,7 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n" % (len(NOK
                                         url=url, description=description, extras=extras)
         self.api.manager.Register(self.api, record_dict)
 
+        
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
     @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
     @add_options('-u', '--url', dest='url', metavar='<url>', help='URL', default=None)
@@ -242,12 +247,14 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n" % (len(NOK
                                         url=url, description=description, extras=extras)
         self.api.manager.Update(self.api, record_dict)
 
+
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
     @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
     def remove(self, xrn, type=None):
         """Remove given object from the registry"""
         xrn = Xrn(xrn, type)
         self.api.manager.Remove(self.api, xrn)
+
 
     @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
     @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
@@ -257,17 +264,20 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n" % (len(NOK
             self.api, xrn, type, self.api.hrn)
         print(cred)
 
+
     def import_registry(self):
         """Run the importer"""
         from sfa.importer import Importer
         importer = Importer()
         importer.run()
 
+
     def sync_db(self):
         """Initialize or upgrade the db"""
         from sfa.storage.dbschema import DBSchema
         dbschema = DBSchema()
         dbschema.init_or_upgrade()
+
 
     @add_options('-a', '--all', dest='all', metavar='<all>', action='store_true', default=False,
                  help='Remove all registry records and all files in %s area' % help_basedir)
