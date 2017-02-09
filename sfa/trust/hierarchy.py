@@ -177,6 +177,7 @@ class Hierarchy:
 
         gid = self.create_gid(xrn, create_uuid(), pkey)
         gid.save_to_file(gid_filename, save_parents=True)
+        return gid
 
     def create_top_level_auth(self, hrn=None):
         """
