@@ -23,8 +23,9 @@ from sfa.util.config import Config
 from sfa.trust.sfaticket import SfaTicket
 
 ##
-# The AuthInfo class contains the information for an authority. This information
-# includes the GID, private key, and database connection information.
+# The AuthInfo class contains the information for an authority. This
+# information includes the GID, private key, and database connection
+# information.
 
 
 class AuthInfo:
@@ -35,7 +36,8 @@ class AuthInfo:
     ##
     # Initialize and authority object.
     #
-    # @param xrn the human readable name of the authority (urn will be converted to hrn)
+    # @param xrn the human readable name of the authority
+    #  (urn will be converted to hrn)
     # @param gid_filename the filename containing the GID
     # @param privkey_filename the filename containing the private key
 
@@ -88,10 +90,10 @@ class AuthInfo:
 # The Hierarchy class is responsible for managing the tree of authorities.
 # Each authority is a node in the tree and exists as an AuthInfo object.
 #
-# The tree is stored on disk in a hierarchical manner than reflects the
-# structure of the tree. Each authority is a subdirectory, and each subdirectory
-# contains the GID and pkey files for that authority (as well as
-# subdirectories for each sub-authority)
+# The tree is stored on disk in a hierarchical manner than reflects
+# the structure of the tree. Each authority is a subdirectory, and
+# each subdirectory contains the GID and pkey files for that authority
+# (as well as subdirectories for each sub-authority)
 
 
 class Hierarchy:
@@ -109,7 +111,8 @@ class Hierarchy:
     # Given a hrn, return the filenames of the GID, private key
     # files.
     #
-    # @param xrn the human readable name of the authority (urn will be convertd to hrn)
+    # @param xrn the human readable name of the authority
+    #  (urn will be convertd to hrn)
 
     def get_auth_filenames(self, xrn):
         hrn, type = urn_to_hrn(xrn)
@@ -137,23 +140,27 @@ class Hierarchy:
         (directory, gid_filename, privkey_filename) = \
             self.get_auth_filenames(hrn)
 
-        return os.path.exists(gid_filename) and os.path.exists(privkey_filename)
+        return os.path.exists(gid_filename) \
+            and os.path.exists(privkey_filename)
 
     ##
     # Create an authority. A private key for the authority and the associated
     # GID are created and signed by the parent authority.
     #
-    # @param xrn the human readable name of the authority to create (urn will be converted to hrn)
-    # @param create_parents if true, also create the parents if they do not exist
+    # @param xrn the human readable name of the authority to create
+    #  (urn will be converted to hrn)
+    # @param create_parents
+    #  if true, also create the parents if they do not exist
 
     def create_auth(self, xrn, create_parents=False):
         hrn, type = urn_to_hrn(str(xrn))
-        logger.debug("Hierarchy: creating authority: %s" % hrn)
+        logger.debug("Hierarchy: creating authority: {}".format(hrn))
 
         # create the parent authority if necessary
         parent_hrn = get_authority(hrn)
         parent_urn = hrn_to_urn(parent_hrn, 'authority')
-        if (parent_hrn) and (not self.auth_exists(parent_urn)) and (create_parents):
+        if (parent_hrn) and (not self.auth_exists(parent_urn)) \
+           and (create_parents):
             self.create_auth(parent_urn, create_parents)
         directory, gid_filename, privkey_filename = self.get_auth_filenames(
             hrn)
@@ -168,8 +175,8 @@ class Hierarchy:
                 pass
 
         if os.path.exists(privkey_filename):
-            logger.debug("using existing key %r for authority %r"
-                         % (privkey_filename, hrn))
+            logger.debug("using existing key {} for authority {}"
+                         .format(privkey_filename, hrn))
             pkey = Keypair(filename=privkey_filename)
         else:
             pkey = Keypair(create=True)
@@ -181,7 +188,8 @@ class Hierarchy:
 
     def create_top_level_auth(self, hrn=None):
         """
-        Create top level records (includes root and sub authorities (local/remote)
+        Create top level records
+        (includes root and sub authorities (local/remote)
         """
         # create the authority if it doesnt alrady exist
         if not self.auth_exists(hrn):
@@ -190,7 +198,7 @@ class Hierarchy:
     def get_interface_auth_info(self, create=True):
         hrn = self.config.SFA_INTERFACE_HRN
         if not self.auth_exists(hrn):
-            if create == True:
+            if create:
                 self.create_top_level_auth(hrn)
             else:
                 raise MissingAuthority(hrn)
@@ -200,13 +208,15 @@ class Hierarchy:
     # does not exist, then an exception is thrown. As a side effect, disk files
     # and a subdirectory may be created to store the authority.
     #
-    # @param xrn the human readable name of the authority to create (urn will be converted to hrn).
+    # @param xrn the human readable name of the authority to create
+    #  (urn will be converted to hrn).
 
     def get_auth_info(self, xrn):
         hrn, type = urn_to_hrn(xrn)
         if not self.auth_exists(hrn):
             logger.warning(
-                "Hierarchy: missing authority - xrn=%s, hrn=%s" % (xrn, hrn))
+                "Hierarchy: missing authority - xrn={}, hrn={}"
+                .format(xrn, hrn))
             raise MissingAuthority(hrn)
 
         (directory, gid_filename, privkey_filename, ) = \
@@ -231,7 +241,8 @@ class Hierarchy:
     # @param uuid the unique identifier to store in the GID
     # @param pkey the public key to store in the GID
 
-    def create_gid(self, xrn, uuid, pkey, CA=False, email=None, force_parent=None):
+    def create_gid(self, xrn, uuid, pkey,
+                   CA=False, email=None, force_parent=None):
         hrn, type = urn_to_hrn(xrn)
         if not type:
             type = 'authority'
@@ -304,7 +315,8 @@ class Hierarchy:
     # credential will contain the authority privilege and will be signed by
     # the authority's parent.
     #
-    # @param hrn the human readable name of the authority (urn is converted to hrn)
+    # @param hrn the human readable name of the authority
+    #  (urn is converted to hrn)
     # @param authority type of credential to return (authority | sa | ma)
 
     def get_auth_cred(self, xrn, kind="authority"):
@@ -346,7 +358,8 @@ class Hierarchy:
     # This looks almost the same as get_auth_cred, but works for tickets
     # XXX does similarity imply there should be more code re-use?
     #
-    # @param xrn the human readable name of the authority (urn is converted to hrn)
+    # @param xrn the human readable name of the authority
+    #  (urn is converted to hrn)
 
     def get_auth_ticket(self, xrn):
         hrn, type = urn_to_hrn(xrn)
