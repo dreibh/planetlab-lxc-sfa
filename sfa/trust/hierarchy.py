@@ -262,6 +262,11 @@ class Hierarchy:
 
         gid.set_pubkey(pkey)
         gid.encode()
+        if 'http' in self.config.SFA_REGISTRY_HOST:
+            url = 'caIssuers;URI:' + str(self.config.SFA_REGISTRY_HOST) +':'+ str(self.config.SFA_REGISTRY_PORT)
+        else:
+            url = 'caIssuers;URI:https://' + str(self.config.SFA_REGISTRY_HOST) +':'+ str(self.config.SFA_REGISTRY_PORT)
+        gid.set_data(url, 'authorityInfoAccess')
         gid.sign()
 
         return gid
