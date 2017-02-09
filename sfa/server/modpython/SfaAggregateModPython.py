@@ -16,6 +16,7 @@ from sfa.planetlab.server import SfaApi
 
 api = SfaApi(interface='aggregate')
 
+
 def handler(req):
     try:
         if req.method != "POST":
@@ -52,5 +53,5 @@ def handler(req):
 
     except Exception as err:
         # Log error in /var/log/httpd/(ssl_)?error_log
-        logger.log_exc('%r'%err)
+        logger.log_exc('%r' % err)
         return apache.HTTP_INTERNAL_SERVER_ERROR

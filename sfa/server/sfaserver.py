@@ -20,6 +20,7 @@ from sfa.trust.certificate import Keypair, Certificate
 # the credential, and verify that the user is using the key that matches the
 # GID supplied in the credential.
 
+
 class SfaServer(threading.Thread):
 
     ##
@@ -28,19 +29,20 @@ class SfaServer(threading.Thread):
     # @param ip the ip address to listen on
     # @param port the port to listen on
     # @param key_file private key filename of registry
-    # @param cert_file certificate filename containing public key 
+    # @param cert_file certificate filename containing public key
     #   (could be a GID file)
 
     def __init__(self, ip, port, key_file, cert_file, interface):
         threading.Thread.__init__(self)
-        self.key = Keypair(filename = key_file)
-        self.cert = Certificate(filename = cert_file)
+        self.key = Keypair(filename=key_file)
+        self.cert = Certificate(filename=cert_file)
         #self.server = SecureXMLRPCServer((ip, port), SecureXMLRpcRequestHandler, key_file, cert_file)
-        self.server = ThreadedServer((ip, int(port)), SecureXMLRpcRequestHandler, key_file, cert_file)
-        self.server.interface=interface
+        self.server = ThreadedServer(
+            (ip, int(port)), SecureXMLRpcRequestHandler, key_file, cert_file)
+        self.server.interface = interface
         self.trusted_cert_list = None
         self.register_functions()
-        logger.info("Starting SfaServer, interface=%s"%interface)
+        logger.info("Starting SfaServer, interface=%s" % interface)
 
     ##
     # Register functions that will be served by the XMLRPC server. This
@@ -57,9 +59,7 @@ class SfaServer(threading.Thread):
         return anything
 
     ##
-    # Execute the server, serving requests forever. 
+    # Execute the server, serving requests forever.
 
     def run(self):
         self.server.serve_forever()
-
-

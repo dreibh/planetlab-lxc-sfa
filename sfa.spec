@@ -1,6 +1,6 @@
 %define name sfa
 %define version 3.1
-%define taglevel 20
+%define taglevel 21
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -187,6 +187,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sfascan.py*
 %{_bindir}/sfascan
 %{_bindir}/sfadump.py*
+%{_bindir}/sfax509.py*
 
 %files plc
 %defattr(-,root,root)
@@ -251,6 +252,18 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Fri Jan 13 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-21
+- sfax509 command can run openssl x509 on all the parts of a gid
+- bugfix in sfi when running the discover subcommand
+- PEP8'ed a substantial part of the code
+- additional debug in chain verification
+- sfi myslice more robust - ignores broken slices
+- new sfi introspect
+- for myslice: the trust/ package should be python3-ready
+- * provided that m2crypto is
+- * although the devel version of m2crypto wroks just fine for us
+- * even if it's incomplete for other aspects that we do not care about
+
 * Thu Dec 17 2015 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-20
 - minor fixes for migrating on fedora23
 

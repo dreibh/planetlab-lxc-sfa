@@ -1,7 +1,8 @@
 from sfa.rspecs.elements.element import Element
 
+
 class Property(Element):
-    
+
     fields = [
         'source_id',
         'dest_id',
@@ -9,4 +10,3 @@ class Property(Element):
         'latency',
         'packet_loss',
     ]
-       

@@ -21,14 +21,10 @@ if command.opts.infile:
         f = open(command.opts.nodefile, "r")
         nodes = f.read().split()
         f.close()
-       
+
     try:
         slivers = [{'hostname': node} for node in nodes]
         rspec.version.remove_slivers(slivers)
         print rspec.toxml()
     except:
         logger.log_exc("sfiDeleteSliver FAILED with nodes %s" % nodes)
-
-    
-
-    

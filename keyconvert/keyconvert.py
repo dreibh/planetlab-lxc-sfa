@@ -13,7 +13,7 @@ class RSA_pub_fix(RSA.RSA_pub):
         return self.save_pub_key_bio(bio)
 
 def rsa_new_pub_key(couple):
-    (e,n)=couple
+    (e, n)=couple
     rsa = m2.rsa_new()
     m2.rsa_set_e(rsa, e)
     m2.rsa_set_n(rsa, n)

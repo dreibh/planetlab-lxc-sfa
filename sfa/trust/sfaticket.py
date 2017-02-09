@@ -39,6 +39,7 @@ from sfa.util.py23 import xmlrpc_client
 #    attributes = slice attributes (keys, vref, instantiation, etc)
 #    rspec = resources
 
+
 class SfaTicket(Certificate):
     gidCaller = None
     gidObject = None
@@ -96,9 +97,11 @@ class SfaTicket(Certificate):
                 "rspec": self.rspec,
                 "delegate": self.delegate}
         if self.gidCaller:
-            dict["gidCaller"] = self.gidCaller.save_to_string(save_parents=True)
+            dict["gidCaller"] = self.gidCaller.save_to_string(
+                save_parents=True)
         if self.gidObject:
-            dict["gidObject"] = self.gidObject.save_to_string(save_parents=True)
+            dict["gidObject"] = self.gidObject.save_to_string(
+                save_parents=True)
         str = "URI:" + xmlrpc_client.dumps((dict,), allow_none=True)
         self.set_data(str)
 
@@ -146,5 +149,5 @@ class SfaTicket(Certificate):
         print("        ", self.get_rspec())
 
         if self.parent and dump_parents:
-           print("PARENT", end=' ')
-           self.parent.dump(dump_parents)
+            print("PARENT", end=' ')
+            self.parent.dump(dump_parents)

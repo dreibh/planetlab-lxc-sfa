@@ -28,9 +28,11 @@ from sfa.util.py23 import xmlrpc_client
 # [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
 
 invalid_xml_ascii = map(chr, range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F))
-xml_escape_table = string.maketrans("".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
+xml_escape_table = string.maketrans(
+    "".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
 
-def xmlrpclib_escape(s, replace = string.replace):
+
+def xmlrpclib_escape(s, replace=string.replace):
     """
     xmlrpclib does not handle invalid 7-bit control characters. This
     function augments xmlrpclib.escape, which by default only replaces
@@ -44,6 +46,7 @@ def xmlrpclib_escape(s, replace = string.replace):
 
     # Replace invalid 7-bit control characters with '?'
     return s.translate(xml_escape_table)
+
 
 def xmlrpclib_dump(self, value, write):
     """
@@ -80,24 +83,26 @@ def xmlrpclib_dump(self, value, write):
 # the expected behaviour under python3
 xmlrpc_client.Marshaller._Marshaller__dump = xmlrpclib_dump
 
+
 class XmlrpcApi:
     """
     The XmlrpcApi class implements a basic xmlrpc (or soap) service 
     """
 
     protocol = None
-  
-    def __init__ (self, encoding="utf-8", methods='sfa.methods'):
+
+    def __init__(self, encoding="utf-8", methods='sfa.methods'):
 
         self.encoding = encoding
-        self.source = None 
-        
+        self.source = None
+
         # flat list of method names
-        self.methods_module = methods_module = __import__(methods, fromlist=[methods])
+        self.methods_module = methods_module = __import__(
+            methods, fromlist=[methods])
         self.methods = methods_module.all
 
         self.logger = logger
- 
+
     def callable(self, method):
         """
         Return a new instance of the specified method.
@@ -105,11 +110,12 @@ class XmlrpcApi:
         # Look up method
         if method not in self.methods:
             raise SfaInvalidAPIMethod(method)
-        
+
         # Get new instance of method
         try:
             classname = method.split(".")[-1]
-            module = __import__(self.methods_module.__name__ + "." + method, globals(), locals(), [classname])
+            module = __import__(self.methods_module.__name__ +
+                                "." + method, globals(), locals(), [classname])
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except (ImportError, AttributeError):
@@ -126,7 +132,6 @@ class XmlrpcApi:
         self.source = source
         return function(*args)
 
-    
     def handle(self, source, data, method_map):
         """
         Handle an XML-RPC or SOAP request from the specified source.
@@ -139,12 +144,13 @@ class XmlrpcApi:
             if method in method_map:
                 method = method_map[method]
             methodresponse = True
-            
+
         except Exception as e:
             if SOAPpy is not None:
                 self.protocol = 'soap'
                 interface = SOAPpy
-                (r, header, body, attrs) = parseSOAPRPC(data, header = 1, body = 1, attrs = 1)
+                (r, header, body, attrs) = parseSOAPRPC(
+                    data, header=1, body=1, attrs=1)
                 method = r._name
                 args = r._aslist()
                 # XXX Support named arguments
@@ -155,34 +161,36 @@ class XmlrpcApi:
             result = self.call(source, method, *args)
         except SfaFault as fault:
             result = fault
-            self.logger.log_exc("XmlrpcApi.handle has caught Exception") 
+            self.logger.log_exc("XmlrpcApi.handle has caught Exception")
         except Exception as fault:
             self.logger.log_exc("XmlrpcApi.handle has caught Exception")
             result = SfaAPIError(fault)
 
-
         # Return result
         response = self.prepare_response(result, method)
         return response
-    
+
     def prepare_response(self, result, method=""):
         """
         convert result to a valid xmlrpc or soap response
-        """   
- 
+        """
+
         if self.protocol == 'xmlrpc':
             if not isinstance(result, SfaFault):
                 result = (result,)
-            response = xmlrpc_client.dumps(result, methodresponse = True, encoding = self.encoding, allow_none = 1)
+            response = xmlrpc_client.dumps(
+                result, methodresponse=True, encoding=self.encoding, allow_none=1)
         elif self.protocol == 'soap':
             if isinstance(result, Exception):
-                result = faultParameter(NS.ENV_T + ":Server", "Method Failed", method)
-                result._setDetail("Fault %d: %s" % (result.faultCode, result.faultString))
+                result = faultParameter(
+                    NS.ENV_T + ":Server", "Method Failed", method)
+                result._setDetail("Fault %d: %s" %
+                                  (result.faultCode, result.faultString))
             else:
-                response = buildSOAP(kw = {'%sResponse' % method: {'Result': result}}, encoding = self.encoding)
+                response = buildSOAP(
+                    kw={'%sResponse' % method: {'Result': result}}, encoding=self.encoding)
         else:
             if isinstance(result, Exception):
-                raise result 
-            
-        return response
+                raise result
 
+        return response

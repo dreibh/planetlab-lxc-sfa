@@ -9,7 +9,8 @@ from lxml import etree as ET
 ##
 # The location of the RelaxNG schema.
 #
-EUCALYPTUS_RSPEC_SCHEMA='eucalyptus.rng'
+EUCALYPTUS_RSPEC_SCHEMA = 'eucalyptus.rng'
+
 
 def main():
     with open(sys.argv[1], 'r') as f:
@@ -19,11 +20,10 @@ def main():
         rspecXML = ET.XML(xml)
         if not rspecValidator(rspecXML):
             error = rspecValidator.error_log.last_error
-            message = '%s (line %s)' % (error.message, error.line) 
+            message = '%s (line %s)' % (error.message, error.line)
             print(message)
         else:
             print('It is valid')
 
 if __name__ == "__main__":
     main()
-

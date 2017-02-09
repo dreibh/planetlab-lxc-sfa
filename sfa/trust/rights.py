@@ -33,7 +33,6 @@
 ##
 
 
-
 ##
 # privilege_table is a list of priviliges and what operations are allowed
 # per privilege.
@@ -46,16 +45,15 @@ privilege_table = {"authority": ["register", "remove", "update", "resolve", "lis
                    "sa": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "deleteslice", "deletesliver", "updateslice",
                           "getsliceresources", "getticket", "loanresources", "stopslice", "startslice", "renewsliver",
                           "deleteslice", "deletesliver", "resetslice", "listslices", "listnodes", "getpolicy", "sliverstatus"],
-                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "renewsliver", "deleteslice", 
+                   "embed": ["getticket", "redeemslice", "redeemticket", "createslice", "createsliver", "renewsliver", "deleteslice",
                              "deletesliver", "updateslice", "sliverstatus", "getsliceresources", "shutdown"],
                    "bind": ["getticket", "loanresources", "redeemticket"],
-                   "control": ["updateslice", "createslice", "createsliver", "renewsliver", "sliverstatus", "stopslice", "startslice", 
+                   "control": ["updateslice", "createslice", "createsliver", "renewsliver", "sliverstatus", "stopslice", "startslice",
                                "deleteslice", "deletesliver", "resetslice", "getsliceresources", "getgids"],
                    "info": ["listslices", "listnodes", "getpolicy"],
                    "ma": ["setbootstate", "getbootstate", "reboot", "getgids", "gettrustedcerts"],
-                   "operator": ["gettrustedcerts", "getgids"],                   
-                   "*": ["createsliver", "deletesliver", "sliverstatus", "renewsliver", "shutdown"]} 
-
+                   "operator": ["gettrustedcerts", "getgids"],
+                   "*": ["createsliver", "deletesliver", "sliverstatus", "renewsliver", "shutdown"]}
 
 
 ##
@@ -105,7 +103,6 @@ def determine_rights(type, name):
 # The Right class represents a single privilege.
 
 
-
 class Right:
     ##
     # Create a new right.
@@ -116,7 +113,7 @@ class Right:
         self.kind = kind
         self.delegate = delegate
 
-    def __repr__ (self): return "<Rgt:%s>"%self.kind
+    def __repr__(self): return "<Rgt:%s>" % self.kind
 
     ##
     # Test to see if this right object is allowed to perform an operation.
@@ -161,6 +158,7 @@ class Right:
 ##
 # A Rights object represents a list of privileges.
 
+
 class Rights:
     ##
     # Create a new rightlist object, containing no rights.
@@ -172,7 +170,8 @@ class Rights:
         if string:
             self.load_from_string(string)
 
-    def __repr__ (self): return "[" + " ".join( ["%s"%r for r in self.rights]) + "]"
+    def __repr__(self): return "[" + \
+        " ".join(["%s" % r for r in self.rights]) + "]"
 
     def is_empty(self):
         return self.rights == []
@@ -227,7 +226,7 @@ class Rights:
     # @param op_name is an operation to check, for example "listslices"
 
     def can_perform(self, op_name):
-        
+
         for right in self.rights:
             if right.can_perform(op_name):
                 return True
@@ -251,7 +250,6 @@ class Rights:
             if not allowed:
                 return False
         return True
-
 
     ##
     # set the delegate bit to 'delegate' on

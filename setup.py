@@ -16,8 +16,8 @@ import shutil
 from distutils.core import setup
 
 # check for the correct version of python
-major,minor = sys.version_info [0:2]
-if (major,minor) != (2,7):
+major, minor = sys.version_info [0:2]
+if (major, minor) != (2, 7):
     print ("Sorry, the SFA package is currently available only with python-2.7")
     exit(1)
 
@@ -67,7 +67,8 @@ packages = [
     ]
 
 initscripts = [ 'sfa' ]
-if not os.path.isfile('/etc/redhat-release'): initscripts.append('functions.sfa')
+if not os.path.isfile('/etc/redhat-release'):
+    initscripts.append('functions.sfa')
 
 data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml',
                               'config/registries.xml',
@@ -102,25 +103,26 @@ for d in processor_subdirs:
 
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
-    site_packages_path = [ os.path.join(p,'sfa') for p in python_path if p.endswith('site-packages')]
-    site_packages_path += [ os.path.join(p,'sfatables') for p in python_path if p.endswith('site-packages')]
+    site_packages_path = [ os.path.join(p, 'sfa') for p in python_path if p.endswith('site-packages')]
+    site_packages_path += [ os.path.join(p, 'sfatables') for p in python_path if p.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/', '/etc/sfatables'] + site_packages_path
     remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in scripts ]
     remove_files = remove_bins + [ "/etc/init.d/%s"%x for x in initscripts ]
 
     # remove files
-    def feedback (file, msg): print ("removing", file, "...",msg)
+    def feedback (file, msg):
+        print ("removing", file, "...", msg)
     for filepath in remove_files:
         try:
             os.remove(filepath)
-            feedback(filepath,"success")
+            feedback(filepath, "success")
         except: 
-            feedback(filepath,"failed")
+            feedback(filepath, "failed")
     # remove directories
     for directory in remove_dirs:
         try:
             shutil.rmtree(directory)
-            feedback (directory,"success")
+            feedback (directory, "success")
         except: 
             feedback (directory, "failed")
 else:
@@ -141,7 +143,7 @@ else:
         packages         = packages,
         data_files       = data_files,
         version          = version_tag,
-        keywords         = ['federation','testbeds','SFA','SfaWrap'],
+        keywords         = ['federation', 'testbeds', 'SFA', 'SfaWrap'],
         url              = "http://svn.planet-lab.org/wiki/SFATutorial",
         author           = "Thierry Parmentelat, Tony Mack, Scott Baker",
         author_email     = "thierry.parmentelat@inria.fr, tmack@princeton.cs.edu, smbaker@gmail.com",

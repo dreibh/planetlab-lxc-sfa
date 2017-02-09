@@ -8,14 +8,16 @@ class GetVersion(Method):
     Returns this GENI Aggregate Manager's Version Information
     @return version
     """
-    interfaces = ['registry','aggregate', 'slicemgr', 'component']
+    interfaces = ['registry', 'aggregate', 'slicemgr', 'component']
     accepts = [
         Parameter(dict, "Options")
-        ]
+    ]
     returns = Parameter(dict, "Version information")
 
     # API v2 specifies options is optional, so..
     def call(self, options=None):
-        if options is None: options={}
-        self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
+        if options is None:
+            options = {}
+        self.api.logger.info("interface: %s\tmethod-name: %s" %
+                             (self.api.interface, self.name))
         return self.api.manager.GetVersion(self.api, options)

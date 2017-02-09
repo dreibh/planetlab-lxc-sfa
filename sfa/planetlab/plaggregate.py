@@ -26,41 +26,45 @@ from sfa.storage.model import SliverAllocation
 
 import time
 
+
 class PlAggregate:
 
     def __init__(self, driver):
         self.driver = driver
 
     def get_nodes(self, options=None):
-        if options is None: options={}
+        if options is None:
+            options = {}
         filter = {'peer_id': None}
-        geni_available = options.get('geni_available')    
+        geni_available = options.get('geni_available')
         if geni_available == True:
             filter['boot_state'] = 'boot'
         nodes = self.driver.shell.GetNodes(filter)
-       
-        return nodes  
- 
+
+        return nodes
+
     def get_sites(self, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         sites = {}
         for site in self.driver.shell.GetSites(filter):
             sites[site['site_id']] = site
         return sites
 
     def get_interfaces(self, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         interfaces = {}
         for interface in self.driver.shell.GetInterfaces(filter):
             iface = Interface()
             if interface['bwlimit']:
-                interface['bwlimit'] = str(int(interface['bwlimit'])/1000)
+                interface['bwlimit'] = str(int(interface['bwlimit']) / 1000)
             interfaces[interface['interface_id']] = interface
         return interfaces
 
     def get_links(self, sites, nodes, interfaces):
-        
-        topology = Topology() 
+
+        topology = Topology()
         links = []
         for (site_id1, site_id2) in topology:
             site_id1 = int(site_id1)
@@ -82,34 +86,44 @@ class PlAggregate:
                     node2 = nodes[s2_node_id]
                     # set interfaces
                     # just get first interface of the first node
-                    if1_xrn = PlXrn(auth=self.driver.hrn, interface='node%s:eth0' % (node1['node_id']))
+                    if1_xrn = PlXrn(auth=self.driver.hrn,
+                                    interface='node%s:eth0' % (node1['node_id']))
                     if1_ipv4 = interfaces[node1['interface_ids'][0]]['ip']
-                    if2_xrn = PlXrn(auth=self.driver.hrn, interface='node%s:eth0' % (node2['node_id']))
+                    if2_xrn = PlXrn(auth=self.driver.hrn,
+                                    interface='node%s:eth0' % (node2['node_id']))
                     if2_ipv4 = interfaces[node2['interface_ids'][0]]['ip']
 
-                    if1 = Interface({'component_id': if1_xrn.urn, 'ipv4': if1_ipv4} )
-                    if2 = Interface({'component_id': if2_xrn.urn, 'ipv4': if2_ipv4} )
+                    if1 = Interface(
+                        {'component_id': if1_xrn.urn, 'ipv4': if1_ipv4})
+                    if2 = Interface(
+                        {'component_id': if2_xrn.urn, 'ipv4': if2_ipv4})
 
                     # set link
-                    link = Link({'capacity': '1000000', 'latency': '0', 'packet_loss': '0', 'type': 'ipv4'})
+                    link = Link({'capacity': '1000000', 'latency': '0',
+                                 'packet_loss': '0', 'type': 'ipv4'})
                     link['interface1'] = if1
                     link['interface2'] = if2
-                    link['component_name'] = "%s:%s" % (site1['login_base'], site2['login_base'])
-                    link['component_id'] = PlXrn(auth=self.driver.hrn, interface=link['component_name']).get_urn()
-                    link['component_manager_id'] =  hrn_to_urn(self.driver.hrn, 'authority+am')
+                    link['component_name'] = "%s:%s" % (
+                        site1['login_base'], site2['login_base'])
+                    link['component_id'] = PlXrn(auth=self.driver.hrn, interface=link[
+                                                 'component_name']).get_urn()
+                    link['component_manager_id'] = hrn_to_urn(
+                        self.driver.hrn, 'authority+am')
                     links.append(link)
 
         return links
 
     def get_node_tags(self, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         node_tags = {}
-        for node_tag in self.driver.shell.GetNodeTags(filter, ['tagname', 'value', 'node_id', 'node_tag_id'] ):
+        for node_tag in self.driver.shell.GetNodeTags(filter, ['tagname', 'value', 'node_id', 'node_tag_id']):
             node_tags[node_tag['node_tag_id']] = node_tag
         return node_tags
 
     def get_pl_initscripts(self, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         pl_initscripts = {}
         filter.update({'enabled': True})
         for initscript in self.driver.shell.GetInitScripts(filter):
@@ -117,7 +131,8 @@ class PlAggregate:
         return pl_initscripts
 
     def get_slivers(self, urns, options=None):
-        if options is None: options={}
+        if options is None:
+            options = {}
         names = set()
         slice_ids = set()
         node_ids = []
@@ -128,13 +143,13 @@ class PlAggregate:
                  # id: slice_id-node_id
                 try:
                     sliver_id_parts = xrn.get_sliver_id_parts()
-                    slice_id = int(sliver_id_parts[0]) 
+                    slice_id = int(sliver_id_parts[0])
                     node_id = int(sliver_id_parts[1])
-                    slice_ids.add(slice_id) 
+                    slice_ids.add(slice_id)
                     node_ids.append(node_id)
                 except ValueError:
-                    pass 
-            else:  
+                    pass
+            else:
                 slice_hrn = xrn.get_hrn()
 
         filter = {}
@@ -142,21 +157,25 @@ class PlAggregate:
         if slice_ids:
             filter['slice_id'] = list(slice_ids)
         # get all slices
-        fields = ['slice_id', 'name', 'hrn', 'person_ids', 'node_ids', 'slice_tag_ids', 'expires']
+        fields = ['slice_id', 'name', 'hrn', 'person_ids',
+                  'node_ids', 'slice_tag_ids', 'expires']
         all_slices = self.driver.shell.GetSlices(filter, fields)
         if slice_hrn:
-            slices = [slice for slice in all_slices if slice['hrn'] == slice_hrn]
+            slices = [slice for slice in all_slices if slice[
+                'hrn'] == slice_hrn]
         else:
             slices = all_slices
-      
+
         if not slices:
             if slice_hrn:
-                logger.error("PlAggregate.get_slivers : no slice found with hrn {}".format(slice_hrn))
+                logger.error(
+                    "PlAggregate.get_slivers : no slice found with hrn {}".format(slice_hrn))
             else:
-                logger.error("PlAggregate.get_slivers : no sliver found with urns {}".format(urns))
+                logger.error(
+                    "PlAggregate.get_slivers : no sliver found with urns {}".format(urns))
             return []
-        slice = slices[0]     
-        slice['hrn'] = slice_hrn   
+        slice = slices[0]
+        slice['hrn'] = slice_hrn
 
         # get sliver users
         persons = []
@@ -165,37 +184,39 @@ class PlAggregate:
             person_ids.extend(slice['person_ids'])
         if person_ids:
             persons = self.driver.shell.GetPersons(person_ids)
-                 
+
         # get user keys
         keys = {}
         key_ids = []
         for person in persons:
             key_ids.extend(person['key_ids'])
-        
+
         if key_ids:
             key_list = self.driver.shell.GetKeys(key_ids)
             for key in key_list:
-                keys[key['key_id']] = key  
+                keys[key['key_id']] = key
 
         # construct user key info
         users = []
         for person in persons:
-            person_urn = hrn_to_urn(self.driver.shell.GetPersonHrn(int(person['person_id'])), 'user')
+            person_urn = hrn_to_urn(self.driver.shell.GetPersonHrn(
+                int(person['person_id'])), 'user')
             user = {
-                'login': slice['name'], 
+                'login': slice['name'],
                 'user_urn': person_urn,
                 'keys': [keys[k_id]['key'] for k_id in person['key_ids'] if k_id in keys]
             }
             users.append(user)
 
         if node_ids:
-            node_ids = [node_id for node_id in node_ids if node_id in slice['node_ids']]
+            node_ids = [
+                node_id for node_id in node_ids if node_id in slice['node_ids']]
             slice['node_ids'] = node_ids
         pltags_dict = self.get_pltags_by_node_id(slice)
         nodes_dict = self.get_slice_nodes(slice, options)
         slivers = []
         for node in nodes_dict.values():
-            node.update(slice) 
+            node.update(slice)
             # slice-global tags
             node['slice-tags'] = pltags_dict['slice-global']
             # xxx
@@ -204,33 +225,40 @@ class PlAggregate:
             # xxx
             # sliver tags
             node['slice-tags'] += pltags_dict[node['node_id']]
-            sliver_hrn = '%s.%s-%s' % (self.driver.hrn, slice['slice_id'], node['node_id'])
+            sliver_hrn = '%s.%s-%s' % (self.driver.hrn,
+                                       slice['slice_id'], node['node_id'])
             node['sliver_id'] = Xrn(sliver_hrn, type='sliver').urn
-            node['urn'] = node['sliver_id'] 
+            node['urn'] = node['sliver_id']
             node['services_user'] = users
             slivers.append(node)
         if not slivers:
-            logger.warning("PlAggregate.get_slivers : slice(s) found but with no sliver {}".format(urns))
+            logger.warning(
+                "PlAggregate.get_slivers : slice(s) found but with no sliver {}".format(urns))
         return slivers
 
     def node_to_rspec_node(self, node, sites, interfaces, node_tags, pl_initscripts=None, grain=None, options=None):
-        if pl_initscripts is None: pl_initscripts=[]
-        if options is None: options={}
+        if pl_initscripts is None:
+            pl_initscripts = []
+        if options is None:
+            options = {}
         rspec_node = NodeElement()
         # xxx how to retrieve site['login_base']
-        site=sites[node['site_id']]
-        rspec_node['component_id'] = hostname_to_urn(self.driver.hrn, site['login_base'], node['hostname'])
+        site = sites[node['site_id']]
+        rspec_node['component_id'] = hostname_to_urn(
+            self.driver.hrn, site['login_base'], node['hostname'])
         rspec_node['component_name'] = node['hostname']
-        rspec_node['component_manager_id'] = Xrn(self.driver.hrn, 'authority+cm').get_urn()
-        rspec_node['authority_id'] = hrn_to_urn(PlXrn.site_hrn(self.driver.hrn, site['login_base']), 'authority+sa')
+        rspec_node['component_manager_id'] = Xrn(
+            self.driver.hrn, 'authority+cm').get_urn()
+        rspec_node['authority_id'] = hrn_to_urn(PlXrn.site_hrn(
+            self.driver.hrn, site['login_base']), 'authority+sa')
         # do not include boot state (<available> element) in the manifest rspec
         rspec_node['boot_state'] = node['boot_state']
-        if node['boot_state'] == 'boot': 
+        if node['boot_state'] == 'boot':
             rspec_node['available'] = 'true'
         else:
             rspec_node['available'] = 'false'
 
-        #distinguish between Shared and Reservable nodes
+        # distinguish between Shared and Reservable nodes
         if node['node_type'] == 'reservable':
             rspec_node['exclusive'] = 'true'
         else:
@@ -244,13 +272,14 @@ class PlAggregate:
         # add site/interface info to nodes.
         # assumes that sites, interfaces and tags have already been prepared.
         if site['longitude'] and site['latitude']:
-            location = Location({'longitude': site['longitude'], 'latitude': site['latitude'], 'country': 'unknown'})
+            location = Location({'longitude': site['longitude'], 'latitude': site[
+                                'latitude'], 'country': 'unknown'})
             rspec_node['location'] = location
         # Granularity
         granularity = Granularity({'grain': grain})
         rspec_node['granularity'] = granularity
         rspec_node['interfaces'] = []
-        if_count=0
+        if_count = 0
         for if_id in node['interface_ids']:
             interface = Interface(interfaces[if_id])
             interface['ipv4'] = interface['ip']
@@ -260,17 +289,19 @@ class PlAggregate:
             if slice:
                 interface['client_id'] = "%s:%s" % (node['node_id'], if_id)
             rspec_node['interfaces'].append(interface)
-            if_count+=1
+            if_count += 1
         # this is what describes a particular node
-        node_level_tags = [PLTag(node_tags[tag_id]) for tag_id in node['node_tag_ids'] if tag_id in node_tags]
+        node_level_tags = [PLTag(node_tags[tag_id]) for tag_id in node[
+            'node_tag_ids'] if tag_id in node_tags]
         rspec_node['tags'] = node_level_tags
         return rspec_node
 
-    def sliver_to_rspec_node(self, sliver, sites, interfaces, node_tags, sliver_pltags, \
+    def sliver_to_rspec_node(self, sliver, sites, interfaces, node_tags, sliver_pltags,
                              pl_initscripts, sliver_allocations):
         # get the granularity in second for the reservation system
         grain = self.driver.shell.GetLeaseGranularity()
-        rspec_node = self.node_to_rspec_node(sliver, sites, interfaces, node_tags, pl_initscripts, grain)
+        rspec_node = self.node_to_rspec_node(
+            sliver, sites, interfaces, node_tags, pl_initscripts, grain)
         for pltag in sliver_pltags:
             logger.debug("Need to expose {}".format(pltag))
         # xxx how to retrieve site['login_base']
@@ -282,21 +313,23 @@ class PlAggregate:
                                'name': sliver['name'],
                                'type': 'plab-vserver',
                                'tags': sliver_pltags,
-                           })
+                               })
         rspec_node['sliver_id'] = rspec_sliver['sliver_id']
         if sliver['urn'] in sliver_allocations:
-            rspec_node['client_id'] = sliver_allocations[sliver['urn']].client_id
+            rspec_node['client_id'] = sliver_allocations[
+                sliver['urn']].client_id
             if sliver_allocations[sliver['urn']].component_id:
-                rspec_node['component_id'] = sliver_allocations[sliver['urn']].component_id
+                rspec_node['component_id'] = sliver_allocations[
+                    sliver['urn']].component_id
         rspec_node['slivers'] = [rspec_sliver]
 
         # slivers always provide the ssh service
         login = Login({'authentication': 'ssh-keys',
                        'hostname': sliver['hostname'],
-                       'port':'22', 
+                       'port': '22',
                        'username': sliver['name'],
                        'login': sliver['name']
-                      })
+                       })
         service = ServicesElement({'login': login,
                                    'services_user': sliver['services_user']})
         rspec_node['services'] = [service]
@@ -316,7 +349,8 @@ class PlAggregate:
                 pltags_dict[tag['node_id']].append(PLTag(tag))
             # restricted to a nodegroup
             # for now such tags are not exposed to describe
-            # xxx we should also expose the nodegroup name in this case to be complete..
+            # xxx we should also expose the nodegroup name in this case to be
+            # complete..
             elif tag['nodegroup_id']:
                 tag['scope'] = 'nodegroup'
                 pltags_dict['nodegroup'].append(PLTag(tag))
@@ -327,7 +361,8 @@ class PlAggregate:
         return pltags_dict
 
     def get_slice_nodes(self, slice, options=None):
-        if options is None: options={}
+        if options is None:
+            options = {}
         nodes_dict = {}
         filter = {'peer_id': None}
         tags_filter = {}
@@ -336,7 +371,7 @@ class PlAggregate:
         else:
             # there are no nodes to look up
             return nodes_dict
-        tags_filter=filter.copy()
+        tags_filter = filter.copy()
         geni_available = options.get('geni_available')
         if geni_available == True:
             filter['boot_state'] = 'boot'
@@ -346,14 +381,15 @@ class PlAggregate:
         return nodes_dict
 
     def rspec_node_to_geni_sliver(self, rspec_node, sliver_allocations=None):
-        if sliver_allocations is None: sliver_allocations={}
+        if sliver_allocations is None:
+            sliver_allocations = {}
         if rspec_node['sliver_id'] in sliver_allocations:
             # set sliver allocation and operational status
             sliver_allocation = sliver_allocations[rspec_node['sliver_id']]
             if sliver_allocation:
                 allocation_status = sliver_allocation.allocation_state
                 if allocation_status == 'geni_allocated':
-                    op_status =  'geni_pending_allocation'
+                    op_status = 'geni_pending_allocation'
                 elif allocation_status == 'geni_provisioned':
                     if rspec_node['boot_state'] == 'boot':
                         op_status = 'geni_ready'
@@ -362,28 +398,30 @@ class PlAggregate:
                 else:
                     op_status = 'geni_unknown'
             else:
-                allocation_status = 'geni_unallocated'    
+                allocation_status = 'geni_unallocated'
         else:
             allocation_status = 'geni_unallocated'
             op_status = 'geni_failed'
         # required fields
         geni_sliver = {'geni_sliver_urn': rspec_node['sliver_id'],
                        'geni_expires': rspec_node['expires'],
-                       'geni_allocation_status' : allocation_status,
+                       'geni_allocation_status': allocation_status,
                        'geni_operational_status': op_status,
                        'geni_error': '',
                        }
-        return geni_sliver        
+        return geni_sliver
 
     def get_leases(self, slice=None, options=None):
-        if options is None: options={}
-        
+        if options is None:
+            options = {}
+
         now = int(time.time())
-        filter={}
-        filter.update({'clip':now})
+        filter = {}
+        filter.update({'clip': now})
         if slice:
-           filter.update({'name':slice['name']})
-        return_fields = ['lease_id', 'hostname', 'site_id', 'name', 't_from', 't_until']
+            filter.update({'name': slice['name']})
+        return_fields = ['lease_id', 'hostname',
+                         'site_id', 'name', 't_from', 't_until']
         leases = self.driver.shell.GetLeases(filter)
         grain = self.driver.shell.GetLeaseGranularity()
 
@@ -392,38 +430,41 @@ class PlAggregate:
             site_ids.append(lease['site_id'])
 
         # get sites
-        sites_dict  = self.get_sites({'site_id': site_ids}) 
-  
+        sites_dict = self.get_sites({'site_id': site_ids})
+
         rspec_leases = []
         for lease in leases:
 
             rspec_lease = Lease()
-            
-            # xxx how to retrieve site['login_base']
-            site_id=lease['site_id']
-            site=sites_dict[site_id]
 
-            rspec_lease['component_id'] = hrn_to_urn(self.driver.shell.GetNodeHrn(lease['hostname']), 'node')
+            # xxx how to retrieve site['login_base']
+            site_id = lease['site_id']
+            site = sites_dict[site_id]
+
+            rspec_lease['component_id'] = hrn_to_urn(
+                self.driver.shell.GetNodeHrn(lease['hostname']), 'node')
             slice_hrn = self.driver.shell.GetSliceHrn(lease['slice_id'])
             slice_urn = hrn_to_urn(slice_hrn, 'slice')
             rspec_lease['slice_id'] = slice_urn
             rspec_lease['start_time'] = lease['t_from']
-            rspec_lease['duration'] = (lease['t_until'] - lease['t_from']) / grain
+            rspec_lease['duration'] = (
+                lease['t_until'] - lease['t_from']) / grain
             rspec_leases.append(rspec_lease)
         return rspec_leases
 
-    
-    def list_resources(self, version = None, options=None):
-        if options is None: options={}
+    def list_resources(self, version=None, options=None):
+        if options is None:
+            options = {}
 
         version_manager = VersionManager()
         version = version_manager.get_version(version)
-        rspec_version = version_manager._get_version(version.type, version.version, 'ad')
+        rspec_version = version_manager._get_version(
+            version.type, version.version, 'ad')
         rspec = RSpec(version=rspec_version, user_options=options)
-       
+
         if not options.get('list_leases') or options['list_leases'] != 'leases':
             # get nodes
-            nodes  = self.get_nodes(options)
+            nodes = self.get_nodes(options)
             site_ids = []
             interface_ids = []
             tag_ids = []
@@ -434,31 +475,34 @@ class PlAggregate:
                 tag_ids.extend(node['node_tag_ids'])
                 nodes_dict[node['node_id']] = node
             sites = self.get_sites({'site_id': site_ids})
-            interfaces = self.get_interfaces({'interface_id':interface_ids})
+            interfaces = self.get_interfaces({'interface_id': interface_ids})
             node_tags = self.get_node_tags({'node_tag_id': tag_ids})
             pl_initscripts = self.get_pl_initscripts()
             # convert nodes to rspec nodes
             rspec_nodes = []
             for node in nodes:
-                rspec_node = self.node_to_rspec_node(node, sites, interfaces, node_tags, pl_initscripts)
+                rspec_node = self.node_to_rspec_node(
+                    node, sites, interfaces, node_tags, pl_initscripts)
                 rspec_nodes.append(rspec_node)
             rspec.version.add_nodes(rspec_nodes)
 
             # add links
-            links = self.get_links(sites, nodes_dict, interfaces)        
+            links = self.get_links(sites, nodes_dict, interfaces)
             rspec.version.add_links(links)
 
         if not options.get('list_leases') or options.get('list_leases') and options['list_leases'] != 'resources':
-           leases = self.get_leases()
-           rspec.version.add_leases(leases)
+            leases = self.get_leases()
+            rspec.version.add_leases(leases)
 
         return rspec.toxml()
 
     def describe(self, urns, version=None, options=None):
-        if options is None: options={}
+        if options is None:
+            options = {}
         version_manager = VersionManager()
         version = version_manager.get_version(version)
-        rspec_version = version_manager._get_version(version.type, version.version, 'manifest')
+        rspec_version = version_manager._get_version(
+            version.type, version.version, 'manifest')
         rspec = RSpec(version=rspec_version, user_options=options)
 
         # get slivers
@@ -467,19 +511,21 @@ class PlAggregate:
         if slivers:
             rspec_expires = datetime_to_string(utcparse(slivers[0]['expires']))
         else:
-            rspec_expires = datetime_to_string(utcparse(time.time()))      
+            rspec_expires = datetime_to_string(utcparse(time.time()))
         rspec.xml.set('expires',  rspec_expires)
 
         # lookup the sliver allocations
         geni_urn = urns[0]
         sliver_ids = [sliver['sliver_id'] for sliver in slivers]
         constraint = SliverAllocation.sliver_id.in_(sliver_ids)
-        sliver_allocations = self.driver.api.dbsession().query(SliverAllocation).filter(constraint)
+        sliver_allocations = self.driver.api.dbsession().query(
+            SliverAllocation).filter(constraint)
         sliver_allocation_dict = {}
         for sliver_allocation in sliver_allocations:
             geni_urn = sliver_allocation.slice_urn
-            sliver_allocation_dict[sliver_allocation.sliver_id] = sliver_allocation
-      
+            sliver_allocation_dict[
+                sliver_allocation.sliver_id] = sliver_allocation
+
         if not options.get('list_leases') or options['list_leases'] != 'leases':
             # add slivers
             site_ids = []
@@ -492,7 +538,7 @@ class PlAggregate:
                 tag_ids.extend(sliver['node_tag_ids'])
                 nodes_dict[sliver['node_id']] = sliver
             sites = self.get_sites({'site_id': site_ids})
-            interfaces = self.get_interfaces({'interface_id':interface_ids})
+            interfaces = self.get_interfaces({'interface_id': interface_ids})
             node_tags = self.get_node_tags({'node_tag_id': tag_ids})
             pl_initscripts = self.get_pl_initscripts()
             rspec_nodes = []
@@ -500,25 +546,27 @@ class PlAggregate:
                 if sliver['slice_ids_whitelist'] and sliver['slice_id'] not in sliver['slice_ids_whitelist']:
                     continue
                 sliver_pltags = sliver['slice-tags']
-                rspec_node = self.sliver_to_rspec_node(sliver, sites, interfaces, node_tags, sliver_pltags, 
+                rspec_node = self.sliver_to_rspec_node(sliver, sites, interfaces, node_tags, sliver_pltags,
                                                        pl_initscripts, sliver_allocation_dict)
-                logger.debug('rspec of type {}'.format(rspec_node.__class__.__name__))
+                logger.debug('rspec of type {}'.format(
+                    rspec_node.__class__.__name__))
                 # manifest node element shouldn't contain available attribute
                 rspec_node.pop('available')
-                rspec_nodes.append(rspec_node) 
-                geni_sliver = self.rspec_node_to_geni_sliver(rspec_node, sliver_allocation_dict)
+                rspec_nodes.append(rspec_node)
+                geni_sliver = self.rspec_node_to_geni_sliver(
+                    rspec_node, sliver_allocation_dict)
                 geni_slivers.append(geni_sliver)
             rspec.version.add_nodes(rspec_nodes)
 
             # add sliver defaults
             #default_sliver = slivers.get(None, [])
-            #if default_sliver:
+            # if default_sliver:
             #    default_sliver_attribs = default_sliver.get('tags', [])
             #    for attrib in default_sliver_attribs:
             #        rspec.version.add_default_sliver_attribute(attrib['tagname'], attrib['value'])
 
-            # add links 
-            links = self.get_links(sites, nodes_dict, interfaces)        
+            # add links
+            links = self.get_links(sites, nodes_dict, interfaces)
             rspec.version.add_links(links)
 
         if not options.get('list_leases') or options['list_leases'] != 'resources':
@@ -526,7 +574,6 @@ class PlAggregate:
                 leases = self.get_leases(slivers[0])
                 rspec.version.add_leases(leases)
 
-               
-        return {'geni_urn': geni_urn, 
+        return {'geni_urn': geni_urn,
                 'geni_rspec': rspec.toxml(),
                 'geni_slivers': geni_slivers}

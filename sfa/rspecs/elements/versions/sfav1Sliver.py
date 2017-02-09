@@ -19,13 +19,14 @@ class SFAv1Sliver:
             tags = sliver.get('tags', [])
             if tags:
                 for tag in tags:
-                    SFAv1Sliver.add_sliver_attribute(sliver_elem, tag['tagname'], tag['value'])
+                    SFAv1Sliver.add_sliver_attribute(
+                        sliver_elem, tag['tagname'], tag['value'])
 
     @staticmethod
     def add_sliver_attribute(xml, name, value):
         elem = xml.add_element(name)
         elem.set_text(value)
-    
+
     @staticmethod
     def get_sliver_attributes(xml):
         attribs = []
@@ -36,19 +37,19 @@ class SFAv1Sliver:
                 instance['name'] = elem.tag
                 instance['value'] = elem.text
                 attribs.append(instance)
-        return attribs 
-                
+        return attribs
+
     @staticmethod
     def get_slivers(xml, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         xpath = './default:sliver | ./sliver'
         sliver_elems = xml.xpath(xpath)
         slivers = []
         for sliver_elem in sliver_elems:
-            sliver = Sliver(sliver_elem.attrib,sliver_elem)
-            if 'component_id' in xml.attrib:     
+            sliver = Sliver(sliver_elem.attrib, sliver_elem)
+            if 'component_id' in xml.attrib:
                 sliver['component_id'] = xml.attrib['component_id']
             sliver['tags'] = SFAv1Sliver.get_sliver_attributes(sliver_elem)
             slivers.append(sliver)
-        return slivers           
-
+        return slivers

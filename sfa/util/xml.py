@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/python
 from lxml import etree
 from sfa.util.faults import InvalidXML
 from sfa.rspecs.elements.element import Element
@@ -7,22 +7,25 @@ from sfa.util.py23 import StringType
 from sfa.util.py23 import StringIO
 
 # helper functions to help build xpaths
-class XpathFilter:
-    @staticmethod
 
+
+class XpathFilter:
+
+    @staticmethod
     def filter_value(key, value):
-        xpath = ""    
+        xpath = ""
         if isinstance(value, str):
             if '*' in value:
                 value = value.replace('*', '')
                 xpath = 'contains(%s, "%s")' % (key, value)
             else:
-                xpath = '%s="%s"' % (key, value)                
+                xpath = '%s="%s"' % (key, value)
         return xpath
 
     @staticmethod
     def xpath(filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         xpath = ""
         if filter:
             filter_list = []
@@ -30,12 +33,13 @@ class XpathFilter:
                 if key == 'text':
                     key = 'text()'
                 else:
-                    key = '@'+key
+                    key = '@' + key
                 if isinstance(value, str):
                     filter_list.append(XpathFilter.filter_value(key, value))
                 elif isinstance(value, list):
-                    stmt = ' or '.join([XpathFilter.filter_value(key, str(val)) for val in value])
-                    filter_list.append(stmt)   
+                    stmt = ' or '.join(
+                        [XpathFilter.filter_value(key, str(val)) for val in value])
+                    filter_list.append(stmt)
             if filter_list:
                 xpath = ' and '.join(filter_list)
                 xpath = '[' + xpath + ']'
@@ -48,22 +52,25 @@ class XpathFilter:
 # a default namespace defined (xmlns="http://default.com/") and specific prefixes defined
 # (xmlns:foo="http://foo.com")
 # according to the documentation instead of writing
-# element.xpath ( "//node/foo:subnode" ) 
+# element.xpath ( "//node/foo:subnode" )
 # we'd then need to write xpaths like
-# element.xpath ( "//{http://default.com/}node/{http://foo.com}subnode" ) 
+# element.xpath ( "//{http://default.com/}node/{http://foo.com}subnode" )
 # which is a real pain..
 # So just so we can keep some reasonable programming style we need to manage the
-# namespace map that goes with the _Element (its internal .nsmap being unmutable)
+# namespace map that goes with the _Element (its internal .nsmap being
+# unmutable)
+
 
 class XmlElement:
+
     def __init__(self, element, namespaces):
         self.element = element
         self.namespaces = namespaces
-        
+
     # redefine as few methods as possible
     def xpath(self, xpath, namespaces=None):
         if not namespaces:
-            namespaces = self.namespaces 
+            namespaces = self.namespaces
         elems = self.element.xpath(xpath, namespaces=namespaces)
         return [XmlElement(elem, namespaces) for elem in elems]
 
@@ -85,7 +92,8 @@ class XmlElement:
         Returns an instance (dict) of this xml element. The instance
         holds a reference to this xml element.   
         """
-        if fields is None: fields=[]
+        if fields is None:
+            fields = []
         if not instance_class:
             instance_class = Element
         if not fields and hasattr(instance_class, 'fields'):
@@ -97,32 +105,33 @@ class XmlElement:
             instance = instance_class({}, self)
             for field in fields:
                 if field in self.attrib:
-                   instance[field] = self.attrib[field]  
-        return instance             
+                    instance[field] = self.attrib[field]
+        return instance
 
     def add_instance(self, name, instance, fields=None):
         """
         Adds the specifed instance(s) as a child element of this xml 
         element. 
         """
-        if fields is None: fields=[]
+        if fields is None:
+            fields = []
         if not fields and hasattr(instance, 'keys'):
             fields = instance.keys()
         elem = self.add_element(name)
         for field in fields:
             if field in instance and instance[field]:
                 elem.set(field, unicode(instance[field]))
-        return elem                  
+        return elem
 
     def remove_elements(self, name):
         """
         Removes all occurences of an element from the tree. Start at
         specified root_node if specified, otherwise start at tree's root.
         """
-        
+
         if not element_name.startswith('//'):
             element_name = '//' + element_name
-        elements = self.element.xpath('%s ' % name, namespaces=self.namespaces) 
+        elements = self.element.xpath('%s ' % name, namespaces=self.namespaces)
         for element in elements:
             parent = element.getparent()
             parent.remove(element)
@@ -139,26 +148,27 @@ class XmlElement:
 
     def set_text(self, text):
         self.element.text = text
-    
+
     # Element does not have unset ?!?
     def unset(self, key):
         del self.element.attrib[key]
-  
+
     def toxml(self):
-        return etree.tostring(self.element, encoding='UTF-8', pretty_print=True)                    
+        return etree.tostring(self.element, encoding='UTF-8', pretty_print=True)
 
     def __str__(self):
         return self.toxml()
 
-    ### other method calls or attribute access like .text or .tag or .get 
+    # other method calls or attribute access like .text or .tag or .get
     # are redirected on self.element
-    def __getattr__ (self, name):
+    def __getattr__(self, name):
         if not hasattr(self.element, name):
             raise AttributeError(name)
         return getattr(self.element, name)
 
+
 class XML:
- 
+
     def __init__(self, xml=None, namespaces=None):
         self.root = None
         self.namespaces = namespaces
@@ -188,29 +198,30 @@ class XML:
         root = tree.getroot()
         self.namespaces = dict(root.nsmap)
         # set namespaces map
-        if 'default' not in self.namespaces and None in self.namespaces: 
-            # If the 'None' exist, then it's pointing to the default namespace. This makes 
-            # it hard for us to write xpath queries for the default naemspace because lxml 
-            # wont understand a None prefix. We will just associate the default namespeace 
-            # with a key named 'default'.     
+        if 'default' not in self.namespaces and None in self.namespaces:
+            # If the 'None' exist, then it's pointing to the default namespace. This makes
+            # it hard for us to write xpath queries for the default naemspace because lxml
+            # wont understand a None prefix. We will just associate the default namespeace
+            # with a key named 'default'.
             self.namespaces['default'] = self.namespaces.pop(None)
-            
+
         else:
-            self.namespaces['default'] = 'default' 
+            self.namespaces['default'] = 'default'
 
         self.root = XmlElement(root, self.namespaces)
         # set schema
         for key in self.root.attrib.keys():
             if key.endswith('schemaLocation'):
                 # schemaLocation should be at the end of the list.
-                # Use list comprehension to filter out empty strings 
-                schema_parts  = [x for x in self.root.attrib[key].split(' ') if x]
-                self.schema = schema_parts[1]    
-                namespace, schema  = schema_parts[0], schema_parts[1]
+                # Use list comprehension to filter out empty strings
+                schema_parts = [
+                    x for x in self.root.attrib[key].split(' ') if x]
+                self.schema = schema_parts[1]
+                namespace, schema = schema_parts[0], schema_parts[1]
                 break
 
-    def parse_dict(self, d, root_tag_name='xml', element = None):
-        if element is None: 
+    def parse_dict(self, d, root_tag_name='xml', element=None):
+        if element is None:
             if self.root is None:
                 self.parse_xml('<%s/>' % root_tag_name)
             element = self.root.element
@@ -228,7 +239,8 @@ class XML:
                         child_element = etree.SubElement(element, key)
                         self.parse_dict(val, key, child_element)
                     elif isinstance(val, StringType):
-                        child_element = etree.SubElement(element, key).text = val
+                        child_element = etree.SubElement(
+                            element, key).text = val
 
             elif isinstance(value, int):
                 d[key] = unicode(d[key])
@@ -237,7 +249,7 @@ class XML:
 
         # element.attrib.update will explode if DateTimes are in the
         # dcitionary.
-        d=d.copy()
+        d = d.copy()
         # looks like iteritems won't stand side-effects
         for k in d.keys():
             if not isinstance(d[k], StringType):
@@ -268,7 +280,7 @@ class XML:
     def remove_attribute(self, name, element=None):
         if not element:
             element = self.root
-        element.remove_attribute(name) 
+        element.remove_attribute(name)
 
     def add_element(self, *args, **kwds):
         """
@@ -278,7 +290,7 @@ class XML:
         """
         return self.root.add_element(*args, **kwds)
 
-    def remove_elements(self, name, element = None):
+    def remove_elements(self, name, element=None):
         """
         Removes all occurences of an element from the tree. Start at 
         specified root_node if specified, otherwise start at tree's root.   
@@ -308,9 +320,11 @@ class XML:
             for child_elem in list(elem):
                 key = str(child_elem.tag)
                 if key not in attrs:
-                    attrs[key] = [self.get_element_attributes(child_elem, depth-1)]
+                    attrs[key] = [self.get_element_attributes(
+                        child_elem, depth - 1)]
                 else:
-                    attrs[key].append(self.get_element_attributes(child_elem, depth-1))
+                    attrs[key].append(
+                        self.get_element_attributes(child_elem, depth - 1))
         else:
             attrs['child_nodes'] = list(elem)
         return attrs
@@ -319,7 +333,7 @@ class XML:
         return self.root.append(elem)
 
     def iterchildren(self):
-        return self.root.iterchildren()    
+        return self.root.iterchildren()
 
     def merge(self, in_xml):
         pass
@@ -328,8 +342,8 @@ class XML:
         return self.toxml()
 
     def toxml(self):
-        return etree.tostring(self.root.element, encoding='UTF-8', pretty_print=True)  
-    
+        return etree.tostring(self.root.element, encoding='UTF-8', pretty_print=True)
+
     # XXX smbaker, for record.load_from_string
     def todict(self, elem=None):
         if elem is None:
@@ -342,18 +356,17 @@ class XML:
                 d[child.tag] = []
             d[child.tag].append(self.todict(child))
 
-        if len(d)==1 and ("text" in d):
+        if len(d) == 1 and ("text" in d):
             d = d["text"]
 
         return d
-        
+
     def save(self, filename):
         f = open(filename, 'w')
         f.write(self.toxml())
         f.close()
 
-# no RSpec in scope 
-#if __name__ == '__main__':
+# no RSpec in scope
+# if __name__ == '__main__':
 #    rspec = RSpec('/tmp/resources.rspec')
 #    print rspec
-

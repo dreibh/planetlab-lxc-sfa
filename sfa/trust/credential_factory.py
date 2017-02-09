@@ -34,6 +34,7 @@ import re
 # Specifically, this factory can create standard SFA credentials
 # and ABAC credentials from XML strings based on their identifying content
 
+
 class CredentialFactory:
 
     UNKNOWN_CREDENTIAL_TYPE = 'geni_unknown'
@@ -58,12 +59,14 @@ class CredentialFactory:
     @staticmethod
     def createCred(credString=None, credFile=None):
         if not credString and not credFile:
-            raise Exception("CredentialFactory.createCred called with no argument")
+            raise Exception(
+                "CredentialFactory.createCred called with no argument")
         if credFile:
             try:
                 credString = open(credFile).read()
             except Exception as e:
-                logger.info("Error opening credential file %s: %s" % credFile, e)
+                logger.info("Error opening credential file %s: %s" %
+                            credFile, e)
                 return None
 
         # Try to treat the file as JSON, getting the cred_type from the struct
@@ -73,7 +76,8 @@ class CredentialFactory:
                 cred_type = credO['geni_type']
                 credString = credO['geni_value']
         except Exception as e:
-            # It wasn't a struct. So the credString is XML. Pull the type directly from the string
+            # It wasn't a struct. So the credString is XML. Pull the type
+            # directly from the string
             logger.debug("Credential string not JSON: %s" % e)
             cred_type = CredentialFactory.getType(credString)
 
@@ -84,9 +88,11 @@ class CredentialFactory:
             except Exception as e:
                 if credFile:
                     msg = "credString started: %s" % credString[:50]
-                    raise Exception("%s not a parsable SFA credential: %s. " % (credFile, e) + msg)
+                    raise Exception(
+                        "%s not a parsable SFA credential: %s. " % (credFile, e) + msg)
                 else:
-                    raise Exception("SFA Credential not parsable: %s. Cred start: %s..." % (e, credString[:50]))
+                    raise Exception(
+                        "SFA Credential not parsable: %s. Cred start: %s..." % (e, credString[:50]))
 
         elif cred_type == ABACCredential.ABAC_CREDENTIAL_TYPE:
             try:
@@ -94,9 +100,11 @@ class CredentialFactory:
                 return cred
             except Exception as e:
                 if credFile:
-                    raise Exception("%s not a parsable ABAC credential: %s" % (credFile, e))
+                    raise Exception(
+                        "%s not a parsable ABAC credential: %s" % (credFile, e))
                 else:
-                    raise Exception("ABAC Credential not parsable: %s. Cred start: %s..." % (e, credString[:50]))
+                    raise Exception(
+                        "ABAC Credential not parsable: %s. Cred start: %s..." % (e, credString[:50]))
         else:
             raise Exception("Unknown credential type '%s'" % cred_type)
 

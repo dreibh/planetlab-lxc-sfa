@@ -126,7 +126,7 @@ files:
 	@find . -type f | egrep -v '^\./\.|/\.git/|/\.svn/|TAGS|AA-|~$$|egg-info|\.(py[co]|doc|html|pdf|png|svg|out|bak|dg|pickle)$$' 
 
 git-files:
-	@git ls-files | grep -v '\.doc$$'
+	@git ls-files | egrep -v '\.(doc|html|pdf)$$'
 
 tags:	
 	$(MAKE) git-files | xargs etags

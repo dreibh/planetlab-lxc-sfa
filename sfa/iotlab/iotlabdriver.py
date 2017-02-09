@@ -143,7 +143,7 @@ class IotLabDriver(Driver):
         """
         leases = rspec.version.get_leases()
         start_time = min([int(lease['start_time'])
-                         for lease in leases])
+                          for lease in leases])
         # ASAP jobs
         if start_time == 0:
             start_time = None
@@ -152,13 +152,13 @@ class IotLabDriver(Driver):
         # schedule jobs
         else:
             end_time = max([int(lease['start_time']) +
-                            int(lease['duration'])*60
+                            int(lease['duration']) * 60
                             for lease in leases])
             from math import floor
             # minutes
-            duration = floor((end_time - start_time)/60)
+            duration = floor((end_time - start_time) / 60)
         nodes_list = [Xrn.unescape(Xrn(lease['component_id'].strip(),
-                      type='node').get_leaf())
+                                       type='node').get_leaf())
                       for lease in leases]
         # uniq hostnames
         nodes_list = list(set(nodes_list))

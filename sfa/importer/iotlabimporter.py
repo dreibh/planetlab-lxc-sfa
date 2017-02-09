@@ -6,6 +6,7 @@ from sfa.storage.model import init_tables
 from sqlalchemy import Table, MetaData
 from sqlalchemy.exc import NoSuchTableError
 
+
 class IotLabImporter:
     """
     Creates the iotlab specific lease table to keep track
@@ -16,10 +17,10 @@ class IotLabImporter:
         self.logger = loc_logger
         self.logger.setLevelDebug()
 
-    def add_options (self, parser):
+    def add_options(self, parser):
         """ Not used and need by SFA """
         pass
-    
+
     def _exists(self, tablename):
         """
         Checks if the table exists in SFA database.
@@ -31,7 +32,6 @@ class IotLabImporter:
 
         except NoSuchTableError:
             return False
-     
 
     def run(self, options):
         """ Run importer"""

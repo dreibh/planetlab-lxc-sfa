@@ -8,6 +8,7 @@ from sfa.trust.credential import Credential
 
 from sfa.storage.parameter import Parameter, Mixed
 
+
 class ListResources(Method):
     """
     Returns information about available resources
@@ -17,42 +18,45 @@ class ListResources(Method):
     """
     interfaces = ['aggregate', 'slicemgr']
     accepts = [
-        Mixed(Parameter(str, "Credential string"), 
+        Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
         Parameter(dict, "Options")
-        ]
+    ]
     returns = Parameter(str, "List of resources")
 
     def call(self, creds, options):
-        self.api.logger.info("interface: %s\tmethod-name: %s" % (self.api.interface, self.name))
-       
+        self.api.logger.info("interface: %s\tmethod-name: %s" %
+                             (self.api.interface, self.name))
+
         # client must specify a version
         if not options.get('geni_rspec_version'):
             if options.get('rspec_version'):
                 options['geni_rspec_version'] = options['rspec_version']
             else:
-                raise SfaInvalidArgument('Must specify an rspec version option. geni_rspec_version cannot be null')
+                raise SfaInvalidArgument(
+                    'Must specify an rspec version option. geni_rspec_version cannot be null')
 
         # Find the valid credentials
-        valid_creds = self.api.auth.checkCredentialsSpeaksFor(creds, 'listnodes', options=options)
+        valid_creds = self.api.auth.checkCredentialsSpeaksFor(
+            creds, 'listnodes', options=options)
 
-        # get hrn of the original caller 
+        # get hrn of the original caller
         origin_hrn = options.get('origin_hrn', None)
         if not origin_hrn:
-            origin_hrn = Credential(cred=valid_creds[0]).get_gid_caller().get_hrn()
+            origin_hrn = Credential(
+                cred=valid_creds[0]).get_gid_caller().get_hrn()
         rspec = self.api.manager.ListResources(self.api, creds, options)
 
-        # filter rspec through sfatables 
+        # filter rspec through sfatables
         if self.api.interface in ['aggregate']:
             chain_name = 'OUTGOING'
-        elif self.api.interface in ['slicemgr']: 
+        elif self.api.interface in ['slicemgr']:
             chain_name = 'FORWARD-OUTGOING'
-        self.api.logger.debug("ListResources: sfatables on chain %s"%chain_name)
-        filtered_rspec = run_sfatables(chain_name, '', origin_hrn, rspec) 
- 
+        self.api.logger.debug(
+            "ListResources: sfatables on chain %s" % chain_name)
+        filtered_rspec = run_sfatables(chain_name, '', origin_hrn, rspec)
+
         if 'geni_compressed' in options and options['geni_compressed'] == True:
             filtered_rspec = zlib.compress(filtered_rspec).encode('base64')
 
-        return filtered_rspec  
-    
-    
+        return filtered_rspec

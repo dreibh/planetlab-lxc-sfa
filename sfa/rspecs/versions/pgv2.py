@@ -10,6 +10,7 @@ from sfa.rspecs.elements.versions.pgv2Lease import PGv2Lease
 from sfa.util.sfalogging import logger
 from sfa.util.py23 import StringType
 
+
 class PGv2(RSpecVersion):
     type = 'ProtoGENI'
     content_type = 'ad'
@@ -51,18 +52,19 @@ class PGv2(RSpecVersion):
 
     def add_nodes(self, nodes, check_for_dupes=False, rspec_content_type=None):
         return PGv2Node.add_nodes(self.xml, nodes, rspec_content_type)
-    
+
     def merge_node(self, source_node_tag):
         # this is untested
         self.xml.root.append(deepcopy(source_node_tag))
 
     # Slivers
-    
+
     def get_sliver_attributes(self, component_id, network=None):
-        nodes = self.get_nodes({'component_id': '*%s*' %component_id})
+        nodes = self.get_nodes({'component_id': '*%s*' % component_id})
         try:
             node = nodes[0]
-            sliver = node.xpath('./default:sliver_type', namespaces=self.namespaces)
+            sliver = node.xpath('./default:sliver_type',
+                                namespaces=self.namespaces)
             if sliver is not None and isinstance(sliver, list) and len(sliver) > 0:
                 sliver = sliver[0]
                 return self.attributes_list(sliver)
@@ -77,21 +79,25 @@ class PGv2(RSpecVersion):
         # TODO: default sliver attributes in the PG rspec?
         default_ns_prefix = self.namespaces['default']
         for node in nodes_with_slivers:
-            sliver_attributes = self.get_sliver_attributes(node['component_id'], network)
+            sliver_attributes = self.get_sliver_attributes(
+                node['component_id'], network)
             for sliver_attribute in sliver_attributes:
-                name=str(sliver_attribute[0])
-                text =str(sliver_attribute[1])
+                name = str(sliver_attribute[0])
+                text = str(sliver_attribute[1])
                 attribs = sliver_attribute[2]
-                # we currently only suppor the <initscript> and <flack> attributes
-                if  'info' in name:
-                    attribute = {'name': 'flack_info', 'value': str(attribs), 'node_id': node}
+                # we currently only suppor the <initscript> and <flack>
+                # attributes
+                if 'info' in name:
+                    attribute = {'name': 'flack_info',
+                                 'value': str(attribs), 'node_id': node}
                     slice_attributes.append(attribute)
                 elif 'initscript' in name:
                     if attribs is not None and 'name' in attribs:
                         value = attribs['name']
                     else:
                         value = text
-                    attribute = {'name': 'initscript', 'value': value, 'node_id': node}
+                    attribute = {'name': 'initscript',
+                                 'value': value, 'node_id': node}
                     slice_attributes.append(attribute)
 
         return slice_attributes
@@ -110,7 +116,8 @@ class PGv2(RSpecVersion):
         pass
 
     def add_slivers(self, hostnames, attributes=None, sliver_urn=None, append=False):
-        if attributes is None: attributes=[]
+        if attributes is None:
+            attributes = []
         # all nodes hould already be present in the rspec. Remove all
         # nodes that done have slivers
         for hostname in hostnames:
@@ -118,27 +125,28 @@ class PGv2(RSpecVersion):
             if not node_elems:
                 continue
             node_elem = node_elems[0]
-            
+
             # determine sliver types for this node
-            valid_sliver_types = ['emulab-openvz', 'raw-pc', 'plab-vserver', 'plab-vnode']
+            valid_sliver_types = ['emulab-openvz',
+                                  'raw-pc', 'plab-vserver', 'plab-vnode']
             requested_sliver_type = None
             for sliver_type in node_elem.get('slivers', []):
                 if sliver_type.get('type') in valid_sliver_types:
                     requested_sliver_type = sliver_type['type']
-            
+
             if not requested_sliver_type:
                 continue
             sliver = {'type': requested_sliver_type,
-                     'pl_tags': attributes}
+                      'pl_tags': attributes}
 
             # remove available element
             for available_elem in node_elem.xpath('./default:available | ./available'):
                 node_elem.remove(available_elem)
-            
+
             # remove interface elements
             for interface_elem in node_elem.xpath('./default:interface | ./interface'):
                 node_elem.remove(interface_elem)
-        
+
             # remove existing sliver_type elements
             for sliver_type in node_elem.get('slivers', []):
                 node_elem.element.remove(sliver_type.element)
@@ -154,8 +162,8 @@ class PGv2(RSpecVersion):
                 #sliver_id = Xrn(xrn=sliver_urn, type='slice', id=str(node_id)).get_urn()
                 #node_elem.set('sliver_id', sliver_id)
 
-            # add the sliver type elemnt    
-            PGv2SliverType.add_slivers(node_elem.element, sliver)         
+            # add the sliver type elemnt
+            PGv2SliverType.add_slivers(node_elem.element, sliver)
 
         # remove all nodes without slivers
         if not append:
@@ -165,7 +173,7 @@ class PGv2(RSpecVersion):
                     parent.remove(node_elem.element)
 
     def remove_slivers(self, slivers, network=None, no_dupes=False):
-        PGv2Node.remove_slivers(self.xml, slivers) 
+        PGv2Node.remove_slivers(self.xml, slivers)
 
     # Links
 
@@ -173,7 +181,7 @@ class PGv2(RSpecVersion):
         return PGv2Link.get_links(self.xml)
 
     def get_link_requests(self):
-        return PGv2Link.get_link_requests(self.xml)  
+        return PGv2Link.get_link_requests(self.xml)
 
     def add_links(self, links):
         PGv2Link.add_links(self.xml.root, links)
@@ -186,7 +194,7 @@ class PGv2(RSpecVersion):
     def get_leases(self, filter=None):
         return PGv2Lease.get_leases(self.xml, filter)
 
-    def add_leases(self, leases, network = None, no_dupes=False):
+    def add_leases(self, leases, network=None, no_dupes=False):
         PGv2Lease.add_leases(self.xml, leases)
 
     # Spectrum
@@ -194,7 +202,7 @@ class PGv2(RSpecVersion):
     def get_channels(self, filter=None):
         return []
 
-    def add_channels(self, channels, network = None, no_dupes=False):
+    def add_channels(self, channels, network=None, no_dupes=False):
         pass
 
     # Utility
@@ -220,16 +228,14 @@ class PGv2(RSpecVersion):
                 main_nodes.append(node)
         self.add_nodes(main_nodes)
         self.add_links(in_rspec.version.get_links())
-        
+
         # Leases
         leases = in_rspec.version.get_leases()
         self.add_leases(leases)
         #
         #rspec = RSpec(in_rspec)
-        #for child in rspec.xml.iterchildren():
+        # for child in rspec.xml.iterchildren():
         #    self.xml.root.append(child)
-        
-        
 
     def cleanup(self):
         # remove unncecessary elements, attributes
@@ -237,11 +243,13 @@ class PGv2(RSpecVersion):
             # remove 'available' element from remaining node elements
             self.xml.remove_element('//default:available | //available')
 
+
 class PGv2Ad(PGv2):
     enabled = True
     content_type = 'ad'
     schema = 'http://www.protogeni.net/resources/rspec/2/ad.xsd'
     template = '<rspec type="advertisement" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/ad.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
+
 
 class PGv2Request(PGv2):
     enabled = True
@@ -249,13 +257,12 @@ class PGv2Request(PGv2):
     schema = 'http://www.protogeni.net/resources/rspec/2/request.xsd'
     template = '<rspec type="request" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/request.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
 
+
 class PGv2Manifest(PGv2):
     enabled = True
     content_type = 'manifest'
     schema = 'http://www.protogeni.net/resources/rspec/2/manifest.xsd'
     template = '<rspec type="manifest" xmlns="http://www.protogeni.net/resources/rspec/2" xmlns:plos="http://www.planet-lab.org/resources/sfa/ext/plos/1" xmlns:flack="http://www.protogeni.net/resources/rspec/ext/flack/1" xmlns:planetlab="http://www.planet-lab.org/resources/sfa/ext/planetlab/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.protogeni.net/resources/rspec/2 http://www.protogeni.net/resources/rspec/2/manifest.xsd http://www.planet-lab.org/resources/sfa/ext/planetlab/1 http://www.planet-lab.org/resources/sfa/ext/planetlab/1/planetlab.xsd http://www.planet-lab.org/resources/sfa/ext/plos/1 http://www.planet-lab.org/resources/sfa/ext/plos/1/plos.xsd"/>'
-
-     
 
 
 if __name__ == '__main__':

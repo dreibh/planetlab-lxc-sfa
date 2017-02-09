@@ -1,4 +1,4 @@
-## Please use make index to update this file
+# Please use make index to update this file
 all = """
 Allocate
 CreateGid

@@ -13,6 +13,7 @@ from sfa.rspecs.elements.versions.nitosv1Sliver import NITOSv1Sliver
 from sfa.rspecs.elements.versions.nitosv1Lease import NITOSv1Lease
 from sfa.rspecs.elements.versions.nitosv1Channel import NITOSv1Channel
 
+
 class NITOSv1(RSpecVersion):
     enabled = True
     type = 'NITOS'
@@ -24,13 +25,12 @@ class NITOSv1(RSpecVersion):
     namespaces = None
     template = '<RSpec type="%s"></RSpec>' % type
 
-    # Network 
+    # Network
     def get_networks(self):
         network_elems = self.xml.xpath('//network')
-        networks = [network_elem.get_instance(fields=['name', 'slice']) for \
+        networks = [network_elem.get_instance(fields=['name', 'slice']) for
                     network_elem in network_elems]
-        return networks    
-
+        return networks
 
     def add_network(self, network):
         network_tags = self.xml.xpath('//network[@name="%s"]' % network)
@@ -40,16 +40,15 @@ class NITOSv1(RSpecVersion):
             network_tag = network_tags[0]
         return network_tag
 
-
     # Nodes
-    
+
     def get_nodes(self, filter=None):
         return NITOSv1Node.get_nodes(self.xml, filter)
 
     def get_nodes_with_slivers(self):
         return NITOSv1Node.get_nodes_with_slivers(self.xml)
 
-    def add_nodes(self, nodes, network = None, no_dupes=False, rspec_content_type=None):
+    def add_nodes(self, nodes, network=None, no_dupes=False, rspec_content_type=None):
         NITOSv1Node.add_nodes(self.xml, nodes, rspec_content_type)
 
     def merge_node(self, source_node_tag, network, no_dupes=False):
@@ -61,9 +60,10 @@ class NITOSv1(RSpecVersion):
         network_tag.append(deepcopy(source_node_tag))
 
     # Slivers
-   
+
     def add_slivers(self, hostnames, attributes=None, sliver_urn=None, append=False):
-        if attributes is None: attributes=[]
+        if attributes is None:
+            attributes = []
         # add slice name to network tag
         network_tags = self.xml.xpath('//network')
         if network_tags:
@@ -71,7 +71,7 @@ class NITOSv1(RSpecVersion):
             network_tag.set('slice', urn_to_hrn(sliver_urn)[0])
 
         # add slivers
-        sliver = {'name':sliver_urn,
+        sliver = {'name': sliver_urn,
                   'pl_tags': attributes}
         for hostname in hostnames:
             if sliver_urn:
@@ -89,10 +89,9 @@ class NITOSv1(RSpecVersion):
                     parent = node_elem.element.getparent()
                     parent.remove(node_elem.element)
 
-
     def remove_slivers(self, slivers, network=None, no_dupes=False):
         NITOSv1Node.remove_slivers(self.xml, slivers)
- 
+
     def get_slice_attributes(self, network=None):
         attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers()
@@ -101,13 +100,12 @@ class NITOSv1(RSpecVersion):
             attribute['node_id'] = None
             attributes.append(attribute)
         for node in nodes_with_slivers:
-            nodename=node['component_name']
+            nodename = node['component_name']
             sliver_attributes = self.get_sliver_attributes(nodename, network)
             for sliver_attribute in sliver_attributes:
                 sliver_attribute['node_id'] = nodename
                 attributes.append(sliver_attribute)
         return attributes
-
 
     def add_sliver_attribute(self, component_id, name, value, network=None):
         nodes = self.get_nodes({'component_id': '*%s*' % component_id})
@@ -119,7 +117,8 @@ class NITOSv1(RSpecVersion):
                 NITOSv1Sliver.add_sliver_attribute(sliver, name, value)
         else:
             # should this be an assert / raise an exception?
-            logger.error("WARNING: failed to find component_id %s" % component_id)
+            logger.error("WARNING: failed to find component_id %s" %
+                         component_id)
 
     def get_sliver_attributes(self, component_id, network=None):
         nodes = self.get_nodes({'component_id': '*%s*' % component_id})
@@ -136,20 +135,21 @@ class NITOSv1(RSpecVersion):
         attribs = self.get_sliver_attributes(component_id)
         for attrib in attribs:
             if attrib['name'] == name and attrib['value'] == value:
-                #attrib.element.delete()
+                # attrib.element.delete()
                 parent = attrib.element.getparent()
                 parent.remove(attrib.element)
 
     def add_default_sliver_attribute(self, name, value, network=None):
         if network:
-            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
+            defaults = self.xml.xpath(
+                "//network[@name='%s']/sliver_defaults" % network)
         else:
             defaults = self.xml.xpath("//sliver_defaults")
         if not defaults:
             if network:
                 network_tag = self.xml.xpath("//network[@name='%s']" % network)
             else:
-                network_tag = self.xml.xpath("//network")    
+                network_tag = self.xml.xpath("//network")
             if isinstance(network_tag, list):
                 network_tag = network_tag[0]
             defaults = network_tag.add_element('sliver_defaults')
@@ -159,17 +159,19 @@ class NITOSv1(RSpecVersion):
 
     def get_default_sliver_attributes(self, network=None):
         if network:
-            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
+            defaults = self.xml.xpath(
+                "//network[@name='%s']/sliver_defaults" % network)
         else:
             defaults = self.xml.xpath("//sliver_defaults")
-        if not defaults: return []
+        if not defaults:
+            return []
         return NITOSv1Sliver.get_sliver_attributes(defaults[0])
-    
+
     def remove_default_sliver_attribute(self, name, value, network=None):
         attribs = self.get_default_sliver_attributes(network)
         for attrib in attribs:
             if attrib['name'] == name and attrib['value'] == value:
-                #attrib.element.delete()
+                # attrib.element.delete()
                 parent = attrib.element.getparent()
                 parent.remove(attrib.element)
 
@@ -183,6 +185,7 @@ class NITOSv1(RSpecVersion):
 
     def add_links(self, links):
         pass
+
     def add_link_requests(self, links):
         pass
 
@@ -220,7 +223,7 @@ class NITOSv1(RSpecVersion):
     def get_leases(self, filter=None):
         return NITOSv1Lease.get_leases(self.xml, filter)
 
-    def add_leases(self, leases_channels, network = None, no_dupes=False):
+    def add_leases(self, leases_channels, network=None, no_dupes=False):
         leases, channels = leases_channels
         NITOSv1Lease.add_leases(self.xml, leases, channels)
 
@@ -229,9 +232,8 @@ class NITOSv1(RSpecVersion):
     def get_channels(self, filter=None):
         return NITOSv1Channel.get_channels(self.xml, filter)
 
-    def add_channels(self, channels, network = None, no_dupes=False):
+    def add_channels(self, channels, network=None, no_dupes=False):
         NITOSv1Channel.add_channels(self.xml, channels)
-
 
 
 if __name__ == '__main__':

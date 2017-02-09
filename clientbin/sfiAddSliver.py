@@ -19,13 +19,13 @@ if not command.opts.nodefile:
     print "Missing node list -- exiting"
     command.parser.print_help()
     sys.exit(1)
-    
+
 if command.opts.infile:
     infile = open(command.opts.infile)
 else:
     infile = sys.stdin
 if command.opts.outfile:
-    outfile = open(command.opts.outfile,"w")
+    outfile = open(command.opts.outfile, "w")
 else:
     outfile = sys.stdout
 ad_rspec = RSpec(infile)
@@ -34,7 +34,8 @@ version_manager = VersionManager()
 try:
     type = ad_rspec.version.type
     version_num = ad_rspec.version.version
-    request_version = version_manager._get_version(type, version_num, 'request')    
+    request_version = version_manager._get_version(
+        type, version_num, 'request')
     request_rspec = RSpec(version=request_version)
     request_rspec.version.merge(ad_rspec)
     request_rspec.version.add_slivers(nodes)

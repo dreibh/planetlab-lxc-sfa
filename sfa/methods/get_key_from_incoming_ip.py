@@ -3,6 +3,7 @@ from sfa.util.sfalogging import logger
 
 from sfa.storage.parameter import Parameter
 
+
 class get_key_from_incoming_ip(Method):
     """
     Generate a new keypair and gid for requesting caller (component/node).     
@@ -11,14 +12,15 @@ class get_key_from_incoming_ip(Method):
     """
 
     interfaces = ['registry']
-    
+
     accepts = []
 
     returns = Parameter(int, "1 if successful, faults otherwise")
-    
+
     def call(self):
-        if hasattr(self.api.manager,'get_key_from_incoming_ip'):
-            return self.api.manager.get_key_from_incoming_ip (api)
+        if hasattr(self.api.manager, 'get_key_from_incoming_ip'):
+            return self.api.manager.get_key_from_incoming_ip(api)
         else:
-            logger.warning("get_key_from_incoming_ip not supported by registry manager")
+            logger.warning(
+                "get_key_from_incoming_ip not supported by registry manager")
             return 0

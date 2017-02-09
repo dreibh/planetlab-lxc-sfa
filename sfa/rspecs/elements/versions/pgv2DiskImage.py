@@ -1,20 +1,22 @@
 from sfa.rspecs.elements.element import Element
 from sfa.rspecs.elements.disk_image import DiskImage
 
+
 class PGv2DiskImage:
 
     @staticmethod
     def add_images(xml, images):
         if not images:
-            return 
+            return
         if not isinstance(images, list):
             images = [images]
-        for image in images: 
+        for image in images:
             xml.add_instance('disk_image', image, DiskImage.fields)
-    
+
     @staticmethod
     def get_images(xml, filter=None):
-        if filter is None: filter={}
+        if filter is None:
+            filter = {}
         xpath = './default:disk_image | ./disk_image'
         image_elems = xml.xpath(xpath)
         images = []
@@ -22,4 +24,3 @@ class PGv2DiskImage:
             image = DiskImage(image_elem.attrib, image_elem)
             images.append(image)
         return images
-

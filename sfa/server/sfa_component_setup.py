@@ -21,9 +21,11 @@ from sfa.planetlab.plxrn import hrn_to_pl_slicename, slicename_to_hrn
 KEYDIR = "/var/lib/sfa/"
 CONFDIR = "/etc/sfa/"
 
+
 def handle_gid_mismatch_exception(f):
     def wrapper(*args, **kwds):
-        try: return f(*args, **kwds)
+        try:
+            return f(*args, **kwds)
         except ConnectionKeyGIDMismatch:
             # clean regen server keypair and try again
             print("cleaning keys and trying again")
@@ -32,14 +34,15 @@ def handle_gid_mismatch_exception(f):
 
     return wrapper
 
-def server_proxy(url=None, port=None, keyfile=None, certfile=None,verbose=False):
+
+def server_proxy(url=None, port=None, keyfile=None, certfile=None, verbose=False):
     """
     returns an xmlrpc connection to the service a the specified 
     address
     """
     if url:
         url_parts = url.split(":")
-        if len(url_parts) >1:
+        if len(url_parts) > 1:
             pass
         else:
             url = "http://%(url)s:%(port)s" % locals()
@@ -53,8 +56,8 @@ def server_proxy(url=None, port=None, keyfile=None, certfile=None,verbose=False)
         print("Contacting registry at: %(url)s" % locals())
 
     server = SfaServerProxy(url, keyfile, certfile)
-    return server    
-    
+    return server
+
 
 def create_default_dirs():
     config = Config()
@@ -67,9 +70,11 @@ def create_default_dirs():
         if not os.path.exists(dir):
             os.makedirs(dir)
 
+
 def has_node_key():
     key_file = KEYDIR + os.sep + 'server.key'
-    return os.path.exists(key_file) 
+    return os.path.exists(key_file)
+
 
 def clean_key_cred():
     """
@@ -80,17 +85,17 @@ def clean_key_cred():
         filepath = KEYDIR + os.sep + f
         if os.path.isfile(filepath):
             os.unlink(f)
-   
+
     # install the new key pair
     # GetCredential will take care of generating the new keypair
-    # and credential 
+    # and credential
     GetCredential()
-    
-             
+
+
 def get_node_key(registry=None, verbose=False):
-    # this call requires no authentication, 
+    # this call requires no authentication,
     # so we can generate a random keypair here
-    subject="component"
+    subject = "component"
     (kfd, keyfile) = tempfile.mkstemp()
     (cfd, certfile) = tempfile.mkstemp()
     key = Keypair(create=True)
@@ -100,9 +105,10 @@ def get_node_key(registry=None, verbose=False):
     cert.set_pubkey(key)
     cert.sign()
     cert.save_to_file(certfile)
-    
-    registry = server_proxy(url = registry, keyfile=keyfile, certfile=certfile)    
+
+    registry = server_proxy(url=registry, keyfile=keyfile, certfile=certfile)
     registry.get_key_from_incoming_ip()
+
 
 def create_server_keypair(keyfile=None, certfile=None, hrn="component", verbose=False):
     """
@@ -114,48 +120,51 @@ def create_server_keypair(keyfile=None, certfile=None, hrn="component", verbose=
     cert.set_issuer(key=key, subject=hrn)
     cert.set_pubkey(key)
     cert.sign()
-    cert.save_to_file(certfile, save_parents=True)       
+    cert.save_to_file(certfile, save_parents=True)
+
 
 @handle_gid_mismatch_exception
 def GetCredential(registry=None, force=False, verbose=False):
     config = Config()
     hierarchy = Hierarchy()
-    key_dir= hierarchy.basedir
+    key_dir = hierarchy.basedir
     data_dir = config.data_path
     config_dir = config.config_path
     credfile = data_dir + os.sep + 'node.cred'
     # check for existing credential
     if not force and os.path.exists(credfile):
         if verbose:
-            print("Loading Credential from %(credfile)s " % locals())  
+            print("Loading Credential from %(credfile)s " % locals())
         cred = Credential(filename=credfile).save_to_string(save_parents=True)
     else:
         if verbose:
-            print("Getting credential from registry") 
+            print("Getting credential from registry")
         # make sure node private key exists
         node_pkey_file = config_dir + os.sep + "node.key"
         node_gid_file = config_dir + os.sep + "node.gid"
         if not os.path.exists(node_pkey_file) or \
            not os.path.exists(node_gid_file):
             get_node_key(registry=registry, verbose=verbose)
-        
+
         gid = GID(filename=node_gid_file)
         hrn = gid.get_hrn()
         # create server key and certificate
-        keyfile =data_dir + os.sep + "server.key"
+        keyfile = data_dir + os.sep + "server.key"
         certfile = data_dir + os.sep + "server.cert"
         key = Keypair(filename=node_pkey_file)
         key.save_to_file(keyfile)
         create_server_keypair(keyfile, certfile, hrn, verbose)
 
-        # get credential from registry 
-        registry = server_proxy(url=registry, keyfile=keyfile, certfile=certfile)
+        # get credential from registry
+        registry = server_proxy(
+            url=registry, keyfile=keyfile, certfile=certfile)
         cert = Certificate(filename=certfile)
         cert_str = cert.save_to_string(save_parents=True)
         cred = registry.GetSelfCredential(cert_str, 'node', hrn)
         Credential(string=cred).save_to_file(credfile, save_parents=True)
-    
+
     return cred
+
 
 @handle_gid_mismatch_exception
 def get_trusted_certs(registry=None, verbose=False):
@@ -175,13 +184,14 @@ def get_trusted_certs(registry=None, verbose=False):
     # get credential
     cred = GetCredential(registry=registry, verbose=verbose)
     # make sure server key cert pair exists
-    create_server_keypair(keyfile=keyfile, certfile=certfile, hrn=hrn, verbose=verbose)
+    create_server_keypair(
+        keyfile=keyfile, certfile=certfile, hrn=hrn, verbose=verbose)
     registry = server_proxy(url=registry, keyfile=keyfile, certfile=certfile)
     # get the trusted certs and save them in the right place
     if verbose:
         print("Getting trusted certs from registry")
     trusted_certs = registry.get_trusted_certs(cred)
-    trusted_gid_names = [] 
+    trusted_gid_names = []
     for gid_str in trusted_certs:
         gid = GID(string=gid_str)
         gid.decode()
@@ -189,7 +199,7 @@ def get_trusted_certs(registry=None, verbose=False):
         trusted_gid_names.append(relative_filename)
         gid_filename = trusted_certs_dir + os.sep + relative_filename
         if verbose:
-            print("Writing GID for %s as %s" % (gid.get_hrn(), gid_filename)) 
+            print("Writing GID for %s as %s" % (gid.get_hrn(), gid_filename))
         gid.save_to_file(gid_filename, save_parents=True)
 
     # remove old certs
@@ -198,7 +208,8 @@ def get_trusted_certs(registry=None, verbose=False):
         if gid_name not in trusted_gid_names:
             if verbose:
                 print("Removing old gid ", gid_name)
-            os.unlink(trusted_certs_dir + os.sep + gid_name)                     
+            os.unlink(trusted_certs_dir + os.sep + gid_name)
+
 
 @handle_gid_mismatch_exception
 def get_gids(registry=None, verbose=False):
@@ -220,14 +231,15 @@ def get_gids(registry=None, verbose=False):
     # get credential
     cred = GetCredential(registry=registry, verbose=verbose)
     # make sure server key cert pair exists
-    create_server_keypair(keyfile=keyfile, certfile=certfile, hrn=hrn, verbose=verbose)
+    create_server_keypair(
+        keyfile=keyfile, certfile=certfile, hrn=hrn, verbose=verbose)
     registry = server_proxy(url=registry, keyfile=keyfile, certfile=certfile)
-            
+
     if verbose:
         print("Getting current slices on this node")
     # get a list of slices on this node
     from sfa.generic import Generic
-    generic=Generic.the_flavour()
+    generic = Generic.the_flavour()
     api = generic.make_api(interface='component')
     xids_tuple = api.driver.nodemanager.GetXIDs()
     slices = eval(xids_tuple[1])
@@ -237,19 +249,19 @@ def get_gids(registry=None, verbose=False):
     slices_without_gids = []
     for slicename in slicenames:
         if not os.path.isfile("/vservers/%s/etc/slice.gid" % slicename) \
-        or not os.path.isfile("/vservers/%s/etc/node.gid" % slicename):
-            slices_without_gids.append(slicename) 
-    
+                or not os.path.isfile("/vservers/%s/etc/node.gid" % slicename):
+            slices_without_gids.append(slicename)
+
     # convert slicenames to hrns
-    hrns = [slicename_to_hrn(interface_hrn, slicename) \
+    hrns = [slicename_to_hrn(interface_hrn, slicename)
             for slicename in slices_without_gids]
-    
+
     # exit if there are no gids to install
     if not hrns:
         return
-        
+
     if verbose:
-        print("Getting gids for slices on this node from registry")  
+        print("Getting gids for slices on this node from registry")
     # get the gids
     # and save them in the right palce
     records = registry.GetGids(hrns, cred)
@@ -261,7 +273,7 @@ def get_gids(registry=None, verbose=False):
         # if this slice isnt really instatiated skip it
         if not os.path.exists("/vservers/%(slicename)s" % locals()):
             continue
-       
+
         # save the slice gid in /etc/sfa/ in the vservers filesystem
         vserver_path = "/vservers/%(slicename)s" % locals()
         gid = record['gid']
@@ -273,8 +285,8 @@ def get_gids(registry=None, verbose=False):
         node_gid_filename = os.sep.join([vserver_path, "etc", "node.gid"])
         if verbose:
             print("Saving node GID for %(slicename)s as %(node_gid_filename)s" % locals())
-        node_gid.save_to_file(node_gid_filename, save_parents=True) 
-                
+        node_gid.save_to_file(node_gid_filename, save_parents=True)
+
 
 def dispatch(options, args):
 
@@ -287,26 +299,27 @@ def dispatch(options, args):
         if options.verbose:
             print("Getting the component's trusted certs")
         get_trusted_certs(verbose=options.verbose)
-    if options.gids:        
+    if options.gids:
         if options.verbose:
             print("Geting the component's GIDs")
         get_gids(verbose=options.verbose)
+
 
 def main():
     args = sys.argv
     prog_name = args[0]
     parser = OptionParser(usage="%(prog_name)s [options]" % locals())
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
-                      default=False, help="Be verbose") 
+                      default=False, help="Be verbose")
     parser.add_option("-r", "--registry", dest="registry", default=None,
-                      help="Url of registry to contact")  
-    parser.add_option("-k", "--key", dest="key", action="store_true", 
-                     default=False,  
-                     help="Get the node's pkey from the registry")
+                      help="Url of registry to contact")
+    parser.add_option("-k", "--key", dest="key", action="store_true",
+                      default=False,
+                      help="Get the node's pkey from the registry")
     parser.add_option("-c", "--certs", dest="certs", action="store_true",
                       default=False,
                       help="Get the trusted certs from the registry")
-    parser.add_option("-g", "--gids", dest="gids", action="store_true",       
+    parser.add_option("-g", "--gids", dest="gids", action="store_true",
                       default=False,
                       help="Get gids for all the slices on the component")
 
@@ -315,4 +328,4 @@ def main():
     dispatch(options, args)
 
 if __name__ == '__main__':
-    main()    
+    main()

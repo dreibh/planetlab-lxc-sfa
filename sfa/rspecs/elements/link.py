@@ -1,8 +1,9 @@
-from sfa.rspecs.elements.element import Element    
+from sfa.rspecs.elements.element import Element
+
 
 class Link(Element):
     fields = [
-        'client_id', 
+        'client_id',
         'component_id',
         'component_name',
         'component_manager',

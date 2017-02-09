@@ -36,12 +36,12 @@ class IotLABAggregate(object):
                 rspec_lease = Lease()
                 rspec_lease['lease_id'] = lease['id']
                 iotlab_xrn = Xrn('.'.join([self.driver.root_auth,
-                                 Xrn.escape(node)]),
+                                           Xrn.escape(node)]),
                                  type='node')
                 rspec_lease['component_id'] = iotlab_xrn.urn
                 rspec_lease['start_time'] = str(lease['date'])
                 # duration in minutes
-                duration = int(lease['duration'])/60
+                duration = int(lease['duration']) / 60
                 rspec_lease['duration'] = duration
                 rspec_lease['slice_id'] = lease['slice_id']
                 rspec_leases.append(rspec_lease)
@@ -54,7 +54,7 @@ class IotLABAggregate(object):
         rspec_node['archi'] = node['archi']
         rspec_node['radio'] = (node['archi'].split(':'))[1]
         iotlab_xrn = Xrn('.'.join([self.driver.root_auth,
-                         Xrn.escape(node['network_address'])]),
+                                   Xrn.escape(node['network_address'])]),
                          type='node')
         # rspec_node['boot_state'] = 'true'
         if node['state'] == 'Absent' or \
@@ -183,7 +183,8 @@ class IotLABAggregate(object):
                 else:
                     reserved_nodes[lease_id]['slice_id'] = \
                         hrn_to_urn(self.driver.root_auth + '.' +
-                                   reserved_nodes[lease_id]['owner']+"_slice",
+                                   reserved_nodes[lease_id][
+                                       'owner'] + "_slice",
                                    'slice')
                 leases.append(reserved_nodes[lease_id])
 

@@ -14,21 +14,24 @@
 # the fact e.g. that PlanetLab insists on getting a first_name and last_name is not
 # exactly consistent with the GENI spec. of CreateSliver
 #
+
+
 def pg_users_arg(records):
-    users = []  
+    users = []
     for record in records:
-        if record['type'] != 'user': 
+        if record['type'] != 'user':
             continue
         user = {'urn': record['reg-urn'],
                 'keys': record['reg-keys'],
                 'email': record['email']}
         users.append(user)
-    return users    
+    return users
 
-def sfa_users_arg (records, slice_record):
+
+def sfa_users_arg(records, slice_record):
     users = []
     for record in records:
-        if record['type'] != 'user': 
+        if record['type'] != 'user':
             continue
         user = {'urn': record['reg-urn'],
                 'keys': record['reg-keys'],
@@ -36,22 +39,25 @@ def sfa_users_arg (records, slice_record):
                 }
         # fill as much stuff as possible from planetlab or similar
         # note that reg-email is not yet available
-        pl_fields = ['email', 'person_id', 'first_name', 'last_name', 'key_ids']
-        nitos_fields = [ 'email', 'user_id' ]
-        extra_fields = list ( set(pl_fields).union(set(nitos_fields)))
+        pl_fields = ['email', 'person_id',
+                     'first_name', 'last_name', 'key_ids']
+        nitos_fields = ['email', 'user_id']
+        extra_fields = list(set(pl_fields).union(set(nitos_fields)))
         # try to fill all these in
         for field in extra_fields:
-            if field in record: user[field]=record[field]
+            if field in record:
+                user[field] = record[field]
         users.append(user)
 
     return users
+
 
 def sfa_to_pg_users_arg(users):
 
     new_users = []
     fields = ['urn', 'keys']
     for user in users:
-        new_user = dict([item for item in user.items() \
-          if item[0] in fields])
+        new_user = dict([item for item in user.items()
+                         if item[0] in fields])
         new_users.append(new_user)
-    return new_users        
+    return new_users

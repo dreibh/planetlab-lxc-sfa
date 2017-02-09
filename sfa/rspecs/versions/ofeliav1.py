@@ -16,6 +16,7 @@ from sfa.rspecs.elements.versions.sfav1Lease import SFAv1Lease
 from sfa.rspecs.elements.versions.ofeliav1datapath import Ofeliav1Datapath
 from sfa.rspecs.elements.versions.ofeliav1link import Ofeliav1Link
 
+
 class Ofelia(RSpecVersion):
     enabled = True
     type = 'OFELIA'
@@ -28,14 +29,13 @@ class Ofelia(RSpecVersion):
     #template = '<RSpec type="%s"></RSpec>' % type
     template = '<rspec></rspec>'
 
-    # Network 
+    # Network
     def get_networks(self):
         raise Exception("Not implemented")
         network_elems = self.xml.xpath('//network')
-        networks = [network_elem.get_instance(fields=['name', 'slice']) for \
+        networks = [network_elem.get_instance(fields=['name', 'slice']) for
                     network_elem in network_elems]
-        return networks    
-
+        return networks
 
     def add_network(self, network):
         raise Exception("Not implemented")
@@ -46,19 +46,20 @@ class Ofelia(RSpecVersion):
             network_tag = network_tags[0]
         return network_tag
 
-# These are all resources 
-# get_resources function can return all resources or a specific type of resource
+# These are all resources
+# get_resources function can return all resources or a specific type of
+# resource
     def get_resources(self, filter=None, type=None):
         resources = list()
-        if not type or type=='datapath':
+        if not type or type == 'datapath':
             datapaths = self.get_datapaths(filter)
             for datapath in datapaths:
-                datapath['type']='datapath'
+                datapath['type'] = 'datapath'
             resources.extend(datapaths)
-        if not type or type=='link':
+        if not type or type == 'link':
             links = self.get_links(filter)
             for link in links:
-                link['type']='link'
+                link['type'] = 'link'
             resources.extend(links)
         return resources
 
@@ -71,7 +72,7 @@ class Ofelia(RSpecVersion):
         return Ofeliav1Link.get_links(self.xml, filter)
 
 #    def get_link_requests(self):
-#        return PGv2Link.get_link_requests(self.xml) 
+#        return PGv2Link.get_link_requests(self.xml)
 #
 #    def add_links(self, links):
 #        networks = self.get_networks()
@@ -84,12 +85,11 @@ class Ofelia(RSpecVersion):
 #    def add_link_requests(self, links):
 #        PGv2Link.add_link_requests(self.xml, links)
 
-
-
     # Slivers
-   
+
     def add_slivers(self, hostnames, attributes=None, sliver_urn=None, append=False):
-        if attributes is None: attributes=[]
+        if attributes is None:
+            attributes = []
         # add slice name to network tag
         network_tags = self.xml.xpath('//network')
         if network_tags:
@@ -97,7 +97,7 @@ class Ofelia(RSpecVersion):
             network_tag.set('slice', urn_to_hrn(sliver_urn)[0])
 
         # add slivers
-        sliver = {'name':sliver_urn,
+        sliver = {'name': sliver_urn,
                   'pl_tags': attributes}
         for hostname in hostnames:
             if sliver_urn:
@@ -115,10 +115,9 @@ class Ofelia(RSpecVersion):
                     parent = node_elem.element.getparent()
                     parent.remove(node_elem.element)
 
-
     def remove_slivers(self, slivers, network=None, no_dupes=False):
         SFAv1Node.remove_slivers(self.xml, slivers)
- 
+
     def get_slice_attributes(self, network=None):
         attributes = []
         nodes_with_slivers = self.get_nodes_with_slivers()
@@ -127,13 +126,12 @@ class Ofelia(RSpecVersion):
             attribute['node_id'] = None
             attributes.append(attribute)
         for node in nodes_with_slivers:
-            nodename=node['component_name']
+            nodename = node['component_name']
             sliver_attributes = self.get_sliver_attributes(nodename, network)
             for sliver_attribute in sliver_attributes:
                 sliver_attribute['node_id'] = nodename
                 attributes.append(sliver_attribute)
         return attributes
-
 
     def add_sliver_attribute(self, component_id, name, value, network=None):
         nodes = self.get_nodes({'component_id': '*%s*' % component_id})
@@ -145,7 +143,8 @@ class Ofelia(RSpecVersion):
                 SFAv1Sliver.add_sliver_attribute(sliver, name, value)
         else:
             # should this be an assert / raise an exception?
-            logger.error("WARNING: failed to find component_id %s" % component_id)
+            logger.error("WARNING: failed to find component_id %s" %
+                         component_id)
 
     def get_sliver_attributes(self, component_id, network=None):
         nodes = self.get_nodes({'component_id': '*%s*' % component_id})
@@ -162,20 +161,21 @@ class Ofelia(RSpecVersion):
         attribs = self.get_sliver_attributes(component_id)
         for attrib in attribs:
             if attrib['name'] == name and attrib['value'] == value:
-                #attrib.element.delete()
+                # attrib.element.delete()
                 parent = attrib.element.getparent()
                 parent.remove(attrib.element)
 
     def add_default_sliver_attribute(self, name, value, network=None):
         if network:
-            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
+            defaults = self.xml.xpath(
+                "//network[@name='%s']/sliver_defaults" % network)
         else:
             defaults = self.xml.xpath("//sliver_defaults")
         if not defaults:
             if network:
                 network_tag = self.xml.xpath("//network[@name='%s']" % network)
             else:
-                network_tag = self.xml.xpath("//network")    
+                network_tag = self.xml.xpath("//network")
             if isinstance(network_tag, list):
                 network_tag = network_tag[0]
             defaults = network_tag.add_element('sliver_defaults')
@@ -185,17 +185,19 @@ class Ofelia(RSpecVersion):
 
     def get_default_sliver_attributes(self, network=None):
         if network:
-            defaults = self.xml.xpath("//network[@name='%s']/sliver_defaults" % network)
+            defaults = self.xml.xpath(
+                "//network[@name='%s']/sliver_defaults" % network)
         else:
             defaults = self.xml.xpath("//sliver_defaults")
-        if not defaults: return []
+        if not defaults:
+            return []
         return SFAv1Sliver.get_sliver_attributes(defaults[0])
-    
+
     def remove_default_sliver_attribute(self, name, value, network=None):
         attribs = self.get_default_sliver_attributes(network)
         for attrib in attribs:
             if attrib['name'] == name and attrib['value'] == value:
-                #attrib.element.delete()
+                # attrib.element.delete()
                 parent = attrib.element.getparent()
                 parent.remove(attrib.element)
 
@@ -234,13 +236,13 @@ if __name__ == '__main__':
     from sfa.rspecs.rspec import RSpec
     from sfa.rspecs.rspec_elements import *
     print("main ofeliav1")
-    if len(sys.argv)!=2:
+    if len(sys.argv) != 2:
         r = RSpec('/tmp/resources.rspec')
     else:
-        r = RSpec(sys.argv[1], version = 'OFELIA 1')
-    #print r.version.get_datapaths()
+        r = RSpec(sys.argv[1], version='OFELIA 1')
+    # print r.version.get_datapaths()
     resources = r.version.get_resources()
     pprint.pprint(resources)
 
-    #r.load_rspec_elements(SFAv1.elements)
-    #print r.get(RSpecElements.NODE)
+    # r.load_rspec_elements(SFAv1.elements)
+    # print r.get(RSpecElements.NODE)

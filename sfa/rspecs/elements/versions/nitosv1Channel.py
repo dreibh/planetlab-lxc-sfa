@@ -23,18 +23,18 @@ class NITOSv1Channel:
 
     @staticmethod
     def add_channels(xml, channels):
-        
+
         network_elems = xml.xpath('//network')
         if len(network_elems) > 0:
             network_elem = network_elems[0]
         elif len(channels) > 0:
-            # dirty hack that handles no resource manifest rspec 
+            # dirty hack that handles no resource manifest rspec
             network_urn = "omf"
-            network_elem = xml.add_element('network', name = network_urn)
+            network_elem = xml.add_element('network', name=network_urn)
         else:
             network_elem = xml
 
-#        spectrum_elems = xml.xpath('//spectrum') 
+#        spectrum_elems = xml.xpath('//spectrum')
 #        spectrum_elem = xml.add_element('spectrum')
 
 #        if len(spectrum_elems) > 0:
@@ -44,25 +44,28 @@ class NITOSv1Channel:
 #        else:
 #            spectrum_elem = xml
 
-        spectrum_elem = network_elem.add_instance('spectrum', [])    
-          
-        channel_elems = []       
-        for channel in channels:
-            channel_fields = ['channel_num', 'frequency', 'standard', 'component_id']
-            channel_elem = spectrum_elem.add_instance('channel', channel, channel_fields)
-            channel_elems.append(channel_elem)
+        spectrum_elem = network_elem.add_instance('spectrum', [])
 
+        channel_elems = []
+        for channel in channels:
+            channel_fields = ['channel_num',
+                              'frequency', 'standard', 'component_id']
+            channel_elem = spectrum_elem.add_instance(
+                'channel', channel, channel_fields)
+            channel_elems.append(channel_elem)
 
     @staticmethod
     def get_channels(xml, filter=None):
-        if filter is None: filter={}
-        xpath = '//channel%s | //default:channel%s' % (XpathFilter.xpath(filter), XpathFilter.xpath(filter))
+        if filter is None:
+            filter = {}
+        xpath = '//channel%s | //default:channel%s' % (
+            XpathFilter.xpath(filter), XpathFilter.xpath(filter))
         channel_elems = xml.xpath(xpath)
         return NITOSv1Channel.get_channel_objs(channel_elems)
 
     @staticmethod
     def get_channel_objs(channel_elems):
-        channels = []    
+        channels = []
         for channel_elem in channel_elems:
             channel = Channel(channel_elem.attrib, channel_elem)
             channel['channel_num'] = channel_elem.attrib['channel_num']
@@ -71,5 +74,4 @@ class NITOSv1Channel:
             channel['component_id'] = channel_elem.attrib['component_id']
 
             channels.append(channel)
-        return channels            
-
+        return channels
