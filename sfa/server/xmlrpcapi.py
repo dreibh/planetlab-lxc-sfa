@@ -27,12 +27,15 @@ from sfa.util.py23 import xmlrpc_client
 # avoiding
 # [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
 
-invalid_xml_ascii = map(chr, range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F))
-xml_escape_table = string.maketrans(
-    "".join(invalid_xml_ascii), "?" * len(invalid_xml_ascii))
+invalid_codepoints = range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F)
+# broke with f24, somehow we get a unicode as an incoming string to be translated
+str_xml_escape_table = string.maketrans("".join((chr(x) for x in invalid_codepoints)),
+                                        "?" * len(invalid_codepoints))
+# loosely inspired from
+# http://stackoverflow.com/questions/1324067/how-do-i-get-str-translate-to-work-with-unicode-strings
+unicode_xml_escape_table = { invalid : u"?" for invalid in invalid_codepoints}
 
-
-def xmlrpclib_escape(s, replace=string.replace):
+def xmlrpclib_escape(s, replace = string.replace):
     """
     xmlrpclib does not handle invalid 7-bit control characters. This
     function augments xmlrpclib.escape, which by default only replaces
@@ -45,7 +48,10 @@ def xmlrpclib_escape(s, replace=string.replace):
     s = replace(s, ">", "&gt;",)
 
     # Replace invalid 7-bit control characters with '?'
-    return s.translate(xml_escape_table)
+    if isinstance(s, str):
+        return s.translate(str_xml_escape_table)
+    else:
+        return s.translate(unicode_xml_escape_table)
 
 
 def xmlrpclib_dump(self, value, write):

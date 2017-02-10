@@ -156,15 +156,15 @@ class GID(Certificate):
         else:
             urn = hrn_to_urn(self.hrn, None)
 
-        str = "URI:" + urn
+        string = "URI:" + urn
 
         if self.uuid:
-            str += ", " + "URI:" + uuid.UUID(int=self.uuid).urn
+            string += ", " + "URI:" + uuid.UUID(int=self.uuid).urn
 
         if self.email:
-            str += ", " + "email:" + self.email
+            string += ", " + "email:" + self.email
 
-        self.set_data(str, 'subjectAltName')
+        self.set_data(string, 'subjectAltName')
 
     ##
     # Decode the subject-alt-name field of the X509 certificate into the
