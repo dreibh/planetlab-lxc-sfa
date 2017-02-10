@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from __future__ import print_function
 
 from argparse import ArgumentParser
@@ -6,6 +8,7 @@ from sfa.util.config import Config
 from sfa.storage.alchemy import alchemy
 from sfa.storage.model import RegRecord
 from sfa.trust.hierarchy import Hierarchy
+from sfa.trust.certificate import convert_public_key, Keypair
 
 """
 WARNING : This script is not exactly thoroughly tested
@@ -75,11 +78,13 @@ class SfaResetGids:
           recreate only for entities not present in SFA_DATA_DIR
         """
 
-        count_auths, count_users = 0, 0
+        count_auths, count_users, count_slices = 0, 0, 0
         hierarchy = Hierarchy()
         for record in self.records:
-            ########## not an autority nor a user : ignored
-            if 'authority' not in record.type and 'user' not in record.type:
+            print(record.hrn)
+            ########## not an autority nor a user nor a slice: ignored
+            # Just wondering what other type it could be...
+            if record.type not in ['authority', 'user', 'slice']:
                 message = ''
                 if record.gid:
                     message = '[GID cleared]'
@@ -108,21 +113,35 @@ class SfaResetGids:
                 count_users += 1
                 continue
             ########## authorities
-            if policy in ('all', 'safe'):
-                redo = True
-            else:
-                redo = not hierarchy.auth_exists(record.hrn)
-            if not redo:
-                print("IGN (existing) {}".format(record.hrn))
-            else:
+            if record.type == 'authority':
+                if policy in ('all', 'safe'):
+                    redo = True
+                else:
+                    redo = not hierarchy.auth_exists(record.hrn)
+                if not redo:
+                    print("IGN (existing) {}".format(record.hrn))
+                else:
+                    print("NEW {} {}".format(record.type, record.hrn))
+                    # because we have it sorted we should not need create_parents
+                    gid = hierarchy.create_auth(str(record.hrn))
+                    record.gid = gid
+                    count_auths += 1
+            ########## slices
+            if record.type == 'slice':
+                hrn = str(record.hrn)
+                gid = record.get_gid_object()
+                uuid = gid.get_uuid()
+                pub = gid.get_pubkey()
+                print("pub {} uuid {}...".format(pub, str(uuid)[:6]))
+                new_gid = hierarchy.create_gid(hrn, uuid, pub)
+                new_gid_str = new_gid.save_to_string()
+                record.gid = new_gid_str
                 print("NEW {} {}".format(record.type, record.hrn))
-                # because we have it sorted we should not need create_parents
-                gid = hierarchy.create_auth(str(record.hrn))
-                record.gid = gid
-                count_auths += 1
+                count_slices += 1
+                continue
         #
-        print("Committing to the DB {} new auth gids and {} new user gids"
-              .format(count_auths, count_users))
+        print("Committing to the DB {} new auth gids and {} new user gids and {} new slice gids"
+              .format(count_auths, count_users, count_slices))
         self.session.commit()
         return True
 
@@ -139,4 +158,5 @@ class SfaResetGids:
 if __name__ == '__main__':
     session = alchemy.session()
     tophrn = Config().SFA_REGISTRY_ROOT_AUTH
+    print(tophrn)
     SfaResetGids(session, tophrn).main()
