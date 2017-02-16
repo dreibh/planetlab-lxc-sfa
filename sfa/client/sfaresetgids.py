@@ -9,6 +9,7 @@ from sfa.storage.alchemy import alchemy
 from sfa.storage.model import RegRecord
 from sfa.trust.hierarchy import Hierarchy
 from sfa.trust.certificate import convert_public_key, Keypair
+from sfa.util.xrn import hrn_to_urn
 
 """
 WARNING : This script is not exactly thoroughly tested
@@ -101,12 +102,13 @@ class SfaResetGids:
             ########## user : rebuild a gid from pubkey and email
             if record.type == 'user':
                 hrn = str(record.hrn)
+                urn = hrn_to_urn(hrn, str(record.type))
                 gid = record.get_gid_object()
                 uuid = gid.get_uuid()
                 pub = gid.get_pubkey()
                 email = gid.get_email()
                 print("pub {} uuid {}... email {}".format(pub, str(uuid)[:6], email))
-                new_gid = hierarchy.create_gid(hrn, uuid, pub, email=email)
+                new_gid = hierarchy.create_gid(urn, uuid, pub, email=email)
                 new_gid_str = new_gid.save_to_string()
                 record.gid = new_gid_str
                 print("NEW {} {} [{}]".format(record.type, record.hrn, email))
@@ -129,11 +131,12 @@ class SfaResetGids:
             ########## slices
             if record.type == 'slice':
                 hrn = str(record.hrn)
+                urn = hrn_to_urn(hrn, str(record.type))
                 gid = record.get_gid_object()
                 uuid = gid.get_uuid()
                 pub = gid.get_pubkey()
                 print("pub {} uuid {}...".format(pub, str(uuid)[:6]))
-                new_gid = hierarchy.create_gid(hrn, uuid, pub)
+                new_gid = hierarchy.create_gid(urn, uuid, pub)
                 new_gid_str = new_gid.save_to_string()
                 record.gid = new_gid_str
                 print("NEW {} {}".format(record.type, record.hrn))
@@ -158,5 +161,4 @@ class SfaResetGids:
 if __name__ == '__main__':
     session = alchemy.session()
     tophrn = Config().SFA_REGISTRY_ROOT_AUTH
-    print(tophrn)
     SfaResetGids(session, tophrn).main()
