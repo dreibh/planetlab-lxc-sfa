@@ -583,7 +583,6 @@ class RegistryManager:
         if type not in ['slice', 'user', 'node', 'authority']:
             raise UnknownSfaType(type)
 
-        credential = api.getCredential()
         registries = api.registries
 
         # Try to remove the object from the PLCDB of federated agg.
@@ -593,6 +592,7 @@ class RegistryManager:
             for registry in registries:
                 if registry not in [api.hrn]:
                     try:
+                        credential = api.getCredential()
                         result = registries[registry].remove_peer_object(
                             credential, record, origin_hrn)
                     except:
