@@ -159,7 +159,7 @@ class IotLABShell(object):
         user['email'] = email
         user['sshPublicKey'] = slice_user['keys'][0]
         # ex : onelab.inria
-        user['structure'] = slice_user['slice_record']['authority']
+        user['structure'] = slice_user['urn'].split('+')[1]
         email = (email.split('@'))[0]
         user['firstName'] = email.split('.')[0]
         try:
