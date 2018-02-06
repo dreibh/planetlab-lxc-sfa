@@ -150,11 +150,17 @@ class IotLABShell(object):
         """
         # pylint:disable=E1123
         logger.warning("iotlashell add_user")
+        logger.warning("slice_user: %s" % slice_user)
+        if 'urn' in slice_user:
+            organization = slice_user['urn']
+        else:
+            organization = "SFA federation"
         # single account creation
         user = {"type": "SA",
                 "city": "To be defined",
                 "country": "To be defined",
-                "motivations": "SFA federation"}
+                "motivations": "SFA federation",
+                "organization": organization}
         email = slice_user['email']
         user['email'] = email
         user['sshPublicKey'] = slice_user['keys'][0]
