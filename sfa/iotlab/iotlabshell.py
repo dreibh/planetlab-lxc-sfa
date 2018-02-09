@@ -52,7 +52,7 @@ class IotLABShell(object):
             nodes_dict[node['network_address']] = node
         return nodes_dict
 
-    def get_users(self):
+    def get_users(self, email=None):
         """
         Get all LDAP users
         :returns: users with LDAP attributes
@@ -79,7 +79,10 @@ class IotLABShell(object):
         logger.warning("iotlashell get_users")
         users_dict = {}
         try:
-            users = self.api.method('admin/users')
+            if email:
+                users = self.api.method('admin/users?email=%s' % email)
+            else:
+                users = self.api.method('admin/users')
         except HTTPError as err:
             logger.warning("iotlashell get_users error %s" % err.reason)
             return {'error': err.reason}
@@ -105,6 +108,7 @@ class IotLABShell(object):
                                    files=exp_file)
         except HTTPError as err:
             logger.warning("iotlashell reserve_nodes error %s" % err.reason)
+            logger.error(err)
             return {'error': err.reason}
 
     def get_reserved_nodes(self):
