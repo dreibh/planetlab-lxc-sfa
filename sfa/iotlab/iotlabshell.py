@@ -52,7 +52,7 @@ class IotLABShell(object):
             nodes_dict[node['network_address']] = node
         return nodes_dict
 
-    def get_users(self):
+    def get_users(self, email=None):
         """
         Get all LDAP users
         :returns: users with LDAP attributes
@@ -79,7 +79,10 @@ class IotLABShell(object):
         logger.warning("iotlashell get_users")
         users_dict = {}
         try:
-            users = self.api.method('admin/users')
+            if email:
+                users = self.api.method('admin/users?email=%s' % email)
+            else:
+                users = self.api.method('admin/users')
         except HTTPError as err:
             logger.warning("iotlashell get_users error %s" % err.reason)
             return {'error': err.reason}
@@ -94,6 +97,7 @@ class IotLABShell(object):
         """
         # pylint:disable=W0212,R0913,E1123
         logger.warning("iotlashell reserve_nodes")
+        logger.info("login=%s, exp_name=%s, nodes_list=%s, start_time=%s, duration=%s" % (login, exp_name, nodes_list, start_time, duration))
         exp_file = helpers.FilesDict()
         _experiment = experiment._Experiment(exp_name, duration, start_time)
         _experiment.type = 'physical'
