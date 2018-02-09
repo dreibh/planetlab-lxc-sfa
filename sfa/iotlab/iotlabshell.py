@@ -97,6 +97,7 @@ class IotLABShell(object):
         """
         # pylint:disable=W0212,R0913,E1123
         logger.warning("iotlashell reserve_nodes")
+        logger.info("login=%s, exp_name=%s, nodes_list=%s, start_time=%s, duration=%s" % (login, exp_name, nodes_list, start_time, duration))
         exp_file = helpers.FilesDict()
         _experiment = experiment._Experiment(exp_name, duration, start_time)
         _experiment.type = 'physical'
