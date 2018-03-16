@@ -1,6 +1,6 @@
 %define name sfa
 %define version 3.1
-%define taglevel 21
+%define taglevel 22
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -252,6 +252,14 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Fri Mar 16 2018 Thierry <Parmentelat> - sfa-3.1-22
+- pl: tweaks for exposing country / city on nodes from site tags if set
+- pl: tweaks for exposing hardware_types on nodes from node tag 'hardware_type' if set
+- pl: fix exposing granularity
+- sfaresetgids.py: a utility to reset gids when a update of the tolpevel gis is needed
+- iotlab: various tweaks
+- patch backported from plcapi about issues with xmlrpc and unicode under fedora >= 24
+
 * Fri Jan 13 2017 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-3.1-21
 - sfax509 command can run openssl x509 on all the parts of a gid
 - bugfix in sfi when running the discover subcommand
