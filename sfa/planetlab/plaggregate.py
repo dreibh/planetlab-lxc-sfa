@@ -272,8 +272,21 @@ class PlAggregate:
         # add site/interface info to nodes.
         # assumes that sites, interfaces and tags have already been prepared.
         if site['longitude'] and site['latitude']:
-            location = Location({'longitude': site['longitude'], 'latitude': site[
-                                'latitude'], 'country': 'unknown'})
+            location_dict = {
+                'longitude': site['longitude'],
+                'latitude': site['latitude'],
+            }
+            for extra in ('country', 'city'):
+                try:
+                    tts = self.driver.shell.GetSiteTags({
+                        'site_id' : site['site_id'],
+                        'tagname' : extra,
+                    })
+                    location_dict[extra] = tts[0]['value']
+                except:
+                    logger.log_exc('extra = {}'.format(extra))
+                    location_dict[extra] = 'unknown'
+            location = Location(location_dict)
             rspec_node['location'] = location
         # Granularity
         granularity = Granularity({'grain': grain})

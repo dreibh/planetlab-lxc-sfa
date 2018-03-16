@@ -7,4 +7,5 @@ class Location(Element):
         'country',
         'longitude',
         'latitude',
+        'city',
     ]
