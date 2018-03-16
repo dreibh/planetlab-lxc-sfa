@@ -492,10 +492,11 @@ class PlAggregate:
             node_tags = self.get_node_tags({'node_tag_id': tag_ids})
             pl_initscripts = self.get_pl_initscripts()
             # convert nodes to rspec nodes
+            grain = self.driver.shell.GetLeaseGranularity()
             rspec_nodes = []
             for node in nodes:
                 rspec_node = self.node_to_rspec_node(
-                    node, sites, interfaces, node_tags, pl_initscripts)
+                    node, sites, interfaces, node_tags, pl_initscripts, grain)
                 rspec_nodes.append(rspec_node)
             rspec.version.add_nodes(rspec_nodes)
 
