@@ -264,8 +264,21 @@ class PlAggregate:
         else:
             rspec_node['exclusive'] = 'false'
 
-        rspec_node['hardware_types'] = [HardwareType({'name': 'plab-pc'}),
-                                        HardwareType({'name': 'pc'})]
+        # expose hardware_types from the hardware_type tag if
+        # set on node
+        tags = self.driver.shell.GetNodeTags({
+            'node_id': node['node_id'],
+            'tagname': 'hardware_type',
+        })
+        if tags:
+            rspec_node['hardware_types'] = [
+                HardwareType({'name': tags[0]['value']}),
+            ]
+        else:
+            rspec_node['hardware_types'] = [
+                HardwareType({'name': 'plab-pc'}),
+                HardwareType({'name': 'pc'})
+        ]
         # only doing this because protogeni rspec needs
         # to advertise available initscripts
         rspec_node['pl_initscripts'] = pl_initscripts.values()
@@ -278,11 +291,11 @@ class PlAggregate:
             }
             for extra in ('country', 'city'):
                 try:
-                    tts = self.driver.shell.GetSiteTags({
+                    tags = self.driver.shell.GetSiteTags({
                         'site_id' : site['site_id'],
                         'tagname' : extra,
                     })
-                    location_dict[extra] = tts[0]['value']
+                    location_dict[extra] = tags[0]['value']
                 except:
                     logger.log_exc('extra = {}'.format(extra))
                     location_dict[extra] = 'unknown'
