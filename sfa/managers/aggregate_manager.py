@@ -68,8 +68,8 @@ class AggregateManager:
         cred_types = [{'geni_type': 'geni_sfa',
                        'geni_version': str(i)} for i in range(4)[-2:]]
         geni_api_versions = ApiVersions().get_versions()
-        geni_api_versions[
-            '3'] = 'http://%s:%s' % (api.config.sfa_aggregate_host, api.config.sfa_aggregate_port)
+        geni_api_versions['3'] = \
+            'https://%s:%s' % (api.config.sfa_aggregate_host, api.config.sfa_aggregate_port)
         version_generic = {
             'testbed': api.driver.testbed_name(),
             'interface': 'aggregate',
