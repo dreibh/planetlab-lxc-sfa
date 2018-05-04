@@ -220,7 +220,7 @@ class PlAggregate:
             # slice-global tags
             node['slice-tags'] = pltags_dict['slice-global']
             # xxx
-            # this is where we chould maybe add the nodegroup slice tags,
+            # this is where we should maybe add the nodegroup slice tags,
             # but it's tedious...
             # xxx
             # sliver tags
