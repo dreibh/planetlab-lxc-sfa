@@ -1,4 +1,5 @@
-import socket
+# pylint: disable=c0111, c0103, r0201
+
 from sfa.rspecs.version_manager import VersionManager
 from sfa.util.version import version_core
 from sfa.util.xrn import Xrn
@@ -10,7 +11,8 @@ from sfa.server.api_versions import ApiVersions
 
 class AggregateManager:
 
-    def __init__(self, config): pass
+    def __init__(self, config):
+        pass
 
     # essentially a union of the core version, the generic version (this code) and
     # whatever the driver needs to expose
@@ -127,7 +129,7 @@ class AggregateManager:
 
     def Allocate(self, api, xrn, creds, rspec_string, expiration, options):
         """
-        Allocate resources as described in a request RSpec argument 
+        Allocate resources as described in a request RSpec argument
         to a slice with the named URN.
         """
         call_id = options.get('call_id')
@@ -137,7 +139,7 @@ class AggregateManager:
 
     def Provision(self, api, xrns, creds, options):
         """
-        Create the sliver[s] (slice) at this aggregate.    
+        Create the sliver[s] (slice) at this aggregate.
         Verify HRN and initialize the slice record in PLC if necessary.
         """
         call_id = options.get('call_id')
