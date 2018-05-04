@@ -22,6 +22,15 @@ class AggregateManager:
         ad_rspec_versions = []
         request_rspec_versions = []
         for rspec_version in version_manager.versions:
+            # avoid publishing non-relevant entries
+            # but stay safe however
+            try:
+                if not rspec_version.extensions \
+                  and not rspec_version.namespace \
+                  and not rspec_version.schema:
+                    continue
+            except Exception as exc:
+                pass
             if rspec_version.content_type in ['*', 'ad']:
                 ad_rspec_versions.append(rspec_version.to_dict())
             if rspec_version.content_type in ['*', 'request']:
