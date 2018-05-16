@@ -46,11 +46,12 @@ from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
 from sfa.client.return_value import ReturnValue
 
-# after http://www.erlenstar.demon.co.uk/unix/faq_2.html
-
 
 def daemon():
-    """Daemonize the current process."""
+    """
+    Daemonize the current process.
+    after http://www.erlenstar.demon.co.uk/unix/faq_2.html
+    """
     if os.fork() != 0:
         os._exit(0)
     os.setsid()
