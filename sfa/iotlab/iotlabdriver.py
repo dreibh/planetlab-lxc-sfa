@@ -111,7 +111,7 @@ class IotLabDriver(Driver):
         email = caller_user['email']
         # ensure user exist in LDAP tree
         users = self._get_users(email)
-        if users and email not in users:
+        if email not in users:
             self.shell.add_user(caller_user)
             users = self._get_users(email)
         if users and email in users:
