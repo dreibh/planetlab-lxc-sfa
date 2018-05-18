@@ -177,9 +177,6 @@ class Xrn:
             self.type = type
             self.hrn_to_urn()
         self._normalize()
-# happens all the time ..
-#        if not type:
-#            debug_logger.debug("type-less Xrn's are not safe")
 
     def __repr__(self):
         result = "<XRN u=%s h=%s" % (self.urn, self.hrn)

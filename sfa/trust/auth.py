@@ -67,17 +67,19 @@ class Auth:
             xrns = []
         error = (None, None)
 
-        def log_invalid_cred(cred):
+        def log_invalid_cred(cred, exception):
             if not isinstance(cred, StringType):
                 logger.info(
-                    "cannot validate credential %s - expecting a string" % cred)
+                    "{}: cannot validate credential {}"
+                    .format(exception, cred))
                 error = ('TypeMismatch',
-                         "checkCredentials: expected a string, received {} -- {}"
+                         "checkCredentials: expected a string, got {} -- {}"
                          .format(type(cred), cred))
             else:
                 cred_obj = Credential(string=cred)
-                logger.info("failed to validate credential - dump=%s" %
-                            cred_obj.dump_string(dump_parents=True))
+                logger.info("{}: failed to validate credential dump={}"
+                            .format(exception,
+                                    cred_obj.dump_string(dump_parents=True)))
                 error = sys.exc_info()[:2]
             return error
 
@@ -90,7 +92,7 @@ class Auth:
         if not isinstance(xrns, list):
             xrns = [xrns]
 
-        slice_xrns = Xrn.filter_type(xrns, 'slice')
+        # slice_xrns = Xrn.filter_type(xrns, 'slice')
         sliver_xrns = Xrn.filter_type(xrns, 'sliver')
 
         # we are not able to validate slivers in the traditional way so
@@ -121,8 +123,8 @@ class Auth:
                     try:
                         self.check(cred, operation, hrn)
                         valid.append(cred)
-                    except:
-                        error = log_invalid_cred(cred)
+                    except Exception as exc:
+                        error = log_invalid_cred(cred, exc)
 
         # make sure all sliver xrns are validated against the valid credentials
         if sliver_xrns:
@@ -140,11 +142,11 @@ class Auth:
 
     def check(self, credential, operation, hrn=None):
         """
-        Check the credential against the peer cert (callerGID) included 
-        in the credential matches the caller that is connected to the 
-        HTTPS connection, check if the credential was signed by a 
-        trusted cert and check if the credential is allowed to perform 
-        the specified operation.    
+        Check the credential against the peer cert (callerGID) included
+        in the credential matches the caller that is connected to the
+        HTTPS connection, check if the credential was signed by a
+        trusted cert and check if the credential is allowed to perform
+        the specified operation.
         """
         cred = Credential(cred=credential)
         self.client_cred = cred
@@ -265,16 +267,16 @@ class Auth:
         Given an authority name, return the information for that authority.
         This is basically a stub that calls the hierarchy module.
 
-        @param auth_hrn human readable name of authority  
+        @param auth_hrn human readable name of authority
         """
 
         return self.hierarchy.get_auth_info(auth_hrn)
 
     def veriry_auth_belongs_to_me(self, name):
         """
-        Verify that an authority belongs to our hierarchy. 
+        Verify that an authority belongs to our hierarchy.
         This is basically left up to the implementation of the hierarchy
-        module. If the specified name does not belong, ane exception is 
+        module. If the specified name does not belong, ane exception is
         thrown indicating the caller should contact someone else.
 
         @param auth_name human readable name of authority
@@ -289,7 +291,7 @@ class Auth:
         this implies that the authority that owns the object belongs
         to our hierarchy. If it does not an exception is thrown.
 
-        @param name human readable name of object        
+        @param name human readable name of object
         """
         auth_name = self.get_authority(name)
         if not auth_name:
@@ -306,10 +308,10 @@ class Auth:
         """
         Verify that the object gid that was specified in the credential
         allows permission to the object 'name'. This is done by a simple
-        prefix test. For example, an object_gid for plc.arizona would 
+        prefix test. For example, an object_gid for plc.arizona would
         match the objects plc.arizona.slice1 and plc.arizona.
 
-        @param name human readable name to test  
+        @param name human readable name to test
         """
         object_hrn = self.object_gid.get_hrn()
         if object_hrn == name:
@@ -381,7 +383,7 @@ class Auth:
 
     def filter_creds_by_caller(self, creds, caller_hrn_list):
         """
-        Returns a list of creds who's gid caller matches the 
+        Returns a list of creds who's gid caller matches the
         specified caller hrn
         """
         if not isinstance(creds, list):

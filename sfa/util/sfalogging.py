@@ -166,12 +166,8 @@ class _SfaLogger:
         self.logger.addHandler(handler)
 
 
-info_logger = _SfaLogger(loggername='info', level=logging.INFO)
-debug_logger = _SfaLogger(loggername='debug', level=logging.DEBUG)
-warn_logger = _SfaLogger(loggername='warning', level=logging.WARNING)
-error_logger = _SfaLogger(loggername='error', level=logging.ERROR)
-critical_logger = _SfaLogger(loggername='critical', level=logging.CRITICAL)
-logger = info_logger
+logger = _SfaLogger(loggername='info', level=logging.INFO)
+
 sfi_logger = _SfaLogger(logfile=os.path.expanduser("~/.sfi/") + 'sfi.log',
                         loggername='sfilog', level=logging.DEBUG)
 ########################################

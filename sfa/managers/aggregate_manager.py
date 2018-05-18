@@ -1,4 +1,5 @@
-import socket
+# pylint: disable=c0111, c0103, r0201
+
 from sfa.rspecs.version_manager import VersionManager
 from sfa.util.version import version_core
 from sfa.util.xrn import Xrn
@@ -10,7 +11,8 @@ from sfa.server.api_versions import ApiVersions
 
 class AggregateManager:
 
-    def __init__(self, config): pass
+    def __init__(self, config):
+        pass
 
     # essentially a union of the core version, the generic version (this code) and
     # whatever the driver needs to expose
@@ -20,6 +22,15 @@ class AggregateManager:
         ad_rspec_versions = []
         request_rspec_versions = []
         for rspec_version in version_manager.versions:
+            # avoid publishing non-relevant entries
+            # but stay safe however
+            try:
+                if not rspec_version.extensions \
+                  and not rspec_version.namespace \
+                  and not rspec_version.schema:
+                    continue
+            except Exception as exc:
+                pass
             if rspec_version.content_type in ['*', 'ad']:
                 ad_rspec_versions.append(rspec_version.to_dict())
             if rspec_version.content_type in ['*', 'request']:
@@ -57,8 +68,8 @@ class AggregateManager:
         cred_types = [{'geni_type': 'geni_sfa',
                        'geni_version': str(i)} for i in range(4)[-2:]]
         geni_api_versions = ApiVersions().get_versions()
-        geni_api_versions[
-            '3'] = 'http://%s:%s' % (api.config.sfa_aggregate_host, api.config.sfa_aggregate_port)
+        geni_api_versions['3'] = \
+            'https://%s:%s' % (api.config.sfa_aggregate_host, api.config.sfa_aggregate_port)
         version_generic = {
             'testbed': api.driver.testbed_name(),
             'interface': 'aggregate',
@@ -127,7 +138,7 @@ class AggregateManager:
 
     def Allocate(self, api, xrn, creds, rspec_string, expiration, options):
         """
-        Allocate resources as described in a request RSpec argument 
+        Allocate resources as described in a request RSpec argument
         to a slice with the named URN.
         """
         call_id = options.get('call_id')
@@ -137,7 +148,7 @@ class AggregateManager:
 
     def Provision(self, api, xrns, creds, options):
         """
-        Create the sliver[s] (slice) at this aggregate.    
+        Create the sliver[s] (slice) at this aggregate.
         Verify HRN and initialize the slice record in PLC if necessary.
         """
         call_id = options.get('call_id')

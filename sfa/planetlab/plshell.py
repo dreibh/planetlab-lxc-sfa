@@ -23,7 +23,7 @@ class PlShell:
                     'UnBindObjectFromPeer', 'UpdateNode', 'UpdatePerson', 'UpdateSite',
                     'UpdateSlice', 'UpdateSliceTag',
                     # also used as-is in importer
-                    'GetSites', 'GetNodes',
+                    'GetSites', 'GetNodes', 'GetSiteTags',
                     # Lease management methods
                     'GetLeases', 'GetLeaseGranularity', 'DeleteLeases', 'UpdateLeases',
                     'AddLeases',

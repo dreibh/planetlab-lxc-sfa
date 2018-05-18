@@ -220,7 +220,7 @@ class PlAggregate:
             # slice-global tags
             node['slice-tags'] = pltags_dict['slice-global']
             # xxx
-            # this is where we chould maybe add the nodegroup slice tags,
+            # this is where we should maybe add the nodegroup slice tags,
             # but it's tedious...
             # xxx
             # sliver tags
@@ -264,16 +264,42 @@ class PlAggregate:
         else:
             rspec_node['exclusive'] = 'false'
 
-        rspec_node['hardware_types'] = [HardwareType({'name': 'plab-pc'}),
-                                        HardwareType({'name': 'pc'})]
+        # expose hardware_types from the hardware_type tag if
+        # set on node
+        tags = self.driver.shell.GetNodeTags({
+            'node_id': node['node_id'],
+            'tagname': 'hardware_type',
+        })
+        if tags:
+            rspec_node['hardware_types'] = [
+                HardwareType({'name': tags[0]['value']}),
+            ]
+        else:
+            rspec_node['hardware_types'] = [
+                HardwareType({'name': 'plab-pc'}),
+                HardwareType({'name': 'pc'})
+        ]
         # only doing this because protogeni rspec needs
         # to advertise available initscripts
         rspec_node['pl_initscripts'] = pl_initscripts.values()
         # add site/interface info to nodes.
         # assumes that sites, interfaces and tags have already been prepared.
         if site['longitude'] and site['latitude']:
-            location = Location({'longitude': site['longitude'], 'latitude': site[
-                                'latitude'], 'country': 'unknown'})
+            location_dict = {
+                'longitude': site['longitude'],
+                'latitude': site['latitude'],
+            }
+            for extra in ('country', 'city'):
+                try:
+                    tags = self.driver.shell.GetSiteTags({
+                        'site_id' : site['site_id'],
+                        'tagname' : extra,
+                    })
+                    location_dict[extra] = tags[0]['value']
+                except:
+                    logger.log_exc('extra = {}'.format(extra))
+                    location_dict[extra] = 'unknown'
+            location = Location(location_dict)
             rspec_node['location'] = location
         # Granularity
         granularity = Granularity({'grain': grain})
@@ -479,10 +505,11 @@ class PlAggregate:
             node_tags = self.get_node_tags({'node_tag_id': tag_ids})
             pl_initscripts = self.get_pl_initscripts()
             # convert nodes to rspec nodes
+            grain = self.driver.shell.GetLeaseGranularity()
             rspec_nodes = []
             for node in nodes:
                 rspec_node = self.node_to_rspec_node(
-                    node, sites, interfaces, node_tags, pl_initscripts)
+                    node, sites, interfaces, node_tags, pl_initscripts, grain)
                 rspec_nodes.append(rspec_node)
             rspec.version.add_nodes(rspec_nodes)
 
