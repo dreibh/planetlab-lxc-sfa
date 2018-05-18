@@ -152,7 +152,20 @@ class IotLABShell(object):
     def add_user(self, slice_user):
         """
         Add LDAP user
+        {
+            "firstName":"loic",
+            "lastName":"test",
+            "email":"loic.test@lip6.fr",
+            "organization":"SFA",
+            "city":"To be defined",
+            "country":"To be defined",
+            "motivations":"SFA federation",
+            "category":"Academic",
+            "type": "SA",
+            "sshPublicKey": "ssh-rsa AAAAB3Nz..."
+        }       
         """
+        
         # pylint:disable=E1123
         logger.warning("iotlashell add_user")
         logger.warning("slice_user: %s" % slice_user)
@@ -165,7 +178,9 @@ class IotLABShell(object):
                 "city": "To be defined",
                 "country": "To be defined",
                 "motivations": "SFA federation",
-                "organization": organization}
+                "organization": organization,
+                "category":"Academic"
+                }
         email = slice_user['email']
         user['email'] = email
         user['sshPublicKey'] = slice_user['keys'][0]
