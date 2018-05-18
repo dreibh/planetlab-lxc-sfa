@@ -52,7 +52,10 @@ class IotLABAggregate(object):
         rspec_node = IotlabNode()
         rspec_node['mobile'] = node['mobile']
         rspec_node['archi'] = node['archi']
-        rspec_node['radio'] = (node['archi'].split(':'))[1]
+        if ':' in node['archi']:
+            rspec_node['radio'] = (node['archi'].split(':'))[1]
+        else:
+            rspec_node['radio'] = node['archi']
         iotlab_xrn = Xrn('.'.join([self.driver.root_auth,
                                    Xrn.escape(node['network_address'])]),
                          type='node')
