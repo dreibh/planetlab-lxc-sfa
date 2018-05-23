@@ -410,7 +410,7 @@ class Certificate:
         # certs)
 
         if string is None or string.strip() == "":
-            logger.warn("Empty string in load_from_string")
+            logger.warning("Empty string in load_from_string")
             return
 
         string = string.strip()
@@ -441,7 +441,7 @@ class Certificate:
             OpenSSL.crypto.FILETYPE_PEM, parts[0])
 
         if self.x509 is None:
-            logger.warn(
+            logger.warning(
                 "Loaded from string but cert is None: {}".format(string))
 
         # if there are more certs, then create a parent and let the parent load
@@ -467,7 +467,7 @@ class Certificate:
 
     def save_to_string(self, save_parents=True):
         if self.x509 is None:
-            logger.warn("None cert in certificate.save_to_string")
+            logger.warning("None cert in certificate.save_to_string")
             return ""
         string = OpenSSL.crypto.dump_certificate(
             OpenSSL.crypto.FILETYPE_PEM, self.x509)
@@ -694,7 +694,7 @@ class Certificate:
         # pyOpenSSL does not have a way to get extensions
         m2x509 = M2Crypto.X509.load_cert_string(certstr)
         if m2x509 is None:
-            logger.warn("No cert loaded in get_extension")
+            logger.warning("No cert loaded in get_extension")
             return None
         if m2x509.get_ext(name) is None:
             return None
@@ -903,8 +903,8 @@ class Certificate:
         # extension and hope there are no other basicConstraints
         if not self.parent.isCA and not (
                 self.parent.get_extension('basicConstraints') == 'CA:TRUE'):
-            logger.warn("verify_chain: cert {}'s parent {} is not a CA"
-                        .format(self.pretty_name(), self.parent.pretty_name()))
+            logger.warning("verify_chain: cert {}'s parent {} is not a CA"
+                            .format(self.pretty_name(), self.parent.pretty_name()))
             raise CertNotSignedByParent("{}: Parent {} not a CA"
                                         .format(self.pretty_name(),
                                                 self.parent.pretty_name()))

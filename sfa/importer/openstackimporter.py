@@ -79,7 +79,7 @@ class OpenstackImporter:
                             'unable to convert public key for %s' % hrn)
                         pkey = Keypair(create=True)
                 else:
-                    self.logger.warn(
+                    self.logger.warning(
                         "OpenstackImporter: person %s does not have a PL public key" % hrn)
                     pkey = Keypair(create=True)
                 user_gid = self.auth_hierarchy.create_gid(

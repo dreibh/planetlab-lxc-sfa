@@ -66,14 +66,15 @@ def daemon():
     # when installed in standalone we might not have httpd installed
     if not os.path.isdir(logdir):
         os.mkdir('/var/log/httpd')
-    crashlog = os.open('%s/sfa_access_log' % logdir, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
+    crashlog = os.open('%s/sfa_access_log' % logdir,
+                       os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
     os.dup2(crashlog, 1)
     os.dup2(crashlog, 2)
 
 
 def install_peer_certs(server_key_file, server_cert_file):
     """
-    Attempt to install missing trusted gids and db records for 
+    Attempt to install missing trusted gids and db records for
     our federated interfaces
     """
     # Attempt to get any missing peer gids
@@ -130,7 +131,7 @@ def install_peer_certs(server_key_file, server_cert_file):
                         message = "installed trusted cert for %s" % new_hrn
                     # log the message
                     api.logger.info(message)
-        except:
+        except Exception:
             message = "interface: %s\tunable to install trusted gid for %s" % \
                 (api.interface, new_hrn)
             api.logger.log_exc(message)
@@ -140,7 +141,7 @@ def install_peer_certs(server_key_file, server_cert_file):
 
 def update_cert_records(gids):
     """
-    Make sure there is a record in the registry for the specified gids. 
+    Make sure there is a record in the registry for the specified gids.
     Removes old records from the db.
     """
     # import db stuff here here so this module can be loaded by PlcComponentApi
@@ -167,11 +168,12 @@ def update_cert_records(gids):
         record = dbsession.query(RegRecord).filter_by(
             hrn=hrn, type=type, pointer=-1).first()
         if not record:
-            record = RegRecord(dict={'type': type,
-                                     'hrn': hrn,
-                                     'authority': get_authority(hrn),
-                                     'gid': gid.save_to_string(save_parents=True),
-                                     })
+            record = RegRecord(
+                dict={'type': type,
+                      'hrn': hrn,
+                      'authority': get_authority(hrn),
+                      'gid': gid.save_to_string(save_parents=True),
+                      })
             dbsession.add(record)
     dbsession.commit()
 
@@ -187,7 +189,8 @@ def main():
                       help="run aggregate manager", default=False)
     parser.add_option("-c", "--component", dest="cm", action="store_true",
                       help="run component server", default=False)
-    parser.add_option("-t", "--trusted-certs", dest="trusted_certs", action="store_true",
+    parser.add_option("-t", "--trusted-certs",
+                      dest="trusted_certs", action="store_true",
                       help="refresh trusted certs", default=False)
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
                       help="Run as daemon.", default=False)

@@ -599,7 +599,7 @@ class Credential(object):
                                     self.gidCaller.get_urn(),
                                     self.gidObject.get_urn(),
                                     oldAttr.name, oldAttr.value, attr.value)
-                        logger.warn(msg)
+                        logger.warning(msg)
                         # raise CredentialNotVerifiable(
                         # "Can't encode new valid delegated credential: {}"
                         # .format(msg))
@@ -707,10 +707,10 @@ class Credential(object):
 
     def sign(self):
         if not self.issuer_privkey:
-            logger.warn("Cannot sign credential (no private key)")
+            logger.warning("Cannot sign credential (no private key)")
             return
         if not self.issuer_gid:
-            logger.warn("Cannot sign credential (no issuer gid)")
+            logger.warning("Cannot sign credential (no issuer gid)")
             return
         doc = parseString(self.get_xml())
         sigs = doc.getElementsByTagName("signatures")[0]

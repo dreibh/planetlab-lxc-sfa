@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import sys
+# pylint: disable=c0111, w1201, w0622
+
 from datetime import datetime
 
 from sfa.util.xrn import get_authority, hrn_to_urn
@@ -8,13 +9,12 @@ from sfa.generic import Generic
 from sfa.util.config import Config
 from sfa.util.sfalogging import _SfaLogger
 from sfa.trust.hierarchy import Hierarchy
-#from sfa.trust.trustedroots import TrustedRoots
+# from sfa.trust.trustedroots import TrustedRoots
 from sfa.trust.gid import create_uuid
 # using global alchemy.session() here is fine
 # as importer is on standalone one-shot process
 from sfa.storage.alchemy import global_dbsession
 from sfa.storage.model import RegRecord, RegAuthority, RegUser
-from sfa.trust.certificate import convert_public_key, Keypair
 
 
 class Importer:
@@ -37,12 +37,15 @@ class Importer:
 #        self.TrustedRoots = TrustedRoots(self.config.get_trustedroots_dir())
 
     # check before creating a RegRecord entry as we run this over and over
-    def record_exists(self, type, hrn):
-        return global_dbsession.query(RegRecord).filter_by(hrn=hrn, type=type).count() != 0
+    @staticmethod
+    def record_exists(type, hrn):
+        return (global_dbsession.query(RegRecord)
+                .filter_by(hrn=hrn, type=type).count() != 0)
 
     def create_top_level_auth_records(self, hrn):
         """
-        Create top level db records (includes root and sub authorities (local/remote)
+        Create top level db records
+        includes root and sub authorities (local/remote)
         """
         # make sure parent exists
         parent_hrn = get_authority(hrn)
@@ -68,7 +71,7 @@ class Importer:
         """
         Create a user record for the Slicemanager service.
         """
-        hrn = self.interface_hrn + '.slicemanager'
+        hrn = self.interface_hrn + '.slicemanager'      # pylint: disable=e1101
         urn = hrn_to_urn(hrn, 'user')
         if not self.auth_hierarchy.auth_exists(urn):
             self.logger.info("SfaImporter: creating Slice Manager user")
@@ -126,8 +129,9 @@ class Importer:
         if importer_class:
             begin_time = datetime.utcnow()
             self.logger.info(30 * '=')
-            self.logger.info("Starting import on %s, using class %s from flavour %s" %
-                             (begin_time, importer_class.__name__, generic.flavour))
+            self.logger.info(
+                "Starting import on %s, using class %s from flavour %s" %
+                (begin_time, importer_class.__name__, generic.flavour))
             testbed_importer = importer_class(auth_hierarchy, self.logger)
             if testbed_importer:
                 testbed_importer.add_options(options)

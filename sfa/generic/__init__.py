@@ -35,7 +35,7 @@ class Generic:
         if flavour is None:
             flavour = config.SFA_GENERIC_FLAVOUR
         flavour = flavour.lower()
-        #mixed = flavour.capitalize()
+        # mixed = flavour.capitalize()
         module_path = "sfa.generic.%s" % flavour
         classname = "%s" % flavour
         logger.debug("Generic.the_flavour with flavour=%s" % flavour)
@@ -97,8 +97,9 @@ class Generic:
         try:
             module_or_class = getattr(self, classname)()
             logger.debug("%s : %s" % (message, module_or_class))
-            # this gets passed to ManagerWrapper that will call the class constructor
-            # if it's a class, or use the module as is if it's a module
+            # this gets passed to ManagerWrapper that will
+            # call the class constructor if it's a class,
+            # or use the module as is if it's a module
             # so bottom line is, don't try the constructor here
             return module_or_class
         except:

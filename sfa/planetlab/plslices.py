@@ -7,7 +7,8 @@ from sfa.util.xrn import Xrn, get_leaf, get_authority, urn_to_hrn
 from sfa.rspecs.rspec import RSpec
 from sfa.planetlab.vlink import VLink
 from sfa.planetlab.topology import Topology
-from sfa.planetlab.plxrn import PlXrn, hrn_to_pl_slicename, xrn_to_hostname, top_auth, hash_loginbase
+from sfa.planetlab.plxrn import (PlXrn, hrn_to_pl_slicename, xrn_to_hostname,
+                                 top_auth, hash_loginbase)
 from sfa.storage.model import SliverAllocation
 
 MAXINT = 2L**31 - 1
@@ -41,8 +42,9 @@ class PlSlices:
         person_ids = list(person_ids)
         all_slice_tag_ids = list(all_slice_tag_ids)
         # Get user information
-        all_persons_list = self.driver.shell.GetPersons({'person_id': person_ids, 'enabled': True},
-                                                        ['person_id', 'enabled', 'key_ids'])
+        all_persons_list = self.driver.shell.GetPersons(
+            {'person_id': person_ids, 'enabled': True},
+            ['person_id', 'enabled', 'key_ids'])
         all_persons = {}
         for person in all_persons_list:
             all_persons[person['person_id']] = person
@@ -90,13 +92,17 @@ class PlSlices:
             sliver_attributes = []
 
             if node is not None:
-                for sliver_attribute in filter(lambda a: a['node_id'] == node['node_id'], slice_tags):
+                for sliver_attribute in filter(
+                        lambda a: a['node_id'] == node['node_id'],
+                        slice_tags):
                     sliver_attributes.append(sliver_attribute['tagname'])
                     attributes.append({'tagname': sliver_attribute['tagname'],
                                        'value': sliver_attribute['value']})
 
             # set nodegroup slice attributes
-            for slice_tag in filter(lambda a: a['nodegroup_id'] in node['nodegroup_ids'], slice_tags):
+            for slice_tag in filter(
+                    lambda a: a['nodegroup_id'] in node['nodegroup_ids'],
+                    slice_tags):
                 # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
@@ -104,7 +110,9 @@ class PlSlices:
                     attributes.append({'tagname': slice_tag['tagname'],
                                        'value': slice_tag['value']})
 
-            for slice_tag in filter(lambda a: a['node_id'] is None, slice_tags):
+            for slice_tag in filter(
+                    lambda a: a['node_id'] is None,
+                    slice_tags):
                 # Do not set any global slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
@@ -144,8 +152,9 @@ class PlSlices:
 
     def verify_slice_leases(self, slice, rspec_requested_leases):
 
-        leases = self.driver.shell.GetLeases({'name': slice['name'], 'clip': int(time.time())},
-                                             ['lease_id', 'name', 'hostname', 't_from', 't_until'])
+        leases = self.driver.shell.GetLeases(
+            {'name': slice['name'], 'clip': int(time.time())},
+            ['lease_id', 'name', 'hostname', 't_from', 't_until'])
         grain = self.driver.shell.GetLeaseGranularity()
 
         requested_leases = []
@@ -165,7 +174,8 @@ class PlSlices:
 
             if slice_name != slice['name']:
                 continue
-            elif Xrn(lease['component_id']).get_authority_urn().split(':')[0] != self.driver.hrn:
+            elif (Xrn(lease['component_id']).get_authority_urn().split(':')[0]
+                  != self.driver.hrn):
                 continue
 
             hostname = xrn_to_hostname(lease['component_id'])
@@ -180,8 +190,9 @@ class PlSlices:
         # prepare actual slice leases by lease_id
         leases_by_id = {}
         for lease in leases:
-            leases_by_id[lease['lease_id']] = {'name': lease['name'], 'hostname': lease['hostname'],
-                                               't_from': lease['t_from'], 't_until': lease['t_until']}
+            leases_by_id[lease['lease_id']] = {
+                'name': lease['name'], 'hostname': lease['hostname'],
+                't_from': lease['t_from'], 't_until': lease['t_until']}
 
         added_leases = []
         kept_leases_id = []
@@ -197,10 +208,11 @@ class PlSlices:
         try:
             self.driver.shell.DeleteLeases(deleted_leases_id)
             for lease in added_leases:
-                self.driver.shell.AddLeases(lease['hostname'], slice['name'], lease[
-                                            't_from'], lease['t_until'])
+                self.driver.shell.AddLeases(
+                    lease['hostname'], slice['name'],
+                    lease['t_from'], lease['t_until'])
 
-        except:
+        except Exception:
             logger.log_exc('Failed to add/remove slice leases')
 
         return leases
@@ -235,7 +247,7 @@ class PlSlices:
             self.driver.shell.DeleteSliceFromNodes(
                 slice['name'], deleted_nodes)
 
-        except:
+        except Exception:
             logger.log_exc('Failed to add/remove slice from nodes')
 
         slices = self.driver.shell.GetSlices(slice['name'], ['node_ids'])
@@ -329,7 +341,8 @@ class PlSlices:
         self.verify_slice_tags(slice, slice_tags, {
                                'pltags': 'append'}, admin=True)
 
-    def verify_site(self, slice_xrn, slice_record=None, sfa_peer=None, options=None):
+    def verify_site(self, slice_xrn,
+                    slice_record=None, sfa_peer=None, options=None):
         if slice_record is None:
             slice_record = {}
         if options is None:
@@ -343,8 +356,9 @@ class PlSlices:
             login_base = hash_loginbase(site_hrn)
 
         # filter sites by hrn
-        sites = self.driver.shell.GetSites({'peer_id': None, 'hrn': site_hrn},
-                                           ['site_id', 'name', 'abbreviated_name', 'login_base', 'hrn'])
+        sites = self.driver.shell.GetSites(
+            {'peer_id': None, 'hrn': site_hrn},
+            ['site_id', 'name', 'abbreviated_name', 'login_base', 'hrn'])
 
         # alredy exists
         if sites:
@@ -371,7 +385,8 @@ class PlSlices:
 
         return site
 
-    def verify_slice(self, slice_hrn, slice_record, sfa_peer, expiration, options=None):
+    def verify_slice(self, slice_hrn, slice_record,
+                     sfa_peer, expiration, options=None):
         if options is None:
             options = {}
         top_auth_hrn = top_auth(slice_hrn)
@@ -385,8 +400,9 @@ class PlSlices:
 
         expires = int(datetime_to_epoch(utcparse(expiration)))
         # Filter slices by HRN
-        slices = self.driver.shell.GetSlices({'peer_id': None, 'hrn': slice_hrn},
-                                             ['slice_id', 'name', 'hrn', 'expires'])
+        slices = self.driver.shell.GetSlices(
+            {'peer_id': None, 'hrn': slice_hrn},
+            ['slice_id', 'name', 'hrn', 'expires'])
 
         if slices:
             slice = slices[0]
@@ -469,7 +485,8 @@ class PlSlices:
 
         return person_id
 
-    def verify_persons(self, slice_hrn, slice_record, users, sfa_peer, options=None):
+    def verify_persons(self, slice_hrn, slice_record,
+                       users, sfa_peer, options=None):
         if options is None:
             options = {}
 
@@ -501,8 +518,9 @@ class PlSlices:
         site_id = site['site_id']
 
         # locate the slice object
-        slice = self.driver.shell.GetSlices({'peer_id': None, 'hrn': slice_hrn}, [
-                                            'slice_id', 'hrn', 'person_ids'])[0]
+        slice = self.driver.shell.GetSlices(
+            {'peer_id': None, 'hrn': slice_hrn},
+            ['slice_id', 'hrn', 'person_ids'])[0]
         slice_id = slice['slice_id']
         slice_person_ids = slice['person_ids']
 
@@ -538,10 +556,12 @@ class PlSlices:
         # and for this we need all the Person objects; we already have the target_existing ones
         # also we avoid issuing a call if possible
         target_created_persons = [] if not target_created_person_ids \
-            else self.driver.shell.GetPersons \
-            ({'peer_id': None, 'person_id': target_created_person_ids}, person_fields)
-        persons_by_person_id = {person['person_id']: person
-                                for person in target_existing_persons + target_created_persons}
+            else self.driver.shell.GetPersons(
+                {'peer_id': None, 'person_id': target_created_person_ids},
+                person_fields)
+        persons_by_person_id = {
+            person['person_id']: person
+            for person in target_existing_persons + target_created_persons}
 
         def user_by_person_id(person_id):
             person = persons_by_person_id[person_id]
@@ -560,7 +580,8 @@ class PlSlices:
 
         # return hrns of the newly added persons
 
-        return [persons_by_person_id[person_id]['hrn'] for person_id in add_person_ids]
+        return [persons_by_person_id[person_id]['hrn']
+                for person_id in add_person_ids]
 
     def verify_keys(self, persons_to_verify_keys, options=None):
         if options is None:
@@ -578,13 +599,14 @@ class PlSlices:
                 key = {'key': key_string, 'key_type': 'ssh'}
                 self.driver.shell.AddPersonKey(int(person_id), key)
 
-    def verify_slice_tags(self, slice, requested_slice_attributes, options=None, admin=False):
+    def verify_slice_tags(self, slice, requested_slice_attributes,
+                          options=None, admin=False):
         """
         This function deals with slice tags, and supports 3 modes described
         in the 'pltags' option that can be either
         (*) 'ignore' (default) - do nothing
         (*) 'append' - only add incoming tags, that do not match an existing tag
-        (*) 'sync' - tries to do the plain wholesale thing, 
+        (*) 'sync' - tries to do the plain wholesale thing,
             i.e. to leave the db in sync with incoming tags
         """
         if options is None:
@@ -634,8 +656,8 @@ class PlSlices:
                 # be removed
                 tag_found = False
                 for requested_attribute in requested_slice_attributes:
-                    if requested_attribute['name'] == slice_tag['tagname'] and \
-                       requested_attribute['value'] == slice_tag['value']:
+                    if (requested_attribute['name'] == slice_tag['tagname'] and
+                            requested_attribute['value'] == slice_tag['value']):
                         tag_found = True
                         break
             # remove tags only if not in append mode
@@ -648,8 +670,8 @@ class PlSlices:
             if requested_attribute['name'] in valid_tag_names:
                 tag_found = False
                 for existing_attribute in existing_slice_tags:
-                    if requested_attribute['name'] == existing_attribute['tagname'] and \
-                       requested_attribute['value'] == existing_attribute['value']:
+                    if (requested_attribute['name'] == existing_attribute['tagname'] and \
+                            requested_attribute['value'] == existing_attribute['value']):
                         tag_found = True
                         break
                 if not tag_found:
@@ -659,7 +681,8 @@ class PlSlices:
             name = tag_or_att[
                 'tagname'] if 'tagname' in tag_or_att else tag_or_att['name']
             return "SliceTag slice={}, tagname={} value={}, node_id={}"\
-                .format(slice['name'], tag_or_att['name'], tag_or_att['value'], tag_or_att.get('node_id'))
+                .format(slice['name'], tag_or_att['name'],
+                        tag_or_att['value'], tag_or_att.get('node_id'))
 
         # remove stale tags
         for tag in slice_tags_to_remove:
@@ -668,16 +691,17 @@ class PlSlices:
                     friendly_message(tag)))
                 self.driver.shell.DeleteSliceTag(tag['slice_tag_id'])
             except Exception as e:
-                logger.warn("Failed to remove slice tag {}\nCause:{}"
-                            .format(friendly_message(tag), e))
+                logger.warning("Failed to remove slice tag {}\nCause:{}"
+                               .format(friendly_message(tag), e))
 
         # add requested_tags
         for attribute in slice_attributes_to_add:
             try:
                 logger.info("Adding Slice Tag {}".format(
                     friendly_message(attribute)))
-                self.driver.shell.AddSliceTag(slice['name'], attribute['name'],
-                                              attribute['value'], attribute.get('node_id', None))
+                self.driver.shell.AddSliceTag(
+                    slice['name'], attribute['name'],
+                    attribute['value'], attribute.get('node_id', None))
             except Exception as e:
-                logger.warn("Failed to add slice tag {}\nCause:{}"
-                            .format(friendly_message(attribute), e))
+                logger.warning("Failed to add slice tag {}\nCause:{}"
+                               .format(friendly_message(attribute), e))

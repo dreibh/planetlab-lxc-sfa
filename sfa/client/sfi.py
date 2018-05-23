@@ -572,7 +572,7 @@ class Sfi:
             parser.add_option("-p", "--pi", dest='delegate_pi', default=None, action='store_true',
                               help="delegate your PI credentials, so s.t. like -A your_hrn^")
             parser.add_option("-A", "--to-authority", dest='delegate_to_authority', action='store_true', default=False,
-                              help="""by default the mandatory argument is expected to be a user, 
+                              help="""by default the mandatory argument is expected to be a user,
 use this if you mean an authority instead""")
 
         if canonical in ("myslice"):
@@ -903,7 +903,7 @@ use this if you mean an authority instead""")
     # resurrect this temporarily so we can support V1 aggregates for a while
     def server_supports_options_arg(self, server):
         """
-        Returns true if server support the optional call_id arg, false otherwise. 
+        Returns true if server support the optional call_id arg, false otherwise.
         """
         server_version = self.get_cached_server_version(server)
         result = False
@@ -1127,8 +1127,8 @@ use this if you mean an authority instead""")
     @declare_command("[xml-filename]", "", ['add'])
     def register(self, options, args):
         """
-        create new record in registry (Register) 
-        from command line options (recommended) 
+        create new record in registry (Register)
+        from command line options (recommended)
         old-school method involving an xml file still supported
         """
         if len(args) > 1:
@@ -1170,8 +1170,8 @@ use this if you mean an authority instead""")
     @declare_command("[xml-filename]", "")
     def update(self, options, args):
         """
-        update record into registry (Update) 
-        from command line options (recommended) 
+        update record into registry (Update)
+        from command line options (recommended)
         old-school method involving an xml file still supported
         """
         if len(args) > 1:
@@ -1302,8 +1302,8 @@ use this if you mean an authority instead""")
     @declare_command("slice_hrn", "")
     def describe(self, options, args):
         """
-        shows currently allocated/provisioned resources 
-        of the named slice or set of slivers (Describe) 
+        shows currently allocated/provisioned resources
+        of the named slice or set of slivers (Describe)
         """
         if len(args) != 1:
             self.print_help()
@@ -1791,7 +1791,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
     * compute all the slices that you currently have credentials on
     * refresh all your credentials (you as a user and pi, your slices)
     * upload them to the manifold backend server
-    for last phase, sfi_config is read to look for the [myslice] section, 
+    for last phase, sfi_config is read to look for the [myslice] section,
     and namely the 'backend', 'delegate' and 'user' settings
         """
 

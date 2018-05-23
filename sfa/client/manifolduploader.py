@@ -169,13 +169,17 @@ def main():
                         help="the filenames to upload")
     parser.add_argument('-u', '--url', dest='url', action='store', default=None,
                         help='the URL of the manifold API')
-    parser.add_argument('-p', '--platform', dest='platform', action='store', default=None,
+    parser.add_argument('-p', '--platform', dest='platform',
+                        action='store', default=None,
                         help='the manifold platform name')
-    parser.add_argument('-U', '--user', dest='username', action='store', default=None,
+    parser.add_argument('-U', '--user', dest='username',
+                        action='store', default=None,
                         help='the manifold username')
-    parser.add_argument('-P', '--password', dest='password', action='store', default=None,
+    parser.add_argument('-P', '--password', dest='password',
+                        action='store', default=None,
                         help='the manifold password')
-    parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0,
+    parser.add_argument('-v', '--verbose', dest='verbose',
+                        action='count', default=0,
                         help='more and more verbose')
     args = parser.parse_args()
 
