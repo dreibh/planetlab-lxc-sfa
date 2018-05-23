@@ -22,3 +22,4 @@ AA-*
 *.dbg
 *.hide
 *-sample
+.auto*
