@@ -1,5 +1,6 @@
 from sfa.util.xrn import Xrn
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.trust.credential import Credential
 
@@ -15,7 +16,7 @@ class Remove(Method):
     @param type record type
     @param xrn human readable name of record to remove (hrn or urn)
 
-    @return 1 if successful, faults otherwise 
+    @return 1 if successful, faults otherwise
     """
 
     interfaces = ['registry']
@@ -40,7 +41,7 @@ class Remove(Method):
         # log the call
         origin_hrn = Credential(
             string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tmethod-name: %s\tcaller-hrn: %s\ttarget-urn: %s" % (
-            self.api.interface, self.name, origin_hrn, xrn.get_urn()))
+        logger.info("interface: %s\tmethod-name: %s\tcaller-hrn: %s\ttarget-urn: %s" % (
+                    self.api.interface, self.name, origin_hrn, xrn.get_urn()))
 
         return self.api.manager.Remove(self.api, xrn)

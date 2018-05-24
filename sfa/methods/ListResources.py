@@ -3,6 +3,8 @@ import zlib
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
 from sfa.util.sfatablesRuntime import run_sfatables
+from sfa.util.sfalogging import logger
+
 from sfa.util.faults import SfaInvalidArgument
 from sfa.trust.credential import Credential
 
@@ -25,8 +27,8 @@ class ListResources(Method):
     returns = Parameter(str, "List of resources")
 
     def call(self, creds, options):
-        self.api.logger.info("interface: %s\tmethod-name: %s" %
-                             (self.api.interface, self.name))
+        logger.info("interface: %s\tmethod-name: %s" %
+                    (self.api.interface, self.name))
 
         # client must specify a version
         if not options.get('geni_rspec_version'):
@@ -52,7 +54,7 @@ class ListResources(Method):
             chain_name = 'OUTGOING'
         elif self.api.interface in ['slicemgr']:
             chain_name = 'FORWARD-OUTGOING'
-        self.api.logger.debug(
+        logger.debug(
             "ListResources: sfatables on chain %s" % chain_name)
         filtered_rspec = run_sfatables(chain_name, '', origin_hrn, rspec)
 

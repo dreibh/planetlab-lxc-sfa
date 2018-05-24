@@ -92,7 +92,7 @@ xmlrpc_client.Marshaller._Marshaller__dump = xmlrpclib_dump
 
 class XmlrpcApi:
     """
-    The XmlrpcApi class implements a basic xmlrpc (or soap) service 
+    The XmlrpcApi class implements a basic xmlrpc (or soap) service
     """
 
     protocol = None
@@ -106,8 +106,6 @@ class XmlrpcApi:
         self.methods_module = methods_module = __import__(
             methods, fromlist=[methods])
         self.methods = methods_module.all
-
-        self.logger = logger
 
     def callable(self, method):
         """
@@ -125,7 +123,7 @@ class XmlrpcApi:
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except (ImportError, AttributeError):
-            self.logger.log_exc("Error importing method: %s" % method)
+            logger.log_exc("Error importing method: %s" % method)
             raise SfaInvalidAPIMethod(method)
 
     def call(self, source, method, *args):
@@ -167,9 +165,9 @@ class XmlrpcApi:
             result = self.call(source, method, *args)
         except SfaFault as fault:
             result = fault
-            self.logger.log_exc("XmlrpcApi.handle has caught Exception")
+            logger.log_exc("XmlrpcApi.handle has caught Exception")
         except Exception as fault:
-            self.logger.log_exc("XmlrpcApi.handle has caught Exception")
+            logger.log_exc("XmlrpcApi.handle has caught Exception")
             result = SfaAPIError(fault)
 
         # Return result

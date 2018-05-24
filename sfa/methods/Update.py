@@ -1,4 +1,5 @@
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.trust.credential import Credential
 
@@ -14,7 +15,7 @@ class Update(Method):
     @param cred credential string specifying rights of the caller
     @param record a record dictionary to be updated
 
-    @return 1 if successful, faults otherwise 
+    @return 1 if successful, faults otherwise
     """
 
     interfaces = ['registry']
@@ -37,7 +38,7 @@ class Update(Method):
         # log
         origin_hrn = Credential(
             string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
-                             (self.api.interface, origin_hrn, hrn, self.name))
+        logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                    (self.api.interface, origin_hrn, hrn, self.name))
 
         return self.api.manager.Update(self.api, record_dict)

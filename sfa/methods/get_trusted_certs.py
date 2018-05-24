@@ -1,4 +1,5 @@
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.trust.auth import Auth
 from sfa.trust.credential import Credential
@@ -9,7 +10,7 @@ from sfa.storage.parameter import Parameter, Mixed
 class get_trusted_certs(Method):
     """
     @param cred credential string specifying the rights of the caller
-    @return list of gid strings  
+    @return list of gid strings
     """
 
     interfaces = ['registry', 'aggregate', 'slicemgr']
@@ -25,7 +26,7 @@ class get_trusted_certs(Method):
         # If cred is not specified just return the gid for this interface.
         # This is true when when a peer is attempting to initiate federation
         # with this interface
-        self.api.logger.debug("get_trusted_certs: %r" % cred)
+        logger.debug("get_trusted_certs: %r" % cred)
         if not cred:
             gid_strings = []
             for gid in self.api.auth.trusted_cert_list:

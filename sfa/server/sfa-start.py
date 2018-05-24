@@ -36,14 +36,17 @@ from optparse import OptionParser
 from sfa.util.sfalogging import init_logger, logger
 from sfa.util.xrn import get_authority, hrn_to_urn
 from sfa.util.config import Config
+
 from sfa.trust.gid import GID
 from sfa.trust.trustedroots import TrustedRoots
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
 from sfa.trust.gid import GID
+
 from sfa.server.sfaapi import SfaApi
 from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
+
 from sfa.client.return_value import ReturnValue
 
 
@@ -130,11 +133,11 @@ def install_peer_certs(server_key_file, server_cert_file):
                         gid.save_to_file(gid_filename, save_parents=True)
                         message = "installed trusted cert for %s" % new_hrn
                     # log the message
-                    api.logger.info(message)
+                    logger.info(message)
         except Exception:
             message = "interface: %s\tunable to install trusted gid for %s" % \
                 (api.interface, new_hrn)
-            api.logger.log_exc(message)
+            logger.log_exc(message)
     # doesnt matter witch one
     update_cert_records(peer_gids)
 

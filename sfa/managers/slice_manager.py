@@ -132,7 +132,7 @@ class SliceManager:
                 return {"aggregate": aggregate, "result": result,
                         "elapsed": time.time() - tStart, "status": "success"}
             except Exception as e:
-                api.logger.log_exc("ListResources failed at %s" % (server.url))
+                logger.log_exc("ListResources failed at %s" % (server.url))
                 return {"aggregate": aggregate, "elapsed": time.time() - tStart,
                         "status": "exception", "exc_info": sys.exc_info()}
 
@@ -152,7 +152,7 @@ class SliceManager:
         if not xrn and self.cache and cached_requested:
             rspec = self.cache.get(version_string)
             if rspec:
-                api.logger.debug(
+                logger.debug(
                     "SliceManager.ListResources returns cached advertisement")
                 return rspec
 
@@ -195,12 +195,12 @@ class SliceManager:
                 try:
                     rspec.version.merge(ReturnValue.get_value(res))
                 except Exception:
-                    api.logger.log_exc(
+                    logger.log_exc(
                         "SM.ListResources: Failed to merge aggregate rspec")
 
         # cache the result
         if self.cache and not xrn:
-            api.logger.debug("SliceManager.ListResources caches advertisement")
+            logger.debug("SliceManager.ListResources caches advertisement")
             self.cache.add(version_string, rspec.toxml())
 
         return rspec.toxml()
@@ -286,7 +286,7 @@ class SliceManager:
                         ReturnValue.get_value(res['geni_rspec']))
                     geni_slivers.extend(res['geni_slivers'])
                 except Exception:
-                    api.logger.log_exc(
+                    logger.log_exc(
                         "SM.Allocate: Failed to merge aggregate rspec")
         return {
             'geni_urn': geni_urn,
@@ -355,7 +355,7 @@ class SliceManager:
                         ReturnValue.get_value(res['geni_rspec']))
                     geni_slivers.extend(res['geni_slivers'])
                 except:
-                    api.logger.log_exc(
+                    logger.log_exc(
                         "SM.Provision: Failed to merge aggregate rspec")
         return {
             'geni_urn': geni_urn,
@@ -487,7 +487,7 @@ class SliceManager:
                 geni_urn = result['geni_urn']
                 geni_slivers.extend(result['geni_slivers'])
             except Exception:
-                api.logger.log_exc(
+                logger.log_exc(
                     "SM.Provision: Failed to merge aggregate rspec")
         return {
             'geni_urn': geni_urn,
@@ -536,7 +536,7 @@ class SliceManager:
                     ReturnValue.get_value(result['geni_rspec']))
                 geni_slivers.extend(result['geni_slivers'])
             except Exception:
-                api.logger.log_exc(
+                logger.log_exc(
                     "SM.Provision: Failed to merge aggregate rspec")
         return {
             'geni_urn': geni_urn,

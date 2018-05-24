@@ -64,7 +64,7 @@ from sfa.util.faults import (CertExpired, CertMissingParent,
 from sfa.util.sfalogging import logger
 
 # this tends to generate quite some logs for little or no value
-debug_verify_chain = False
+debug_verify_chain = True
 
 glo_passphrase_callback = None
 
@@ -789,8 +789,10 @@ class Certificate:
     # @param cert certificate object
 
     def is_signed_by_cert(self, cert):
-        logger.debug("Certificate.is_signed_by_cert -> invoking verify")
         k = cert.get_pubkey()
+        logger.debug("Certificate.is_signed_by_cert -> verify on {}\n"
+                     "with pubkey {}"
+                     .format(self, k))
         result = self.verify(k)
         return result
 
@@ -867,7 +869,7 @@ class Certificate:
                                               trusted_cert.pretty_name()))
             else:
                 logger.debug("verify_chain: not a direct"
-                             " descendant of a trusted root")
+                             " descendant of trusted root #{}".format(i))
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:

@@ -1,5 +1,6 @@
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.trust.credential import Credential
 
@@ -15,7 +16,7 @@ class GetCredential(Method):
     @param cred credential object specifying rights of the caller
     @param type type of object (user | slice | node | authority )
 
-    @return the string representation of a credential object  
+    @return the string representation of a credential object
     """
 
     interfaces = ['registry']
@@ -44,7 +45,7 @@ class GetCredential(Method):
         # log the call
         origin_hrn = Credential(
             string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
-                             (self.api.interface, origin_hrn, hrn, self.name))
+        logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                    (self.api.interface, origin_hrn, hrn, self.name))
 
         return self.api.manager.GetCredential(self.api, xrn, type, self.api.auth.client_gid.get_urn())

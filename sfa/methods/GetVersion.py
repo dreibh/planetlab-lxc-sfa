@@ -1,4 +1,5 @@
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.storage.parameter import Parameter
 
@@ -18,6 +19,6 @@ class GetVersion(Method):
     def call(self, options=None):
         if options is None:
             options = {}
-        self.api.logger.info("interface: %s\tmethod-name: %s" %
-                             (self.api.interface, self.name))
+        logger.info("interface: %s\tmethod-name: %s" %
+                    (self.api.interface, self.name))
         return self.api.manager.GetVersion(self.api, options)
