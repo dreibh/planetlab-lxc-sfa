@@ -1,10 +1,10 @@
+# pylint: disable=c0111, c0103
+
 import sys
 import time
 import traceback
 from copy import copy
-from lxml import etree
 
-from sfa.trust.sfaticket import SfaTicket
 from sfa.trust.credential import Credential
 
 from sfa.util.sfalogging import logger
@@ -15,11 +15,9 @@ from sfa.util.cache import Cache
 
 from sfa.client.multiclient import MultiClient
 
-from sfa.rspecs.rspec_converter import RSpecConverter
 from sfa.rspecs.version_manager import VersionManager
 from sfa.rspecs.rspec import RSpec
 
-from sfa.client.client_helper import sfa_to_pg_users_arg
 from sfa.client.return_value import ReturnValue
 
 
@@ -38,8 +36,9 @@ class SliceManager:
 
     def GetVersion(self, api, options):
         # peers explicitly in aggregates.xml
-        peers = dict([(peername, interface.get_url()) for (peername, interface) in api.aggregates.iteritems()
-                      if peername != api.hrn])
+        peers = {peername: interface.get_url()
+                 for (peername, interface) in api.aggregates.iteritems()
+                 if peername != api.hrn}
         version_manager = VersionManager()
         ad_rspec_versions = []
         request_rspec_versions = []
@@ -55,7 +54,9 @@ class SliceManager:
             'interface': 'slicemgr',
             'sfa': 2,
             'geni_api': 3,
-            'geni_api_versions': {'3': 'https://%s:%s' % (api.config.SFA_SM_HOST, api.config.SFA_SM_PORT)},
+            'geni_api_versions':
+                {'3': 'https://%s:%s'
+                      % (api.config.SFA_SM_HOST, api.config.SFA_SM_PORT)},
             'hrn': xrn.get_hrn(),
             'urn': xrn.get_urn(),
             'peers': peers,
@@ -81,9 +82,10 @@ class SliceManager:
             for node in stats_elements:
                 node.getparent().remove(node)
         except Exception as e:
-            logger.warn("drop_slicemgr_stats failed: %s " % (str(e)))
+            logger.warning("drop_slicemgr_stats failed: %s " % (str(e)))
 
-    def add_slicemgr_stat(self, rspec, callname, aggname, elapsed, status, exc_info=None):
+    def add_slicemgr_stat(self, rspec, callname, aggname,
+                          elapsed, status, exc_info=None):
         try:
             stats_tags = rspec.xml.xpath('//statistics[@call="%s"]' % callname)
             if stats_tags:
@@ -92,25 +94,24 @@ class SliceManager:
                 stats_tag = rspec.xml.root.add_element(
                     "statistics", call=callname)
 
-            stat_tag = stats_tag.add_element("aggregate", name=str(aggname),
-                                             elapsed=str(elapsed), status=str(status))
+            stat_tag = stats_tag.add_element(
+                "aggregate", name=str(aggname),
+                elapsed=str(elapsed), status=str(status))
 
             if exc_info:
                 exc_tag = stat_tag.add_element(
                     "exc_info", name=str(exc_info[1]))
 
-                # formats the traceback as one big text blob
-                #exc_tag.text = "\n".join(traceback.format_exception(exc_info[0], exc_info[1], exc_info[2]))
-
                 # formats the traceback as a set of xml elements
                 tb = traceback.extract_tb(exc_info[2])
                 for item in tb:
-                    exc_frame = exc_tag.add_element("tb_frame", filename=str(item[0]),
-                                                    line=str(item[1]), func=str(item[2]), code=str(item[3]))
+                    exc_frame = exc_tag.add_element(
+                        "tb_frame", filename=str(item[0]),
+                        line=str(item[1]), func=str(item[2]), code=str(item[3]))
 
         except Exception as e:
-            logger.warn("add_slicemgr_stat failed on  %s: %s" %
-                        (aggname, str(e)))
+            logger.warning("add_slicemgr_stat failed on  %s: %s" %
+                           (aggname, str(e)))
 
     def ListResources(self, api, creds, options):
         call_id = options.get('call_id')
@@ -128,10 +129,12 @@ class SliceManager:
                 forward_options['geni_rspec_version'] = options.get(
                     'geni_rspec_version')
                 result = server.ListResources(credential, forward_options)
-                return {"aggregate": aggregate, "result": result, "elapsed": time.time() - tStart, "status": "success"}
+                return {"aggregate": aggregate, "result": result,
+                        "elapsed": time.time() - tStart, "status": "success"}
             except Exception as e:
                 api.logger.log_exc("ListResources failed at %s" % (server.url))
-                return {"aggregate": aggregate, "elapsed": time.time() - tStart, "status": "exception", "exc_info": sys.exc_info()}
+                return {"aggregate": aggregate, "elapsed": time.time() - tStart,
+                        "status": "exception", "exc_info": sys.exc_info()}
 
         # get slice's hrn from options
         xrn = options.get('geni_slice_urn', '')
@@ -184,13 +187,14 @@ class SliceManager:
                 rspec_version.type, rspec_version.version, 'ad')
         rspec = RSpec(version=result_version)
         for result in results:
-            self.add_slicemgr_stat(rspec, "ListResources", result["aggregate"], result["elapsed"],
-                                   result["status"], result.get("exc_info", None))
+            self.add_slicemgr_stat(
+                rspec, "ListResources", result["aggregate"], result["elapsed"],
+                result["status"], result.get("exc_info", None))
             if result["status"] == "success":
                 res = result['result']['value']
                 try:
                     rspec.version.merge(ReturnValue.get_value(res))
-                except:
+                except Exception:
                     api.logger.log_exc(
                         "SM.ListResources: Failed to merge aggregate rspec")
 
@@ -222,11 +226,13 @@ class SliceManager:
                     # rspec.filter(filter)
                     #rspec = rspec.toxml()
                 result = server.Allocate(xrn, credential, rspec, options)
-                return {"aggregate": aggregate, "result": result, "elapsed": time.time() - tStart, "status": "success"}
+                return {"aggregate": aggregate, "result": result,
+                        "elapsed": time.time() - tStart, "status": "success"}
             except:
                 logger.log_exc(
                     'Something wrong in _Allocate with URL %s' % server.url)
-                return {"aggregate": aggregate, "elapsed": time.time() - tStart, "status": "exception", "exc_info": sys.exc_info()}
+                return {"aggregate": aggregate, "elapsed": time.time() - tStart,
+                        "status": "exception", "exc_info": sys.exc_info()}
 
         # Validate the RSpec against PlanetLab's schema --disabled for now
         # The schema used here needs to aggregate the PL and VINI schemas
@@ -269,8 +275,9 @@ class SliceManager:
         geni_slivers = []
 
         for result in results:
-            self.add_slicemgr_stat(result_rspec, "Allocate", result["aggregate"], result["elapsed"],
-                                   result["status"], result.get("exc_info", None))
+            self.add_slicemgr_stat(
+                result_rspec, "Allocate", result["aggregate"], result["elapsed"],
+                result["status"], result.get("exc_info", None))
             if result["status"] == "success":
                 try:
                     res = result['result']['value']
@@ -278,7 +285,7 @@ class SliceManager:
                     result_rspec.version.merge(
                         ReturnValue.get_value(res['geni_rspec']))
                     geni_slivers.extend(res['geni_slivers'])
-                except:
+                except Exception:
                     api.logger.log_exc(
                         "SM.Allocate: Failed to merge aggregate rspec")
         return {
@@ -298,15 +305,17 @@ class SliceManager:
             tStart = time.time()
             try:
                 # Need to call GetVersion at an aggregate to determine the supported
-                # rspec type/format beofre calling CreateSliver at an
+                # rspec type/format before calling CreateSliver at an
                 # Aggregate.
                 server_version = api.get_cached_server_version(server)
                 result = server.Provision(xrn, credential, options)
-                return {"aggregate": aggregate, "result": result, "elapsed": time.time() - tStart, "status": "success"}
-            except:
+                return {"aggregate": aggregate, "result": result,
+                        "elapsed": time.time() - tStart, "status": "success"}
+            except Exception:
                 logger.log_exc(
                     'Something wrong in _Allocate with URL %s' % server.url)
-                return {"aggregate": aggregate, "elapsed": time.time() - tStart, "status": "exception", "exc_info": sys.exc_info()}
+                return {"aggregate": aggregate, "elapsed": time.time() - tStart,
+                        "status": "exception", "exc_info": sys.exc_info()}
 
         # attempt to use delegated credential first
         cred = api.getDelegatedCredential(creds)
@@ -335,8 +344,9 @@ class SliceManager:
         geni_slivers = []
         geni_urn = None
         for result in results:
-            self.add_slicemgr_stat(result_rspec, "Provision", result["aggregate"], result["elapsed"],
-                                   result["status"], result.get("exc_info", None))
+            self.add_slicemgr_stat(
+                result_rspec, "Provision", result["aggregate"], result["elapsed"],
+                result["status"], result.get("exc_info", None))
             if result["status"] == "success":
                 try:
                     res = result['result']['value']
@@ -388,15 +398,16 @@ class SliceManager:
                 continue
             interface = api.aggregates[aggregate]
             server = api.server_proxy(interface, cred)
-            multiclient.run(_Renew, aggregate, server, xrn, [
-                            cred], expiration_time, options)
+            multiclient.run(_Renew, aggregate, server, xrn,
+                            [cred], expiration_time, options)
 
         results = multiclient.get_results()
 
         geni_code = 0
         geni_output = ",".join([x.get('output', "") for x in results])
-        geni_value = reduce(lambda x, y: x and y, [result.get(
-            'value', False) for result in results], True)
+        geni_value = reduce(lambda x, y: x and y,
+                            [result.get('value', False) for result in results],
+                            True)
         for agg_result in results:
             agg_geni_code = agg_result['code'].get('geni_code', 0)
             if agg_geni_code:
@@ -475,7 +486,7 @@ class SliceManager:
             try:
                 geni_urn = result['geni_urn']
                 geni_slivers.extend(result['geni_slivers'])
-            except:
+            except Exception:
                 api.logger.log_exc(
                     "SM.Provision: Failed to merge aggregate rspec")
         return {
@@ -524,7 +535,7 @@ class SliceManager:
                 result_rspec.version.merge(
                     ReturnValue.get_value(result['geni_rspec']))
                 geni_slivers.extend(result['geni_slivers'])
-            except:
+            except Exception:
                 api.logger.log_exc(
                     "SM.Provision: Failed to merge aggregate rspec")
         return {

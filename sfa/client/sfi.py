@@ -1,7 +1,9 @@
-#
-# sfi.py - basic SFA command-line client
-# this module is also used in sfascan
-#
+"""
+sfi.py - basic SFA command-line client
+this module is also used in sfascan
+"""
+
+# pylint: disable=c0111, c0413
 
 from __future__ import print_function
 
@@ -10,7 +12,6 @@ sys.path.append('.')
 
 import os
 import os.path
-import socket
 import re
 import datetime
 import codecs
