@@ -7,7 +7,7 @@ from datetime import datetime
 from sfa.util.xrn import get_authority, hrn_to_urn
 from sfa.generic import Generic
 from sfa.util.config import Config
-from sfa.util.sfalogging import _SfaLogger
+from sfa.util.sfalogging import logger as import_logger
 from sfa.trust.hierarchy import Hierarchy
 # from sfa.trust.trustedroots import TrustedRoots
 from sfa.trust.gid import create_uuid
@@ -28,9 +28,8 @@ class Importer:
         if logger is not None:
             self.logger = logger
         else:
-            self.logger = _SfaLogger(
-                logfile='/var/log/sfa_import.log', loggername='importlog')
-            self.logger.setLevelFromOptVerbose(self.config.SFA_API_LOGLEVEL)
+            self.logger = import_logger
+        self.logger.setLevelFromOptVerbose(self.config.SFA_API_LOGLEVEL)
 # ugly side effect so that other modules get it right
         import sfa.util.sfalogging
         sfa.util.sfalogging.logger = logger

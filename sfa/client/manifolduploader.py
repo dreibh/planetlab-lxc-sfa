@@ -183,7 +183,8 @@ def main():
                         help='more and more verbose')
     args = parser.parse_args()
 
-    from sfa.util.sfalogging import sfi_logger
+    from sfa.util.sfalogging import init_logger, logger as sfi_logger
+    init_logger('console')
     sfi_logger.enable_console()
     sfi_logger.setLevelFromOptVerbose(args.verbose)
     uploader = ManifoldUploader(url=args.url, platform=args.platform,

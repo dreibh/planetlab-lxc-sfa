@@ -33,7 +33,7 @@ import traceback
 import sys
 from optparse import OptionParser
 
-from sfa.util.sfalogging import logger
+from sfa.util.sfalogging import init_logger, logger
 from sfa.util.xrn import get_authority, hrn_to_urn
 from sfa.util.config import Config
 from sfa.trust.gid import GID
@@ -197,6 +197,7 @@ def main():
     (options, args) = parser.parse_args()
 
     config = Config()
+    init_logger('server')
     logger.setLevelFromOptVerbose(config.SFA_API_LOGLEVEL)
 
     # ge the server's key and cert

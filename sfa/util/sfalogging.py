@@ -1,227 +1,188 @@
 #!/usr/bin/python
 
-#----------------------------------------------------------------------
-# Copyright (c) 2008 Board of Trustees, Princeton University
-#
-# Permission is hereby granted, free of charge, to any person obtaining
-# a copy of this software and/or hardware specification (the "Work") to
-# deal in the Work without restriction, including without limitation the
-# rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Work, and to permit persons to whom the Work
-# is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Work.
-#
-# THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS
-# IN THE WORK.
-#----------------------------------------------------------------------
+"""
+A reroutable logger that can handle deep tracebacks
+
+Requirements:
+
+* for legacy, we want all our code to just do:
+
+    from sfa.util.sfalogging import logger
+    ...
+    logger.info('blabla')
+
+* depending on whether the code runs (a) inside the server,
+  (b) as part of sfa-import, or (c) as part of the sfi CLI,
+  we want these messages to be directed in different places
+
+* also because troubleshooting is very painful, we need a better way
+  to report stacks when an exception occurs.
+
+Implementation:
+
+* we use a single unique logger name 'sfa' (wrt getLogger()),
+  and provide an auxiliary function `init_logger()` that
+  accepts for its `context` parameter one of :
+  `server`, `import` `sfi` or `console`
+  It will then reconfigure the 'sfa' logger to do the right thing
+
+* also we create our own subclass of loggers, and install it
+  with logging.setLoggerClass(), so we can add our own customized
+  `log_exc()` method
+
+"""
+
+# pylint: disable=c0111, c0103, w1201
 
 from __future__ import print_function
 
 import os
+import os.path
 import sys
 import traceback
 import logging
 import logging.handlers
+import logging.config
 
-CRITICAL = logging.CRITICAL
-ERROR = logging.ERROR
-WARNING = logging.WARNING
-INFO = logging.INFO
-DEBUG = logging.DEBUG
-
-# a logger that can handle tracebacks
+# so that users of this module don't need to import logging
+from logging import (CRITICAL, ERROR, WARNING, INFO, DEBUG)
 
 
-class _SfaLogger:
-
-    def __init__(self, logfile=None, loggername=None, level=logging.INFO):
-        # default is to locate loggername from the logfile if avail.
-        if not logfile:
-            # loggername='console'
-            # handler=logging.StreamHandler()
-            #handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
-            logfile = "/var/log/sfa.log"
-
-        if not loggername:
-            loggername = os.path.basename(logfile)
-        try:
-            handler = logging.handlers.RotatingFileHandler(
-                logfile, maxBytes=1000000, backupCount=5)
-        except IOError:
-            # This is usually a permissions error because the file is
-            # owned by root, but httpd is trying to access it.
-            tmplogfile = os.path.join(os.getenv("TMPDIR",
-                                                os.getenv("TMP", os.path.normpath("/tmp"))),
-                                      os.path.basename(logfile))
-            tmplogfile = os.path.normpath(tmplogfile)
-
-            tmpdir = os.path.dirname(tmplogfile)
-            if tmpdir and tmpdir != "" and not os.path.exists(tmpdir):
-                os.makedirs(tmpdir)
-
-            # In strange uses, 2 users on same machine might use same code,
-            # meaning they would clobber each others files
-            # We could (a) rename the tmplogfile, or (b)
-            # just log to the console in that case.
-            # Here we default to the console.
-            if os.path.exists(tmplogfile) and not os.access(tmplogfile, os.W_OK):
-                loggername = loggername + "-console"
-                handler = logging.StreamHandler()
-            else:
-                handler = logging.handlers.RotatingFileHandler(
-                    tmplogfile, maxBytes=1000000, backupCount=5)
-        handler.setFormatter(logging.Formatter(
-            "%(asctime)s - %(levelname)s - %(message)s"))
-        self.logger = logging.getLogger(loggername)
-        self.logger.setLevel(level)
-        # check if logger already has the handler we're about to add
-        handler_exists = False
-        for l_handler in self.logger.handlers:
-            if l_handler.baseFilename == handler.baseFilename and \
-               l_handler.level == handler.level:
-                handler_exists = True
-
-        if not handler_exists:
-            self.logger.addHandler(handler)
-
-        self.loggername = loggername
-
-    def setLevel(self, level):
-        self.logger.setLevel(level)
+class SfaLogger(logging.getLoggerClass()):
+    """
+    a rewrite of  old _SfaLogger class that was way too cumbersome
+    keep this as much as possible though
+    """
 
     # shorthand to avoid having to import logging all over the place
     def setLevelDebug(self):
-        self.logger.setLevel(logging.DEBUG)
+        self.setLevel(DEBUG)
 
     def debugEnabled(self):
-        return self.logger.getEffectiveLevel() == logging.DEBUG
+        return self.getEffectiveLevel() == logging.DEBUG
 
     # define a verbose option with s/t like
-    # parser.add_option("-v", "--verbose", action="count", dest="verbose", default=0)
+    # parser.add_option("-v", "--verbose", action="count",
+    #                   dest="verbose", default=0)
     # and pass the coresponding options.verbose to this method to adjust level
     def setLevelFromOptVerbose(self, verbose):
         if verbose == 0:
-            self.logger.setLevel(logging.WARNING)
+            self.setLevel(logging.WARNING)
         elif verbose == 1:
-            self.logger.setLevel(logging.INFO)
+            self.setLevel(logging.INFO)
         elif verbose >= 2:
-            self.logger.setLevel(logging.DEBUG)
-    # in case some other code needs a boolean
+            self.setLevel(logging.DEBUG)
 
-    def getBoolVerboseFromOpt(self, verbose):
+    # in case some other code needs a boolean
+    @staticmethod
+    def getBoolVerboseFromOpt(verbose):
         return verbose >= 1
 
-    def getBoolDebugFromOpt(self, verbose):
+    @staticmethod
+    def getBoolDebugFromOpt(verbose):
         return verbose >= 2
 
-    ####################
-    def info(self, msg):
-        self.logger.info(msg)
+    def log_exc(self, message, limit=100):
+        """
+        standard logger has an exception() method but this will
+        dump the stack only between the frames
+        (1) that does `raise` and (2) the one that does `except`
 
-    def debug(self, msg):
-        self.logger.debug(msg)
+        log_exc() has a limit argument that allows to see deeper than that
 
-    def warn(self, msg):
-        self.logger.warn(msg)
-
-    # some code is using logger.warn(), some is using logger.warning()
-    def warning(self, msg):
-        self.logger.warning(msg)
-
-    def error(self, msg):
-        self.logger.error(msg)
-
-    def critical(self, msg):
-        self.logger.critical(msg)
-
-    # logs an exception - use in an except statement
-    def log_exc(self, message):
+        use limit=None to get the same behaviour as exception()
+        """
         self.error("%s BEG TRACEBACK" % message + "\n" +
-                   traceback.format_exc().strip("\n"))
+                   traceback.format_exc(limit=limit).strip("\n"))
         self.error("%s END TRACEBACK" % message)
 
-    def log_exc_critical(self, message):
-        self.critical("%s BEG TRACEBACK" % message + "\n" +
-                      traceback.format_exc().strip("\n"))
-        self.critical("%s END TRACEBACK" % message)
-
     # for investigation purposes, can be placed anywhere
-    def log_stack(self, message):
-        to_log = "".join(traceback.format_stack())
+    def log_stack(self, message, limit=100):
+        to_log = "".join(traceback.format_stack(limit=limit))
         self.info("%s BEG STACK" % message + "\n" + to_log)
         self.info("%s END STACK" % message)
 
-    def enable_console(self, stream=sys.stdout):
+    def enable_console(self):
         formatter = logging.Formatter("%(message)s")
-        handler = logging.StreamHandler(stream)
+        handler = logging.StreamHandler(sys.stdout)
         handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+        self.addHandler(handler)
 
 
-logger = _SfaLogger(loggername='info', level=logging.INFO)
-
-sfi_logger = _SfaLogger(logfile=os.path.expanduser("~/.sfi/") + 'sfi.log',
-                        loggername='sfilog', level=logging.DEBUG)
-########################################
-import time
+# install our class as the default
+logging.setLoggerClass(SfaLogger)
 
 
-def profile(logger):
-    """
-    Prints the runtime of the specified callable. Use as a decorator, e.g.,
+# configure
+# this is *NOT* passed to dictConfig as-is
+# instead we filter 'handlers' and 'loggers'
+# to contain just one entry
+# so make sure that 'handlers' and 'loggers'
+# have the same set of keys
+def logging_config(context):
+    if context == 'server':
+        handlername = 'file'
+        filename = '/var/log/sfa.log'
+        level = 'INFO'
+    elif context == 'import':
+        handlername = 'file'
+        filename = '/var/log/sfa-import.log'
+        level = 'INFO'
+    elif context == 'cli':
+        handlername = 'file'
+        filename = os.path.expanduser("~/.sfi.log")
+        level = 'DEBUG'
+    elif context == 'console':
+        handlername = 'stdout'
+        filename = 'ignored'
+        level = 'INFO'
+    else:
+        print("Cannot configure logging - exiting")
+        exit(1)
 
-    @profile(logger)
-    def foo(...):
-        ...
-    """
-    def logger_profile(callable):
-        def wrapper(*args, **kwds):
-            start = time.time()
-            result = callable(*args, **kwds)
-            end = time.time()
-            args = map(str, args)
-            args += ["%s = %s" % (name, str(value))
-                     for (name, value) in kwds.iteritems()]
-            # should probably use debug, but then debug is not always enabled
-            logger.info("PROFILED %s (%s): %.02f s" %
-                        (callable.__name__, ", ".join(args), end - start))
-            return result
-        return wrapper
-    return logger_profile
+    return {
+        'version': 1,
+        # IMPORTANT: we may be imported by something else, so:
+        'disable_existing_loggers': False,
+        'formatters': {
+            'standard': {
+                'datefmt': '%m-%d %H:%M:%S',
+                'format': ('%(asctime)s %(levelname)s '
+                           '%(filename)s:%(lineno)d %(message)s'),
+            },
+        },
+        'handlers': {
+            'file': {
+                'filename': filename,
+                'level': level,
+                # not using RotatingFileHandler for this first version
+                'class': 'logging.FileHandler',
+                'formatter': 'standard',
+            },
+            'stdout': {
+                'level': level,
+                'class': 'logging.StreamHandler',
+                'formatter': 'standard',
+            },
+        },
+        'loggers': {
+            'sfa': {
+                'handlers': [handlername],
+                'level': level,
+                'propagate': False,
+            },
+        },
+    }
 
 
-if __name__ == '__main__':
-    print('testing sfalogging into logger.log')
-    logger1 = _SfaLogger('logger.log', loggername='std(info)')
-    logger2 = _SfaLogger('logger.log', loggername='error', level=logging.ERROR)
-    logger3 = _SfaLogger('logger.log', loggername='debug', level=logging.DEBUG)
+logger = logging.getLogger('sfa')
 
-    for logger, msg in ((logger1, "std(info)"), (logger2, "error"), (logger3, "debug")):
 
-        print("====================", msg, logger.logger.handlers)
+def init_logger(context):
+    logging.config.dictConfig(logging_config(context))
 
-        logger.enable_console()
-        logger.critical("logger.critical")
-        logger.error("logger.error")
-        logger.warn("logger.warning")
-        logger.info("logger.info")
-        logger.debug("logger.debug")
-        logger.setLevel(logging.DEBUG)
-        logger.debug("logger.debug again")
 
-        @profile(logger)
-        def sleep(seconds=1):
-            time.sleep(seconds)
-
-        logger.info('console.info')
-        sleep(0.5)
-        logger.setLevel(logging.DEBUG)
-        sleep(0.25)
+# if the user process does not do anything
+# like for the miscell testers and other certificate
+# probing/dumping utilities
+init_logger('console')

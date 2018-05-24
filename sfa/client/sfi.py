@@ -29,7 +29,7 @@ from sfa.trust.credential import Credential
 from sfa.trust.sfaticket import SfaTicket
 
 from sfa.util.faults import SfaInvalidArgument
-from sfa.util.sfalogging import sfi_logger
+from sfa.util.sfalogging import init_logger, logger
 from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, Xrn
 from sfa.util.config import Config
 from sfa.util.version import version_core
@@ -346,7 +346,7 @@ class Sfi:
         self.options = options
         self.user = None
         self.authority = None
-        self.logger = sfi_logger
+        self.logger = logger
         self.logger.enable_console()
         # various auxiliary material that we keep at hand
         self.command = None
@@ -606,6 +606,7 @@ use this if you mean an authority instead""")
         return method(command_options, command_args)
 
     def main(self):
+        init_logger('cli')
         self.sfi_parser = self.create_parser_global()
         (options, args) = self.sfi_parser.parse_args()
         if options.help:

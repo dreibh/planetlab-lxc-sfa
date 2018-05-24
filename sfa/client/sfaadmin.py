@@ -347,9 +347,8 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n"
         filesystem cleanups optionally
         """
         from sfa.storage.dbschema import DBSchema
-        from sfa.util.sfalogging import _SfaLogger
-        logger = _SfaLogger(
-            logfile='/var/log/sfa_import.log', loggername='importlog')
+        from sfa.util.sfalogging import init_logger, logger
+        init_logger('import')
         logger.setLevelFromOptVerbose(self.api.config.SFA_API_LOGLEVEL)
         logger.info("Purging SFA records from database")
         dbschema = DBSchema()
