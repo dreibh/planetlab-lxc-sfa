@@ -155,14 +155,18 @@ def logging_config(context):
             'file': {
                 'filename': filename,
                 'level': level,
-                # not using RotatingFileHandler for this first version
-                'class': 'logging.FileHandler',
                 'formatter': 'standard',
+                'class': 'logging.handlers.TimedRotatingFileHandler',
+                # every monday and during 3 months
+                'when': 'w0',
+                'interval': 1,
+                'backupCount': 12,
+
             },
             'stdout': {
                 'level': level,
-                'class': 'logging.StreamHandler',
                 'formatter': 'standard',
+                'class': 'logging.StreamHandler',
             },
         },
         'loggers': {
