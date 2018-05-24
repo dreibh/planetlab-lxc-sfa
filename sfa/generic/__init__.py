@@ -102,8 +102,9 @@ class Generic:
             # or use the module as is if it's a module
             # so bottom line is, don't try the constructor here
             return module_or_class
-        except:
-            logger.log_exc_critical(message)
+        except Exception:
+            logger.log_exc(message)
+            exit(1)
 
     # need interface to select the right driver
     def make_driver(self, api):
@@ -121,5 +122,6 @@ class Generic:
             class_obj = getattr(self, classname)()
             logger.debug("%s : %s" % (message, class_obj))
             return class_obj(api)
-        except:
-            logger.log_exc_critical(message)
+        except Exception:
+            logger.log_exc(message)
+            exit(1)

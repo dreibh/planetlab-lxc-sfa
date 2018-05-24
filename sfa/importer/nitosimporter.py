@@ -233,13 +233,13 @@ class NitosImporter:
                             except:
                                 continue
                         if not pkey:
-                            self.logger.warn(
+                            self.logger.warning(
                                 'NitosImporter: unable to convert public key for %s' % user_hrn)
                             pkey = Keypair(create=True)
                     else:
                         # the user has no keys. Creating a random keypair for
                         # the user's gid
-                        self.logger.warn(
+                        self.logger.warning(
                             "NitosImporter: user %s does not have a NITOS public key" % user_hrn)
                         pkey = Keypair(create=True)
                     return (pubkey, pkey)

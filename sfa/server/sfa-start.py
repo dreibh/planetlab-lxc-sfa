@@ -243,5 +243,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except:
-        logger.log_exc_critical("SFA server is exiting")
+    except Exception:
+        logger.log_exc("SFA server is exiting")
+        exit(1)
