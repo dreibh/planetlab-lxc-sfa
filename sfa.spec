@@ -151,6 +151,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 /etc/init.d/sfa
+/usr/lib/systemd/system/*.service
 %{_bindir}/sfa-start.py*
 %{_bindir}/sfaadmin.py*
 %{_bindir}/sfaadmin
