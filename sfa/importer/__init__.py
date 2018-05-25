@@ -7,7 +7,7 @@ from datetime import datetime
 from sfa.util.xrn import get_authority, hrn_to_urn
 from sfa.generic import Generic
 from sfa.util.config import Config
-from sfa.util.sfalogging import logger as import_logger
+from sfa.util.sfalogging import init_logger, logger as default_logger
 from sfa.trust.hierarchy import Hierarchy
 # from sfa.trust.trustedroots import TrustedRoots
 from sfa.trust.gid import create_uuid
@@ -16,6 +16,12 @@ from sfa.trust.gid import create_uuid
 from sfa.storage.alchemy import global_dbsession
 from sfa.storage.model import RegRecord, RegAuthority, RegUser
 
+# note on logging
+# it is doubtful that anyone ever used the ability to
+# pass a logger to this class, and that can probably be
+# thrown away.
+# However a quick attempt showed that it seems to
+# also require changes in the Generic layer
 
 class Importer:
 
@@ -25,10 +31,12 @@ class Importer:
             self.auth_hierarchy = auth_hierarchy
         else:
             self.auth_hierarchy = Hierarchy()
-        if logger is not None:
-            self.logger = logger
+        if logger is None:
+            # redirect in sfa-import.log
+            self.logger = default_logger
+            init_logger('import')
         else:
-            self.logger = import_logger
+            self.logger = logger
         self.logger.setLevelFromOptVerbose(self.config.SFA_API_LOGLEVEL)
 # ugly side effect so that other modules get it right
         import sfa.util.sfalogging

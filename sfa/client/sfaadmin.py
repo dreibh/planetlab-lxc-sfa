@@ -12,6 +12,8 @@ from optparse import OptionParser
 
 from sfa.generic import Generic
 from sfa.util.xrn import Xrn
+from sfa.util.sfalogging import logger, init_logger
+
 from sfa.storage.record import Record
 
 from sfa.trust.hierarchy import Hierarchy
@@ -317,6 +319,7 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n"
 
     def import_registry(self):
         """Run the importer"""
+        init_logger('import')
         from sfa.importer import Importer
         importer = Importer()
         importer.run()
