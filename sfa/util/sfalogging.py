@@ -140,7 +140,7 @@ def logging_config(context):
         print("Cannot configure logging - exiting")
         exit(1)
 
-    return {
+    config = {
         'version': 1,
         # IMPORTANT: we may be imported by something else, so:
         'disable_existing_loggers': False,
@@ -151,23 +151,9 @@ def logging_config(context):
                            '%(filename)s:%(lineno)d %(message)s'),
             },
         },
+        # fill in later with just the one needed
+        # otherwise a dummy 'ignored' file gets created
         'handlers': {
-            'file': {
-                'filename': filename,
-                'level': level,
-                'formatter': 'standard',
-                'class': 'logging.handlers.TimedRotatingFileHandler',
-                # every monday and during 3 months
-                'when': 'w0',
-                'interval': 1,
-                'backupCount': 12,
-
-            },
-            'stdout': {
-                'level': level,
-                'formatter': 'standard',
-                'class': 'logging.StreamHandler',
-            },
         },
         'loggers': {
             'sfa': {
@@ -177,6 +163,24 @@ def logging_config(context):
             },
         },
     }
+    if handlername == 'stdout':
+        config['handlers']['stdout'] = {
+            'level': level,
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler',
+            }
+    else:
+        config['handlers']['file'] = {
+            'filename': filename,
+            'level': level,
+            'formatter': 'standard',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            # every monday and during 3 months
+            'when': 'w0',
+            'interval': 1,
+            'backupCount': 12,
+            }
+    return config
 
 
 logger = logging.getLogger('sfa')
