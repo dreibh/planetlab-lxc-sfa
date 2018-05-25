@@ -158,6 +158,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/keyconvert.py*
 %{_bindir}/sfa-config-tty
 %{_bindir}/sfa-config
+%{_bindir}/sfa-db-init.sh
 %config /etc/sfa/default_config.xml
 %config (noreplace) /etc/sfa/aggregates.xml
 %config (noreplace) /etc/sfa/registries.xml
