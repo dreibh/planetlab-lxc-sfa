@@ -103,11 +103,12 @@ function start () {
     postgresql_setting log_timezone "'UTC'"
 
     ######## /var/lib/pgsql/data/pg_hba.conf
-    # Disable access to all DBs from all hosts
-    sed -i -e '/^\(host\|local\)/d' $pg_hba_conf
+    # remove/recreate passwordless localhost entry
+    sed -i -e "/^local/d" $pg_hba_conf
+    echo "local all all trust" >> $pg_hba_conf
 
-    # Enable passwordless localhost access
-    echo "local all all trust" >>$pg_hba_conf
+    # Disable access to our DB from all hosts
+    sed -i -e "/^host ${SFA_DB_NAME}/d' $pg_hba_conf
     # grant access
     {
         echo "host $SFA_DB_NAME $SFA_DB_USER 127.0.0.1/32 password"
