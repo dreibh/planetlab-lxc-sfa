@@ -28,6 +28,9 @@ from sfa.client.sfi import save_records_to_file
 
 pprinter = PrettyPrinter(indent=4)
 
+# if set, will output on stdout
+DEBUG = False
+
 try:
     help_basedir = Hierarchy().basedir
 except Exception:
@@ -319,7 +322,8 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n"
 
     def import_registry(self):
         """Run the importer"""
-        init_logger('import')
+        if not DEBUG:
+            init_logger('import')
         from sfa.importer import Importer
         importer = Importer()
         importer.run()
