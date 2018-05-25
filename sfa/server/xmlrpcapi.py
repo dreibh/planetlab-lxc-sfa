@@ -15,7 +15,6 @@ except ImportError:
     SOAPpy = None
 
 ####################
-#from sfa.util.faults import SfaNotImplemented, SfaAPIError, SfaInvalidAPIMethod, SfaFault
 from sfa.util.faults import SfaInvalidAPIMethod, SfaAPIError, SfaFault
 from sfa.util.sfalogging import logger
 from sfa.util.py23 import xmlrpc_client
