@@ -1,3 +1,5 @@
+# pylint: disable=c0111, w1202
+
 from __future__ import print_function
 
 # for get_key_from_incoming_ip
@@ -5,8 +7,9 @@ import tempfile
 import os
 import commands
 
-from sfa.util.faults import RecordNotFound, AccountNotEnabled, PermissionError, MissingAuthority, \
-    UnknownSfaType, ExistingRecord, NonExistingRecord
+from sfa.util.faults import (
+    RecordNotFound, AccountNotEnabled, PermissionError, MissingAuthority,
+    UnknownSfaType, ExistingRecord, NonExistingRecord)
 from sfa.util.sfatime import utcparse, datetime_to_epoch
 from sfa.util.prefixTree import prefixTree
 from sfa.util.xrn import Xrn, get_authority, hrn_to_urn, urn_to_hrn
@@ -20,8 +23,9 @@ from sfa.trust.credential import Credential
 from sfa.trust.certificate import Certificate, Keypair, convert_public_key
 from sfa.trust.gid import create_uuid
 
-from sfa.storage.model import make_record, RegRecord, RegAuthority, RegUser, RegSlice, RegKey, \
-    augment_with_sfa_builtins
+from sfa.storage.model import (
+    make_record, RegRecord, RegAuthority, RegUser, RegSlice, RegKey,
+    augment_with_sfa_builtins)
 # the types that we need to exclude from sqlobjects before being able to dump
 # them on the xmlrpc wire
 from sqlalchemy.orm.collections import InstrumentedList
@@ -35,8 +39,9 @@ from sqlalchemy.orm.collections import InstrumentedList
 #   'researcher' or 'pi' to be set - reg-* are just ignored
 #
 # the '_normalize_input' helper functions below aim at ironing this out
-# however in order to break as few code as possible we essentially make sure that *both* fields are set
-# upon entering the write methods (so again register and update) for legacy, as some driver code
+# however in order to break as few code as possible we essentially
+# make sure that *both* fields are set upon entering the write methods
+# (again: register and update) for legacy, as some driver code
 # might depend on the presence of, say, 'researcher'
 
 # normalize an input record to a write method - register or update
@@ -76,12 +81,13 @@ def normalize_input_record(record):
 class RegistryManager:
 
     def __init__(self, config):
-        logger.info("Creating RegistryManager[{}]".format(id(self)))
+        logger.debug("Creating RegistryManager[{}]".format(id(self)))
 
     # The GENI GetVersion call
     def GetVersion(self, api, options):
-        peers = dict([(hrn, interface.get_url()) for (hrn, interface) in api.registries.iteritems()
-                      if hrn != api.hrn])
+        peers = {hrn: interface.get_url()
+                 for (hrn, interface) in api.registries.iteritems()
+                 if hrn != api.hrn}
         xrn = Xrn(api.hrn, type='authority')
         return version_core({'interface': 'registry',
                              'sfa': 3,
@@ -133,7 +139,8 @@ class RegistryManager:
                     RegRecord).filter_by(hrn=caller_hrn).first()
             if not caller_record:
                 raise RecordNotFound(
-                    "Unable to associated caller (hrn={}, type={}) with credential for (hrn: {}, type: {})"
+                    "Unable to associated caller (hrn={}, type={}) "
+                    "with credential for (hrn: {}, type: {})"
                     .format(caller_hrn, caller_type, hrn, type))
             caller_gid = GID(string=caller_record.gid)
 
@@ -159,7 +166,7 @@ class RegistryManager:
             new_cred.set_expiration(int(expires))
         auth_kind = "authority,ma,sa"
         # Parent not necessary, verify with certs
-        #new_cred.set_parent(api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
+        # new_cred.set_parent(api.auth.hierarchy.get_auth_cred(auth_hrn, kind=auth_kind))
         new_cred.encode()
         new_cred.sign()
 
@@ -206,8 +213,9 @@ class RegistryManager:
                 credential = api.getCredential()
                 interface = api.registries[registry_hrn]
                 server_proxy = api.server_proxy(interface, credential)
-                # should propagate the details flag but that's not supported in the xmlrpc interface yet
-                #peer_records = server_proxy.Resolve(xrns, credential,type, details=details)
+                # should propagate the details flag but that's not supported
+                # in the xmlrpc interface yet
+                # peer_records = server_proxy.Resolve(xrns, credential,type, details=details)
                 peer_records = server_proxy.Resolve(xrns, credential)
                 # pass foreign records as-is
                 # previous code used to read
@@ -292,7 +300,8 @@ class RegistryManager:
             record_dicts = record_list
 
         # if we still have not found the record yet, try the local registry
-#        logger.debug("before trying local records, {} foreign records".format(len(record_dicts)))
+        # logger.debug("before trying local records, {} foreign records"
+        #              .format(len(record_dicts)))
         if not record_dicts:
             recursive = False
             if ('recursive' in options and options['recursive']):
@@ -306,11 +315,13 @@ class RegistryManager:
             if recursive:
                 records = dbsession.query(RegRecord).filter(
                     RegRecord.hrn.startswith(hrn)).all()
-#                logger.debug("recursive mode, found {} local records".format(len(records)))
+                    # logger.debug("recursive mode, found {} local records".
+                    #              format(len(records)))
             else:
                 records = dbsession.query(
                     RegRecord).filter_by(authority=hrn).all()
-#                logger.debug("non recursive mode, found {} local records".format(len(records)))
+                    # logger.debug("non recursive mode, found {} local records"
+                    #              .format(len(records)))
             # so that sfi list can show more than plain names...
             for record in records:
                 # xxx mystery - see also the bottom of model.py
@@ -349,8 +360,9 @@ class RegistryManager:
     # utility for handling relationships among the SFA objects
 
     # subject_record describes the subject of the relationships
-    # ref_record contains the target values for the various relationships we need to manage
-    # (to begin with, this is just the slice x person (researcher) and authority x person (pi) relationships)
+    # ref_record contains the target values for the various relationships
+    # we need to manage (to begin with, this is just the
+    # slice x person (researcher) and authority x person (pi) relationships)
     def update_driver_relations(self, api, subject_obj, ref_obj):
         type = subject_obj.type
         # for (k,v) in subject_obj.__dict__.items(): print k,'=',v
@@ -361,10 +373,12 @@ class RegistryManager:
             self.update_driver_relation(
                 api, subject_obj, ref_obj.pi, 'user', 'pi')
 
-    # field_key is the name of one field in the record, typically 'researcher' for a 'slice' record
+    # field_key is the name of one field in the record,
+    # typically 'researcher' for a 'slice' record
     # hrns is the list of hrns that should be linked to the subject from now on
     # target_type would be e.g. 'user' in the 'slice' x 'researcher' example
-    def update_driver_relation(self, api, record_obj, hrns, target_type, relation_name):
+    def update_driver_relation(self, api, record_obj, hrns,
+                               target_type, relation_name):
         dbsession = api.dbsession()
         # locate the linked objects in our db
         subject_type = record_obj.type
