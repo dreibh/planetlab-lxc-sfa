@@ -714,7 +714,9 @@ class Certificate:
         if field in self.data:
             raise Exception("Cannot set {} more than once".format(field))
         self.data[field] = string
-        self.add_extension(field, 0, string)
+        # call str() because we've seen unicode there
+        # and the underlying C code doesn't like it
+        self.add_extension(field, 0, str(string))
 
     ##
     # Return the data string that was previously set with set_data
