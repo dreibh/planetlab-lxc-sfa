@@ -18,12 +18,6 @@ sfa_local_config=/etc/sfa/configs/site_config
 sfa_local_config_xml=/etc/sfa/configs/site_config.xml
 sfa_local_config_sh=/etc/sfa/sfa_config.sh
 
-# source shell config if present; might not be the very first time
-[ -f $sfa_local_config_sh ] && source $sfa_local_config_sh
-
-# Export so that we do not have to specify -p to psql invocations
-export PGPORT=$SFA_DB_PORT
-
 # Regenerate configuration files - almost verbatim from plc.init
 function reconfigure () {
 
@@ -108,7 +102,7 @@ function start () {
     echo "local all all trust" >> $pg_hba_conf
 
     # Disable access to our DB from all hosts
-    sed -i -e "/^host ${SFA_DB_NAME}/d' $pg_hba_conf
+    sed -i -e "/^host ${SFA_DB_NAME}/d" $pg_hba_conf
     # grant access
     {
         echo "host $SFA_DB_NAME $SFA_DB_USER 127.0.0.1/32 password"
@@ -144,5 +138,14 @@ function start () {
     sfaadmin.py reg sync_db
 
 }
+
+# source shell config if present
+# but it might not be present the very first time
+[ ! -f $sfa_local_config_sh ] && reconfigure
+
+source $sfa_local_config_sh
+
+# Export so that we do not have to specify -p to psql invocations
+export PGPORT=$SFA_DB_PORT
 
 start

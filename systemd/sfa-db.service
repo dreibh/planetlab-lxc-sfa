@@ -1,6 +1,7 @@
 [Unit]
 Description=SFA Database service
-#After=network.target
+Requires=postgresql
+After=postgresql
 
 [Service]
 Type=oneshot
@@ -10,8 +11,6 @@ RemainAfterExit=true
 # that does not seem useful in our case
 ExecStop=/bin/true
 StandardOutput=journal
-Requires=postgresql
-After=postgresql
 
 [Install]
 WantedBy=multi-user.target

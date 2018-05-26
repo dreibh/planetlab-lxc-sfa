@@ -1,12 +1,10 @@
-# this is meant to be installed under /etc/systemd/system
 [Unit]
 Description=SFA Aggregate Manager (AM)
-
-[Service]
-#Environment=PYTHONPATH=/root/nbhosting/nbhosting
-ExecStart=/bin/bash -c "/usr/bin/sfa-start.py -a"
 Requires=sfa-db
 After=sfa-db
+
+[Service]
+ExecStart=/bin/bash -c "/usr/bin/sfa-start.py -a"
 
 [Install]
 WantedBy=multi-user.target

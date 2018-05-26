@@ -88,14 +88,6 @@ data_files = [
 ]
 
 
-initscripts = [ 'sfa' ]
-if not os.path.isfile('/etc/redhat-release'):
-    initscripts.append('functions.sfa')
-data_files.append(
-    ('/etc/init.d/',
-     [ "init.d/%s"%x for x in initscripts ]))
-
-
 services = ['sfa-db', 'sfa-aggregate', 'sfa-registry']
 data_files.append(
     ('/usr/lib/systemd/system',
@@ -122,8 +114,6 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     remove_dirs = ['/etc/sfa/', '/etc/sfatables'] + site_packages_path
     remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in scripts ]
     remove_files = (remove_bins
-                    + ["/etc/init.d/{}}".format(x)
-                       for x in initscripts ]
                     + ["/usr/lib/systemd/system/{}".format(x)
                        for x in services])
 

@@ -1,12 +1,11 @@
 # this is meant to be installed under /etc/systemd/system
 [Unit]
 Description=SFA Registry Service
-
-[Service]
-#Environment=PYTHONPATH=/root/nbhosting/nbhosting
-ExecStart=/bin/bash -c "/usr/bin/sfa-start.py -r"
 Requires=sfa-db
 After=sfa-db
+
+[Service]
+ExecStart=/bin/bash -c "/usr/bin/sfa-start.py -r"
 
 [Install]
 WantedBy=multi-user.target
