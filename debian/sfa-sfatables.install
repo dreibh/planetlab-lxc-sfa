@@ -1,3 +1,0 @@
-etc/sfatables/*
-usr/bin/sfatables
-usr/lib*/python*/dist-packages/sfatables

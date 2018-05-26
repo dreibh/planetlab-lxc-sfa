@@ -58,36 +58,6 @@ wsdl-clean:
 
 .PHONY: wsdl wsdl-install wsdl-clean
 
-######################################## debian packaging
-# The 'debian' target is called from the build with the following variables set
-# (see build/Makefile and target_debian)
-# (.) RPMTARBALL
-# (.) RPMVERSION
-# (.) RPMRELEASE
-# (.) RPMNAME
-#
-PROJECT=$(RPMNAME)
-DEBVERSION=$(RPMVERSION).$(RPMRELEASE)
-DEBTARBALL=../$(PROJECT)_$(DEBVERSION).orig.tar.bz2
-
-DATE=$(shell date -u +"%a, %d %b %Y %T")
-
-debian: debian/changelog debian.source debian.package
-
-debian/changelog: debian/changelog.in
-	sed -e "s|@VERSION@|$(DEBVERSION)|" -e "s|@DATE@|$(DATE)|" debian/changelog.in > debian/changelog
-
-debian.source: force
-	rsync -a $(RPMTARBALL) $(DEBTARBALL)
-
-debian.package:
-	debuild -uc -us -b
-
-debian.clean:
-	$(MAKE) -f debian/rules clean
-	rm -rf build/ MANIFEST ../*.tar.gz ../*.dsc ../*.build
-	find . -name '*.pyc' -delete
-
 ##########
 tests-install:
 	mkdir -p $(DESTDIR)/usr/share/sfa/tests
@@ -232,8 +202,9 @@ syncmigrations:
 	+$(RSYNC) ./sfa/storage/migrations/versions/*.py $(SSHURL)/usr/share/sfa/migrations/versions/
 syncbin: synccheck
 	+$(RSYNC)  $(BINS) $(SSHURL)/usr/bin/
-syncinit: synccheck
-	+$(RSYNC) ./init.d/sfa  $(SSHURL)/etc/init.d/
+syncservices: synccheck
+	+$(RSYNC) ./systemd/*.service  $(SSHURL)/usr/lib/systemd/system
+	+$(RSYNC) ./systemd/sfa-db-init.sh  $(SSHURL)/usr/bin
 syncconfig:
 	+$(RSYNC) ./config/default_config.xml $(SSHURL)/etc/sfa/
 synctest: synccheck
@@ -247,8 +218,8 @@ syncmig:
 
 
 # full-fledged
-sync: synclib syncbin syncinit syncconfig syncrestart
-syncdeb: synclibdeb syncbin syncinit syncconfig syncrestart
+sync: synclib syncbin syncservices syncconfig syncrestart
+syncdeb: synclibdeb syncbin syncservices syncconfig syncrestart
 # 99% of the time this is enough
 syncfast: synclib syncrestart
 
