@@ -187,7 +187,7 @@ RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) --no-owner $(RSYNC_EXCLUDES)
 
 CLIENTS = $(shell ls clientbin/*.py)
 
-BINS =	./config/sfa-config-tty ./config/gen-sfa-cm-config.py \
+BINS =	./config/sfa-config-tty ./config/gen-sfa-cm-config.py ./systemd/sfa-setup.sh \
 	./sfa/server/sfa-start.py \
 	./clientbin/sfaadmin.py \
 	$(CLIENTS)
@@ -204,7 +204,7 @@ syncbin: synccheck
 	+$(RSYNC)  $(BINS) $(SSHURL)/usr/bin/
 syncservices: synccheck
 	+$(RSYNC) ./systemd/*.service  $(SSHURL)/usr/lib/systemd/system
-	+$(RSYNC) ./systemd/sfa-db-init.sh  $(SSHURL)/usr/bin
+	+$(RSYNC) ./systemd/sfa-setup.sh  $(SSHURL)/usr/bin
 syncconfig:
 	+$(RSYNC) ./config/default_config.xml $(SSHURL)/etc/sfa/
 synctest: synccheck

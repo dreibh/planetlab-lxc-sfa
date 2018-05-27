@@ -223,18 +223,19 @@ def consolidate(default_config, site_config, consolidated_config):
 
 
 def reload_service():
-    global service
-    os.system("set -x ; service %s reload" % service)
+    reload = "sfa-setup.sh reload"
+    print("Running: {}".format(reload))
+    os.system(reload)
 
 ####################
 
 
 def restart_service():
-    global service
-    print("==================== Stopping %s" % service)
-    os.system("service %s stop" % service)
-    print("==================== Starting %s" % service)
-    os.system("service %s start" % service)
+    services = ('sfa-db', 'sfa-aggregate', 'sfa-registry')
+    for service in services:
+        restart = ("systemctl -q is-active {s} && {{ echo restarting {s} ; systemctl restart {s}; }}"
+                   .format(s=service))
+        os.system(restart)
 
 ####################
 

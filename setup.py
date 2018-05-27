@@ -32,7 +32,7 @@ scripts = glob("clientbin/*.py") + [
     'config/sfa-config-tty',
     'config/sfa-config',
     'sfa/server/sfa-start.py',
-    'systemd/sfa-db-init.sh',
+    'systemd/sfa-setup.sh',
     'sfatables/sfatables',
     'keyconvert/keyconvert.py',
     'flashpolicy/sfa_flashpolicy.py',

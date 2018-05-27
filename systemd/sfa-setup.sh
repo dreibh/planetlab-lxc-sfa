@@ -19,7 +19,7 @@ sfa_local_config_xml=/etc/sfa/configs/site_config.xml
 sfa_local_config_sh=/etc/sfa/sfa_config.sh
 
 # Regenerate configuration files - almost verbatim from plc.init
-function reconfigure () {
+function reload () {
 
     # Regenerate the main configuration file from default values
     # overlaid with site-specific and current values.
@@ -61,7 +61,16 @@ function postgresql_setting() {
       $postgresql_conf
 }
 
-function start () {
+function start-db () {
+
+    # source shell config if present
+    # but it might not be present the very first time
+    [ ! -f $sfa_local_config_sh ] && reload
+
+    source $sfa_local_config_sh
+
+    # Export so that we do not have to specify -p to psql invocations
+    export PGPORT=$SFA_DB_PORT
 
     # only if enabled
     [ "$SFA_DB_ENABLED" == 1 -o "$SFA_DB_ENABLED" == True ] || return
@@ -116,7 +125,7 @@ function start () {
     if [ -z "$SFA_DB_PASSWORD" ] ; then
         SFA_DB_PASSWORD=$(uuidgen)
         sfa-config --category=sfa_db --variable=password --value="$SFA_DB_PASSWORD" --save=$sfa_local_config $sfa_local_config >& /dev/null
-        reconfigure
+        reload
     fi
 
     systemctl restart postgresql
@@ -139,13 +148,14 @@ function start () {
 
 }
 
-# source shell config if present
-# but it might not be present the very first time
-[ ! -f $sfa_local_config_sh ] && reconfigure
+usage="$0 start-db|reload
+  start-db: configure postgresql database and restart postgresql
+  reload: recompute miscell configuration files after changes are made in master config
+"
 
-source $sfa_local_config_sh
+func="$1"; shift
 
-# Export so that we do not have to specify -p to psql invocations
-export PGPORT=$SFA_DB_PORT
-
-start
+case "$func" in
+    start-db|reload) $func;;
+    *) echo "$usage"; exit 1;;
+esac
