@@ -1,7 +1,7 @@
 [Unit]
 Description=SFA Database service
-Requires=postgresql
-After=postgresql
+Requires=postgresql.service
+After=postgresql.service
 
 [Service]
 Type=oneshot
