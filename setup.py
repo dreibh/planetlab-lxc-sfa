@@ -56,7 +56,6 @@ packages = [
     'sfa/nitos',
     'sfa/dummy',
     'sfa/openstack',
-    'sfa/federica',
     'sfa/iotlab',
     'sfatables',
     'sfatables/commands',

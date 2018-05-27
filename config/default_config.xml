@@ -259,20 +259,6 @@ Thierry Parmentelat
     </category>
 
     <!-- ======================================== -->
-    <category id="sfa_federica">
-      <name></name>
-      <description>The settings that tell this SFA instance how to interact with the FEDERICA testbed.</description>
-
-      <variablelist>
-	<variable id="url" type="string">
-	  <name>XMLRPC URL</name>
-	  <value>https://root:password@federica.sfa.wrapper.com:8443/fedewrapper/xmlrpc/</value>
-	  <description>URL for the federica xmlrpc API; login and password need to be set like in http://login:password@hostname:port/the/path </description>
-	</variable>
-      </variablelist>
-    </category>
-
-    <!-- ======================================== -->
     <category id="sfa_nova">
       <name>SFA Flash Policy</name>
       <description>The settings that affect how SFA connects to

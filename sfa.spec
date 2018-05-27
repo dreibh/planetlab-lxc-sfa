@@ -62,11 +62,6 @@ Summary: the SFA layer around MyPLC
 Group: Applications/System
 Requires: sfa
 
-%package federica
-Summary: the SFA layer around Federica
-Group: Applications/System
-Requires: sfa
-
 %package nitos
 Summary: the SFA layer around NITOS
 Group: Applications/System
@@ -107,9 +102,6 @@ sfi.py, together with other utilities.
 %description plc
 This package implements the SFA interface which serves as a layer
 between the existing PlanetLab interfaces and the SFA API.
-
-%description federica
-The SFA driver for FEDERICA.
 
 %description nitos
 The SFA driver for NITOS.
@@ -193,9 +185,6 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sfa/xml.xsd
 /etc/sfa/protogeni-rspec-common.xsd
 /etc/sfa/topology
-
-%files federica
-%{python_sitelib}/sfa/federica
 
 %files nitos
 %{python_sitelib}/sfa/nitos

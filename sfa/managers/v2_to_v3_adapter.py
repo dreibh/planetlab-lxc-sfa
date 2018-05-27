@@ -18,12 +18,9 @@ class V2ToV3Adapter:
         if flavour == "nitos":
             from sfa.nitos.nitosdriver import NitosDriver
             self.driver = NitosDriver(api)
-        elif flavour == "fd":
-            from sfa.federica.fddriver import FdDriver
-            self.driver = FdDriver(api)
         else:
             logger.error(
-                "V2ToV3Adapter: Unknown Flavour !!!\n Supported Flavours: nitos, fd")
+                "V2ToV3Adapter: Unknown Flavour !!!\n Supported Flavours: nitos")
 
         # Caching
         if config.SFA_AGGREGATE_CACHING:
