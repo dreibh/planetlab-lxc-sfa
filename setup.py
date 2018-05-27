@@ -35,7 +35,6 @@ scripts = glob("clientbin/*.py") + [
     'systemd/sfa-setup.sh',
     'sfatables/sfatables',
     'keyconvert/keyconvert.py',
-    'flashpolicy/sfa_flashpolicy.py',
 ]
 
 packages = [
@@ -78,7 +77,6 @@ data_files = [
         'sfa/trust/sig.xsd',
         'sfa/trust/xml.xsd',
         'sfa/trust/protogeni-rspec-common.xsd',
-        'flashpolicy/sfa_flashpolicy_config.xml',
     ]),
     ('/etc/sfatables/matches/', glob('sfatables/matches/*.xml')),
     ('/etc/sfatables/targets/', glob('sfatables/targets/*.xml')),

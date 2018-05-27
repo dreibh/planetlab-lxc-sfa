@@ -3,7 +3,7 @@
 <!--
 Default SFA configuration file
 
-Thierry Parmentelat 
+Thierry Parmentelat
 
 -->
 
@@ -21,7 +21,7 @@ Thierry Parmentelat
         <variable id="generic_flavour" type="string">
           <name>Generic Flavour</name>
           <value>pl</value>
-          <description>This string refers to a class located in sfa.generic that describes 
+          <description>This string refers to a class located in sfa.generic that describes
           which specific implementation needs to be used for api, manager and driver objects.
           PlanetLab users do not need to change this setting.
           </description>
@@ -44,7 +44,7 @@ Thierry Parmentelat
           <value>0</value>
           <description>Logging level; 0=minimum, 1=info, 2=debug</description>
         </variable>
-    
+
         <variable id="max_slice_renew" type="int">
           <name>Max Slice Renew</name>
           <value>60</value>
@@ -55,11 +55,11 @@ Thierry Parmentelat
             <name>User Session Keys Path </name>
             <value>/var/lib/sfa/session_keys</value>
             <description>Some services will peform operations on behalf of a user, but make
-            it look like the user is the one performing the operation. Doing this requires a 
-            valid key pair and credential for the user. This option defines the path where 
+            it look like the user is the one performing the operation. Doing this requires a
+            valid key pair and credential for the user. This option defines the path where
             key pairs and credentials are generated and stored.
-            This functionality is used by the SFA web GUI. 
-            </description> 
+            This functionality is used by the SFA web GUI.
+            </description>
         </variable>
 
          <variable id="data_dir" type="string">
@@ -232,32 +232,6 @@ Thierry Parmentelat
     </category>
 
     <!-- ======================================== -->
-    <category id="sfa_flashpolicy">
-      <name>SFA Flash Policy</name>
-      <description>The settings that affect the flash policy server that will run
-      as part of this SFA instance.</description>
-
-      <variablelist>
-        <variable id="enabled" type="boolean">
-          <name>Enable Flash Policy Server</name>
-          <value>false</value>
-          <description>Allows this local SFA instance to run a
-          flash policy server.</description>
-        </variable>
-        <variable id="config_file" type="string">
-          <name>Flash policy config file</name>
-          <value>/etc/sfa/sfa_flashpolicy_config.xml</value>
-          <description>The path to where the flash policy config file can be reached.</description>
-        </variable>
-        <variable id="port" type="int">
-          <name>Flash policy port</name>
-          <value>843</value>
-          <description>The flash policy server port.</description>
-        </variable>
-      </variablelist>
-    </category>
-
-    <!-- ======================================== -->
     <category id="sfa_plc">
       <name></name>
       <description>The settings that tell this SFA instance how to interact with the underlying PLC. Refer to plc-config-tty on this installation for more information.</description>
@@ -301,13 +275,13 @@ Thierry Parmentelat
     <!-- ======================================== -->
     <category id="sfa_nova">
       <name>SFA Flash Policy</name>
-      <description>The settings that affect how SFA connects to 
+      <description>The settings that affect how SFA connects to
                    the Nova/EC2 API</description>
       <variablelist>
         <variable id="user" type="string">
           <name>Sfa nova user</name>
           <value>novaadmin</value>
-          <description>Account/context to use when performing 
+          <description>Account/context to use when performing
                        administrative nova operations</description>
         </variable>
         <variable id="api_url" type="string">

@@ -62,11 +62,6 @@ Summary: the SFA layer around MyPLC
 Group: Applications/System
 Requires: sfa
 
-%package flashpolicy
-Summary: SFA support for flash clients
-Group: Applications/System
-Requires: sfa
-
 %package federica
 Summary: the SFA layer around Federica
 Group: Applications/System
@@ -112,9 +107,6 @@ sfi.py, together with other utilities.
 %description plc
 This package implements the SFA interface which serves as a layer
 between the existing PlanetLab interfaces and the SFA API.
-
-%description flashpolicy
-This package provides support for adobe flash client applications.
 
 %description federica
 The SFA driver for FEDERICA.
@@ -201,10 +193,6 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sfa/xml.xsd
 /etc/sfa/protogeni-rspec-common.xsd
 /etc/sfa/topology
-
-%files flashpolicy
-%{_bindir}/sfa_flashpolicy.py*
-/etc/sfa/sfa_flashpolicy_config.xml
 
 %files federica
 %{python_sitelib}/sfa/federica
