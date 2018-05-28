@@ -177,7 +177,6 @@ rm -rf $RPM_BUILD_ROOT
 %files plc
 %defattr(-,root,root)
 %{python_sitelib}/sfa/planetlab
-%{python_sitelib}/sfa/openstack
 /etc/sfa/pl.rng
 /etc/sfa/credential.xsd
 /etc/sfa/top.xsd
