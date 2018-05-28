@@ -828,7 +828,7 @@ fi
 * Fri Jun 10 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-23
 - includes a change on passphrases that was intended in 1.0-22
 
-* Thu Jun 6 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-22
+* Mon Jun 6 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-22
 - Added support for ProtoGENI RSpec v2
 
 * Wed Mar 16 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-21
@@ -956,7 +956,7 @@ fi
   the api handler on every new server request, making it easier to access the
   cache and use in more general ways.
 
-* Thu May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
+* Tue May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
 - SfaServer now uses a pool of threads to handle requests concurrently
 - sfa.util.rspec no longer used to process/manage rspecs (deprecated). This is now handled by sfa.plc.network and is not backwards compatible
 - PIs can now get a slice credential for any slice at their site without having to be a member of the slice
@@ -1075,7 +1075,7 @@ fi
 * Sat May 30 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-2
 - bugfixes - still a work in progress
 
-* Fri May 18 2009 Baris Metin <tmetin@sophia.inria.fr>
+* Mon May 18 2009 Baris Metin <tmetin@sophia.inria.fr>
 - initial package
 
 
