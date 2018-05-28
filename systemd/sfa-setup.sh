@@ -128,7 +128,8 @@ function start-db () {
         reload
     fi
 
-    systemctl restart postgresql
+    # tell postgresql that settings have changed
+    su - postgres bash -c "pg_ctl reload"
 
     ######## make sure we have the user and db created
     # user
