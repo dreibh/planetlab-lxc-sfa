@@ -1,6 +1,6 @@
 %define name sfa
-%define version 3.1
-%define taglevel 22
+%define version 4.0
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -218,6 +218,14 @@ fi
 #[ "$1" -ge "1" ] && service sfa-cm restart || :
 
 %changelog
+* Mon May 28 2018 Thierry <Parmentelat> - sfa-4.0-0
+- expose geni_api_versions as https://
+- avoid publishing non-relevant entries in GetVersion
+- fixes in the IoT-lab driver (thanks Loic)
+- reviewed logging policy, less awkward and more reliable; /var/log/sfa{,-import}.log should now be alive and time rotate
+- rewrote init-style startup script into systemd-native services: sfa-aggregate and sfa-registry, that both depend on sfa-db
+- huge cleanup, removed everything related to init.d; debian; flash-policy; max aggregate; federica, openstack/nova and nitos drivers
+
 * Fri Mar 16 2018 Thierry <Parmentelat> - sfa-3.1-22
 - pl: tweaks for exposing country / city on nodes from site tags if set
 - pl: tweaks for exposing hardware_types on nodes from node tag 'hardware_type' if set
