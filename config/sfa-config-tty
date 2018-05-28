@@ -34,7 +34,6 @@ usual_variables = [
 
 flavour_xml_section_hash = {
     'pl': 'sfa_plc',
-    'nitos': 'sfa_nitos',
     'dummy': 'sfa_dummy',
 }
 configuration = {

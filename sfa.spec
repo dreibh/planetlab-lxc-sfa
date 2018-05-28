@@ -62,11 +62,6 @@ Summary: the SFA layer around MyPLC
 Group: Applications/System
 Requires: sfa
 
-%package nitos
-Summary: the SFA layer around NITOS
-Group: Applications/System
-Requires: sfa
-
 %package iotlab
 Summary: the SFA layer around IotLab
 Group: Applications/System
@@ -102,9 +97,6 @@ sfi.py, together with other utilities.
 %description plc
 This package implements the SFA interface which serves as a layer
 between the existing PlanetLab interfaces and the SFA API.
-
-%description nitos
-The SFA driver for NITOS.
 
 %description iotlab
 The SFA driver for IotLab.
@@ -184,9 +176,6 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sfa/xml.xsd
 /etc/sfa/protogeni-rspec-common.xsd
 /etc/sfa/topology
-
-%files nitos
-%{python_sitelib}/sfa/nitos
 
 %files iotlab
 %{python_sitelib}/sfa/iotlab

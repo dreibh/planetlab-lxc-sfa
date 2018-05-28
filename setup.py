@@ -53,7 +53,6 @@ packages = [
     'sfa/rspecs/versions',
     'sfa/client',
     'sfa/planetlab',
-    'sfa/nitos',
     'sfa/dummy',
     'sfa/iotlab',
     'sfatables',
