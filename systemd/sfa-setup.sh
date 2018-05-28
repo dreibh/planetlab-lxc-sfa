@@ -56,9 +56,14 @@ function postgresql_setting() {
     param="$1"; shift
     value="$1"; shift
 
-    sed --regexp-extended --in-place \
-      --expression="s|#?${param} = .*|${param} = ${value}|" \
-      $postgresql_conf
+    # is that setting already present in file ?
+    if grep --extended-regexp -q "#?${param} *=.*" $postgresql_conf; then
+        sed --regexp-extended --in-place \
+            --expression="s|#?${param} = .*|${param} = ${value}|" \
+            $postgresql_conf
+    else
+        echo "${param} = ${value}" >> $postgresql_conf
+    fi
 }
 
 function start-db () {
@@ -93,15 +98,18 @@ function start-db () {
     ######## /var/lib/pgsql/data/postgresql.conf
     registry_ip=""
     foo=$(python -c "import socket; print socket.gethostbyname('$SFA_REGISTRY_HOST')") && registry_ip="$foo"
+    db_ip=""
+    foo=$(python -c "import socket; print socket.gethostbyname('$SFA_DB_HOST')") && db_ip="$foo"
     # Enable DB server. drop Postgresql<=7.x
     # PostgreSQL >=8.0 defines listen_addresses
     # listen on a specific IP + localhost, more robust when run within a vserver
     sed -i -e '/^listen_addresses/d' $postgresql_conf
-    if [ -z "$registry_ip" ] ; then
-        postgresql_setting listen_addresses "'localhost'"
-    else
-        postgresql_setting listen_addresses "'${registry_ip},localhost'"
-    fi
+    case "$db_ip" in
+        ""|127.0.0.1|localhost*)
+            postgresql_setting listen_addresses "'localhost'" ;;
+        *)
+            postgresql_setting listen_addresses "'${db_ip},localhost'" ;;
+    esac
     postgresql_setting timezone "'UTC'"
     postgresql_setting log_timezone "'UTC'"
 
@@ -129,6 +137,9 @@ function start-db () {
     fi
 
     # tell postgresql that settings have changed
+    # note that changes to listen_addresses do require a full restart
+    # but it's too intrusive to do this each time, as it would in turn
+    # require a restart of the plc service
     su - postgres bash -c "pg_ctl reload"
 
     ######## make sure we have the user and db created
