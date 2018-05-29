@@ -191,31 +191,27 @@ rm -rf $RPM_BUILD_ROOT
 %files tests
 %{_datadir}/sfa/tests
 
-### sfa installs the 'sfa' service
+# arbitrary choice here, subject to manual tweaks if needed
+# this is in line with default_config.xml
+# no need to enable sfa-db, will be activated as a dependency
 %post
-chkconfig --add sfa
+systemctl enable sfa-aggregate
+systemctl enable sfa-registry
 
 %preun
 if [ "$1" = 0 ] ; then
-  /sbin/service sfa stop || :
-  /sbin/chkconfig --del sfa || :
+    for service in sfa-aggregate sfa-registry sfa-db; do
+        systemctl is-enabled $service && systemctl disable $service
+        systemctl is-active $service && systemctl stop $service
+    done
 fi
 
 %postun
-[ "$1" -ge "1" ] && { service sfa dbdump ; service sfa restart ; }
-
-#### sfa-cm installs the 'sfa-cm' service
-#%post cm
-#chkconfig --add sfa-cm
-#
-#%preun cm
-#if [ "$1" = 0 ] ; then
-#   /sbin/service sfa-cm stop || :
-#   /sbin/chkconfig --del sfa-cm || :
-#fi
-#
-#%postun cm
-#[ "$1" -ge "1" ] && service sfa-cm restart || :
+if [ "$1" -ge "1" ] ; then
+    for service in sfa-db sfa-registry sfa-aggregate; do
+        systemctl is-active $service && systemctl restart $service
+    done
+fi
 
 %changelog
 * Mon May 28 2018 Thierry <Parmentelat> - sfa-4.0-0

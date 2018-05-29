@@ -78,6 +78,7 @@ function start-db () {
     export PGPORT=$SFA_DB_PORT
 
     # only if enabled
+    # this is because the DB can run on a separate box as well
     [ "$SFA_DB_ENABLED" == 1 -o "$SFA_DB_ENABLED" == True ] || return
 
     postgresql_setting port "'$SFA_DB_PORT'"
