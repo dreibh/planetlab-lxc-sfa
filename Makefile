@@ -203,7 +203,7 @@ syncmigrations:
 syncbin: synccheck
 	+$(RSYNC)  $(BINS) $(SSHURL)/usr/bin/
 syncservices: synccheck
-	+$(RSYNC) ./systemd/*.service  $(SSHURL)/usr/lib/systemd/system
+	+$(RSYNC) ./systemd/*.service  $(SSHURL)/lib/systemd/system
 	+$(RSYNC) ./systemd/sfa-setup.sh  $(SSHURL)/usr/bin
 syncconfig:
 	+$(RSYNC) ./config/default_config.xml $(SSHURL)/etc/sfa/

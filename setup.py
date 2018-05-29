@@ -82,10 +82,12 @@ data_files = [
     ('/usr/share/sfa/examples/', glob('sfa/examples/*' ) + [ 'cron.d/sfa.cron' ] ),
 ]
 
-
+# use /lib/systemd instead of /usr/lib/systemd
+# the latter would work on fedora only, the former
+# will work on both fedora and ubuntu
 services = ['sfa-db', 'sfa-aggregate', 'sfa-registry']
 data_files.append(
-    ('/usr/lib/systemd/system',
+    ('/lib/systemd/system',
      ['systemd/{}.service'.format(service)
       for service in services]))
 
@@ -109,7 +111,7 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     remove_dirs = ['/etc/sfa/', '/etc/sfatables'] + site_packages_path
     remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in scripts ]
     remove_files = (remove_bins
-                    + ["/usr/lib/systemd/system/{}".format(x)
+                    + ["/lib/systemd/system/{}".format(x)
                        for x in services])
 
     # remove files

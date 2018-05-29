@@ -126,7 +126,7 @@ make VERSIONTAG="%{version}-%{taglevel}" SCMURL="%{SCMURL}" install DESTDIR="$RP
 rm -rf $RPM_BUILD_ROOT
 
 %files
-/usr/lib/systemd/system/*.service
+/lib/systemd/system/*.service
 %{_bindir}/sfa-start.py*
 %{_bindir}/sfaadmin.py*
 %{_bindir}/sfaadmin
