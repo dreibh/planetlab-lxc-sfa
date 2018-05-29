@@ -229,7 +229,8 @@ def reload_service():
 def restart_service():
     services = ('sfa-db', 'sfa-aggregate', 'sfa-registry')
     for service in services:
-        restart = ("systemctl -q is-active {s} && {{ echo restarting {s} ; systemctl restart {s}; }}"
+        restart = ("systemctl -q is-active {s} && "
+                   "{{ echo restarting {s} ; systemctl restart {s}; }}"
                    .format(s=service))
         os.system(restart)
 
