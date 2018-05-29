@@ -12,7 +12,7 @@ class Status(Method):
     @param slice_urn (string) URN of slice to allocate to
 
     """
-    interfaces = ['aggregate', 'component']
+    interfaces = ['aggregate']
     accepts = [
         Parameter(type([str]), "Slice or sliver URNs"),
         Parameter(type([dict]), "credentials"),

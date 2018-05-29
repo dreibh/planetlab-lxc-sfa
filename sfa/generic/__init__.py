@@ -60,8 +60,6 @@ class Generic:
 
     def aggregate_class(self): pass
 
-    def component_class(self): pass
-
     # build an API object
     # insert a manager instance
     def make_api(self, *args, **kwargs):
@@ -84,7 +82,7 @@ class Generic:
 
     def make_manager(self, interface):
         """
-        interface expected in ['registry', 'aggregate', 'component']
+        interface expected in ['registry', 'aggregate']
         flavour is e.g. 'pl' or 'max' or whatever
         """
         flavour = self.flavour
@@ -112,10 +110,7 @@ class Generic:
         message = "Generic.make_driver for flavour=%s and interface=%s" % (
             flavour, interface)
 
-        if interface == "component":
-            classname = "component_driver_class"
-        else:
-            classname = "driver_class"
+        classname = "driver_class"
         try:
             class_obj = getattr(self, classname)()
             logger.debug("%s : %s" % (message, class_obj))

@@ -48,7 +48,6 @@ class WSDLGen:
               return "complete"
          if self.interface_options.aggregate: return "aggregate"
          elif self.interface_options.registry: return "registry"
-         elif self.interface_options.component: return "component"
          else: return "unknown"
 
     def filter_argname(self, argname):
@@ -336,8 +335,6 @@ def main():
                               help="Generate registry.wsdl", metavar="FILE")
     parser.add_option("-a", "--aggregate", action="store_true", dest="aggregate",
                               help="Generate am.wsdl")
-    parser.add_option("-c", "--component", action="store_true", dest="component",
-                              help="Generate cm.wsdl")
     parser.add_option("-g", "--geni-aggregate", action="store_true", dest="geni_am",
                       help="Generate gm.wsdl")
     parser.add_option("-l", "--lite", action="store_true", dest="lite",

@@ -26,10 +26,3 @@ class iotlab (Generic):
     def driver_class(self):
         import sfa.iotlab.iotlabdriver
         return sfa.iotlab.iotlabdriver.IotLabDriver
-
-    def component_manager_class(self):
-        return None
-    # driver_class
-
-    def component_driver_class(self):
-        return None
