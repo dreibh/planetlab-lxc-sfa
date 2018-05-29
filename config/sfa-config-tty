@@ -28,7 +28,6 @@ usual_variables = [
     "SFA_REGISTRY_ROOT_AUTH",
     "SFA_REGISTRY_HOST",
     "SFA_AGGREGATE_HOST",
-    "SFA_SM_HOST",
     "SFA_DB_HOST",
 ]
 
