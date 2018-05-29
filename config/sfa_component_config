@@ -3,7 +3,7 @@
 
 # HRN
 # Human readable name for this interface
-SFA_INTERFACE_HRN="plc"   
+SFA_INTERFACE_HRN="plc"
 
 # loglevel
 # How deep are we logging (0|1|2)
@@ -13,7 +13,7 @@ SFA_API_LOGLEVEL=1
 # Registry Configuration
 #
 # Enabled
-# Enable the registry interface 
+# Enable the registry interface
 SFA_REGISTRY_ENABLED=0
 
 # Root Auth
@@ -22,7 +22,7 @@ SFA_REGISTRY_ROOT_AUTH="plc"
 
 # Level1 Auth
 # The hrn of the registry's level1 auth (sub authority)
-# The full name of this interface (only secify if this 
+# The full name of this interface (only secify if this
 # interface is a sub authority)
 # xxx could be determined from hrn above
 SFA_REGISTRY_LEVEL1_AUTH=""
@@ -54,21 +54,6 @@ SFA_AGGREGATE_HOST="localhost"
 ## SFA aggregate server port
 SFA_AGGREGATE_PORT=12346
 
-## ==============================================================
-# Slice Manager Configuration
-#
-# Enabled
-# Enable the slice manager  
-SFA_SM_ENABLED=0
-
-# Host
-## The fully qualified hostname or IP address of the slice manager server
-SFA_SM_HOST="localhost"
-
-# Port
-# SFA slice manager server port  
-SFA_SM_PORT=12347
-
 ## ===============================================================
 # Component Manager Configuration
 #
@@ -95,4 +80,3 @@ SFA_CONFIG_DIR="/etc/sfa"
 
 # Directory internal data gets stored
 SFA_DATA_DIR="/var/lib/sfa"
-

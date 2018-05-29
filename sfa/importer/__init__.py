@@ -74,27 +74,6 @@ class Importer:
             self.logger.info(
                 "SfaImporter: imported authority (parent) %s " % auth_record)
 
-    def create_sm_client_record(self):
-        """
-        Create a user record for the Slicemanager service.
-        """
-        hrn = self.interface_hrn + '.slicemanager'      # pylint: disable=e1101
-        urn = hrn_to_urn(hrn, 'user')
-        if not self.auth_hierarchy.auth_exists(urn):
-            self.logger.info("SfaImporter: creating Slice Manager user")
-            self.auth_hierarchy.create_auth(urn)
-
-        if self.record_exists('user', hrn):
-            return
-        auth_info = self.auth_hierarchy.get_auth_info(hrn)
-        user_record = RegUser(hrn=hrn, gid=auth_info.get_gid_object(),
-                              authority=get_authority(hrn))
-        user_record.just_created()
-        global_dbsession.add(user_record)
-        global_dbsession.commit()
-        self.logger.info(
-            "SfaImporter: importing user (slicemanager) %s " % user_record)
-
     def create_interface_records(self):
         """
         Create a record for each SFA interface

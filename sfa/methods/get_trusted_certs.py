@@ -13,7 +13,7 @@ class get_trusted_certs(Method):
     @return list of gid strings
     """
 
-    interfaces = ['registry', 'aggregate', 'slicemgr']
+    interfaces = ['registry', 'aggregate']
 
     accepts = [
         Mixed(Parameter(str, "Credential string"),

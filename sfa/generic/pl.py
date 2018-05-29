@@ -18,10 +18,6 @@ class pl (Generic):
         import sfa.managers.registry_manager
         return sfa.managers.registry_manager.RegistryManager
 
-    def slicemgr_manager_class(self):
-        import sfa.managers.slice_manager
-        return sfa.managers.slice_manager.SliceManager
-
     def aggregate_manager_class(self):
         import sfa.managers.aggregate_manager
         return sfa.managers.aggregate_manager.AggregateManager

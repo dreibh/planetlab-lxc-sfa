@@ -186,8 +186,6 @@ def main():
     parser = OptionParser(usage="sfa-start.py [options]")
     parser.add_option("-r", "--registry", dest="registry", action="store_true",
                       help="run registry server", default=False)
-    parser.add_option("-s", "--slicemgr", dest="sm", action="store_true",
-                      help="run slice manager", default=False)
     parser.add_option("-a", "--aggregate", dest="am", action="store_true",
                       help="run aggregate manager", default=False)
     parser.add_option("-c", "--component", dest="cm", action="store_true",
@@ -230,12 +228,6 @@ def main():
         a = Aggregate("", config.SFA_AGGREGATE_PORT,
                       server_key_file, server_cert_file)
         a.start()
-
-    # start slice manager
-    if (options.sm):
-        from sfa.server.slicemgr import SliceMgr
-        s = SliceMgr("", config.SFA_SM_PORT, server_key_file, server_cert_file)
-        s.start()
 
     if (options.cm):
         from sfa.server.component import Component

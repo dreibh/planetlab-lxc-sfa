@@ -3,7 +3,7 @@ We identify 3 layers in the server-side aspects:
 . api: this object reacts to an incoming SFA request
 
 . manager: this implements a given interface, either registry,
-aggregate, or slicemgr
+or aggregate
 
 . driver: this object is in charge of actually talking to the
 underlying testbed
@@ -19,7 +19,7 @@ configurable in a flavour (e.g. sfa.generic.pl.py)
 * a call to make_api will then create the 3 elements with the
   following layout:
 
-api.manager 
+api.manager
 api.driver
 driver.api
 
@@ -36,5 +36,3 @@ with the arguments passed as arguments to the constructor
 
 ------
 more in sfa/generic/__init__.py
-
-
