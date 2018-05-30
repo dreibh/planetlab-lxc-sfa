@@ -18,7 +18,7 @@ class ListResources(Method):
     @param options dictionary
     @return string
     """
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate']
     accepts = [
         Mixed(Parameter(str, "Credential string"),
               Parameter(type([str]), "List of credentials")),
@@ -52,8 +52,6 @@ class ListResources(Method):
         # filter rspec through sfatables
         if self.api.interface in ['aggregate']:
             chain_name = 'OUTGOING'
-        elif self.api.interface in ['slicemgr']:
-            chain_name = 'FORWARD-OUTGOING'
         logger.debug(
             "ListResources: sfatables on chain %s" % chain_name)
         filtered_rspec = run_sfatables(chain_name, '', origin_hrn, rspec)

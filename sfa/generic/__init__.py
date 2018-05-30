@@ -6,7 +6,7 @@ from sfa.managers.managerwrapper import ManagerWrapper
 # a bundle is the combination of
 # (*) an api that reacts on the incoming requests to trigger the API methods
 # (*) a manager that implements the function of the service,
-#     either aggregate, registry, or slicemgr
+#     either aggregate or registry
 # (*) a driver that controls the underlying testbed
 #
 #
@@ -58,8 +58,6 @@ class Generic:
 
     def registry_class(self): pass
 
-    def slicemgr_class(self): pass
-
     def aggregate_class(self): pass
 
     def component_class(self): pass
@@ -86,7 +84,7 @@ class Generic:
 
     def make_manager(self, interface):
         """
-        interface expected in ['registry', 'aggregate', 'slicemgr', 'component']
+        interface expected in ['registry', 'aggregate', 'component']
         flavour is e.g. 'pl' or 'max' or whatever
         """
         flavour = self.flavour

@@ -504,18 +504,13 @@ class AggregateCommands(Commands):
         self.api.manager.Delete(self.api, [xrn], [], {})
 
 
-class SliceManagerCommands(AggregateCommands):
-
-    def __init__(self, *args, **kwds):
-        self.api = Generic.the_flavour().make_api(interface='slicemgr')
-
-
 class SfaAdmin:
 
-    CATEGORIES = {'certificate': CertCommands,
-                  'registry': RegistryCommands,
-                  'aggregate': AggregateCommands,
-                  'slicemgr': SliceManagerCommands}
+    CATEGORIES = {
+        'certificate': CertCommands,
+        'registry': RegistryCommands,
+        'aggregate': AggregateCommands,
+       }
 
     # returns (name,class) or (None,None)
     def find_category(self, input):

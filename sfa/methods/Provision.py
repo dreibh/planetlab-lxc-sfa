@@ -25,7 +25,7 @@ class Provision(Method):
     @param options (dict) options
 
     """
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate']
     accepts = [
         Parameter(type([str]), "URNs"),
         Parameter(type([dict]), "Credentials"),

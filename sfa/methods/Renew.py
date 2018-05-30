@@ -21,7 +21,7 @@ class Renew(Method):
     @param expiration_time (string) requested time of expiration
     @param options (dict) options
     """
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate']
     accepts = [
         Parameter(type([str]), "Slice URN"),
         Parameter(type([str]), "List of credentials"),

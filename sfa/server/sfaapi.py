@@ -28,7 +28,7 @@ class SfaApi(XmlrpcApi):
     augmented with the local cryptographic material and hrn
 
     It also has the notion of its own interface (a string describing
-    whether we run a registry, aggregate or slicemgr) and has
+    whether we run a registry, or aggregate) and has
     the notion of neighbour sfa services as defined
     in /etc/sfa/{aggregates,registries}.xml
 
@@ -266,6 +266,6 @@ class SfaApi(XmlrpcApi):
         response
         """
         # as of dec 13 2011 we only support API v2
-        if self.interface.lower() in ['aggregate', 'slicemgr']:
+        if self.interface.lower() in ['aggregate']:
             result = self.prepare_response_am(result)
         return XmlrpcApi.prepare_response(self, result, method)

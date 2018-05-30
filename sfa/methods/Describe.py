@@ -21,7 +21,7 @@ class Describe(Method):
     @param options dictionary
     @return dict
     """
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate']
     accepts = [
         Parameter(type([str]), "List of URNs"),
         Mixed(Parameter(str, "Credential string"),
@@ -56,8 +56,6 @@ class Describe(Method):
         # filter rspec through sfatables
         if self.api.interface in ['aggregate']:
             chain_name = 'OUTGOING'
-        elif self.api.interface in ['slicemgr']:
-            chain_name = 'FORWARD-OUTGOING'
         logger.debug(
             "ListResources: sfatables on chain %s" % chain_name)
         desc['geni_rspec'] = run_sfatables(

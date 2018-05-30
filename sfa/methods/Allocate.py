@@ -45,7 +45,7 @@ class Allocate(Method):
     See also http://svn.planet-lab.org/wiki/SFASliceTags
 
     """
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate']
     accepts = [
         Parameter(str, "Slice URN"),
         Parameter(type([dict]), "List of credentials"),
@@ -78,8 +78,6 @@ class Allocate(Method):
         # flter rspec through sfatables
         if self.api.interface in ['aggregate']:
             chain_name = 'INCOMING'
-        elif self.api.interface in ['slicemgr']:
-            chain_name = 'FORWARD-INCOMING'
         logger.debug("Allocate: sfatables on chain %s" % chain_name)
         actual_caller_hrn = the_credential.actual_caller_hrn()
         logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %

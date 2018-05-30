@@ -110,44 +110,6 @@ Thierry Parmentelat
     </category>
 
     <!-- ======================================== -->
-    <category id="sfa_sm">
-      <name>Slice Manager</name>
-      <description>The settings that affect the slice manager that will run
-      as part of this SFA instance.</description>
-
-      <variablelist>
-	<variable id="enabled" type="boolean">
-	  <name>Enable Slice Manager</name>
-	  <value>false</value>
-	  <description>Allows this local SFA instance to run as a
-	  slice manager. Warning, this feature is not really supported
-	  any longer.</description>
-	</variable>
-
-	<variable id="host" type="hostname">
-	  <name>Hostname</name>
-	  <value>localhost</value>
-	  <description>The hostname where the slice manager is expected to
-	  be found.</description>
-	</variable>
-
-	<variable id="port" type="int">
-	  <name>Port number</name>
-	  <value>12347</value>
-	  <description>The port where the slice manager is to be found.</description>
-	</variable>
-
-	<variable id="caching" type="boolean">
-	  <name>Cache advertisement rspec</name>
-	  <value>false</value>
-	  <description>Enable caching of the global advertisement, as
-	  returned by ListResources without a slice argument. </description>
-	  </variable>
-
-      </variablelist>
-    </category>
-
-    <!-- ======================================== -->
     <category id="sfa_aggregate">
       <name>Aggregate</name>
       <description>The settings that affect the aggregate manager that will run

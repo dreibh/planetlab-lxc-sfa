@@ -224,9 +224,9 @@ class Interface:
     # default is for when we can't determine the type of the service
     # typically the server is down, or we can't authenticate, or it's too old
     # code
-    shapes = {"registry": "diamond", "slicemgr": "ellipse",
+    shapes = {"registry": "diamond",
               "aggregate": "box", 'default': 'plaintext'}
-    abbrevs = {"registry": "REG", "slicemgr": "SA",
+    abbrevs = {"registry": "REG",
                "aggregate": "AM", 'default': '[unknown interface]'}
 
     # return a dictionary that translates into the node's attr
@@ -265,8 +265,8 @@ class Interface:
             shape = Interface.shapes['default']
         layout['shape'] = shape
         # fill color to outline wrongly configured or unreachable bodies
-        # as of sfa-2.0 registry doesn't have 'sfa' not 'geni_api', but have peers
-        # slicemgr and aggregate have 'geni_api' and 'sfa'
+        # as of sfa-2.0 registry doesn't have 'sfa' not 'geni_api',
+        # but have peer aggregates have 'geni_api' and 'sfa'
         if 'geni_api' not in version and 'peers' not in version:
             layout['style'] = 'filled'
             layout['fillcolor'] = 'gray'
