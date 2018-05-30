@@ -1,6 +1,6 @@
 %define name sfa
 %define version 4.0
-%define taglevel 0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -214,6 +214,11 @@ if [ "$1" -ge "1" ] ; then
 fi
 
 %changelog
+* Wed May 30 2018 Thierry <Parmentelat> - sfa-4.0-1
+- systemd service files install in /lib instead of /usr/lib for ubuntus
+- removed all features relating to slice manager
+- removed all features relating to component manager
+
 * Mon May 28 2018 Thierry <Parmentelat> - sfa-4.0-0
 - expose geni_api_versions as https://
 - avoid publishing non-relevant entries in GetVersion
