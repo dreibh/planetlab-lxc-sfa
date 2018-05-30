@@ -16,7 +16,7 @@ class Delete(Method):
     @return 1 is successful, faults otherwise
     """
 
-    interfaces = ['aggregate', 'component']
+    interfaces = ['aggregate']
 
     accepts = [
         Parameter(

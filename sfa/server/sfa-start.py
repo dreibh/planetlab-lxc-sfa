@@ -25,8 +25,6 @@
 # TODO: Can all three servers use the same "registry" certificate?
 ##
 
-# xxx todo not in the config yet
-component_port = 12346
 import os
 import os.path
 import traceback
@@ -188,8 +186,6 @@ def main():
                       help="run registry server", default=False)
     parser.add_option("-a", "--aggregate", dest="am", action="store_true",
                       help="run aggregate manager", default=False)
-    parser.add_option("-c", "--component", dest="cm", action="store_true",
-                      help="run component server", default=False)
     parser.add_option("-t", "--trusted-certs",
                       dest="trusted_certs", action="store_true",
                       help="refresh trusted certs", default=False)
@@ -228,13 +224,6 @@ def main():
         a = Aggregate("", config.SFA_AGGREGATE_PORT,
                       server_key_file, server_cert_file)
         a.start()
-
-    if (options.cm):
-        from sfa.server.component import Component
-        c = Component("", config.component_port,
-                      server_key_file, server_cert_file)
-#        c = Component("", config.SFA_COMPONENT_PORT, server_key_file, server_cert_file)
-        c.start()
 
 if __name__ == "__main__":
     try:

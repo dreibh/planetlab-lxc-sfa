@@ -211,32 +211,6 @@ class AggregateTest(BasicTestCase):
         # will raise an exception if the ticket inst valid
         SfaTicket(string=ticket)
 
-class ComponentTest(BasicTestCase):
-    def setUp(self):
-        BasicTestCase.setUp(self)
-        self.slice_cred = self.client.GetCredential(self.slice['hrn'], 'slice')
-
-    def testStartSlice(self):
-        self.cm.start_slice(self.slice_cred, self.slice['hrn'])
-
-    def testStopSlice(self):
-        self.cm.stop_slice(self.slice_cred, self.slice['hrn'])
-
-    def testDeleteSlice(self):
-        self.cm.DeleteSliver(self.slice_cred, self.slice['hrn'],"call-id-delete-slice-cm")
-
-    def testRestartSlice(self):
-        self.cm.restart_slice(self.slice_cred, self.slice['hrn'])
-
-    def testGetSlices(self):
-        self.cm.ListSlices(self.slice_cred, self.slice['hrn'])
-
-    def testRedeemTicket(self):
-        rspec = self.aggregate.get_resources(self.credential)
-        ticket = self.aggregate.GetTicket(slice_cred, self.slice['hrn'], rspec)
-        self.cm.redeem_ticket(slice_cred, ticket)
-
-
 def test_names(testcase):
     return [name for name in dir(testcase) if name.startswith('test')]
 

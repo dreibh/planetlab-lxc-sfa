@@ -9,7 +9,7 @@ class GetVersion(Method):
     Returns this GENI Aggregate Manager's Version Information
     @return version
     """
-    interfaces = ['registry', 'aggregate', 'component']
+    interfaces = ['registry', 'aggregate']
     accepts = [
         Parameter(dict, "Options")
     ]
