@@ -48,31 +48,6 @@ from sfa.server.aggregate import Aggregates
 from sfa.client.return_value import ReturnValue
 
 
-def daemon():
-    """
-    Daemonize the current process.
-    after http://www.erlenstar.demon.co.uk/unix/faq_2.html
-    """
-    if os.fork() != 0:
-        os._exit(0)
-    os.setsid()
-    if os.fork() != 0:
-        os._exit(0)
-    os.umask(0)
-    devnull = os.open(os.devnull, os.O_RDWR)
-    os.dup2(devnull, 0)
-    # xxx fixme - this is just to make sure that nothing gets stupidly lost -
-    # should use devnull
-    logdir = '/var/log/httpd'
-    # when installed in standalone we might not have httpd installed
-    if not os.path.isdir(logdir):
-        os.mkdir('/var/log/httpd')
-    crashlog = os.open('%s/sfa_access_log' % logdir,
-                       os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
-    os.dup2(crashlog, 1)
-    os.dup2(crashlog, 2)
-
-
 def install_peer_certs(server_key_file, server_cert_file):
     """
     Attempt to install missing trusted gids and db records for
@@ -189,8 +164,6 @@ def main():
     parser.add_option("-t", "--trusted-certs",
                       dest="trusted_certs", action="store_true",
                       help="refresh trusted certs", default=False)
-    parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
-                      help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
 
     config = Config()
@@ -206,8 +179,6 @@ def main():
     # ensure interface cert is present in trusted roots dir
     trusted_roots = TrustedRoots(config.get_trustedroots_dir())
     trusted_roots.add_gid(GID(filename=server_cert_file))
-    if (options.daemon):
-        daemon()
 
     if options.trusted_certs:
         install_peer_certs(server_key_file, server_cert_file)
