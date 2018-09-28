@@ -1,6 +1,6 @@
 # attempt to update at build-time
 
-INTERFACES=sfa registry slice-manager aggregate
+INTERFACES=sfa registry aggregate
 
 WSDLS = $(foreach interface,$(INTERFACES),$(interface).wsdl)
 HTMLS = $(foreach interface,$(INTERFACES),$(interface).html)
@@ -11,20 +11,17 @@ all: $(WSDLS) $(HTMLS)
 #TEMPORARY_OFF = yes
 
 ifdef TEMPORARY_OFF
-registry.wsdl slice-manager.wsdl aggregate.wsdl sfa.wsdl:
+registry.wsdl aggregate.wsdl sfa.wsdl:
 	touch $@
 else
 registry.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --registry > $@
 
-slice-manager.wsdl: sfa2wsdl.py
-	PYTHONPATH=../ ./sfa2wsdl.py --slice-manager > $@
-
 aggregate.wsdl: sfa2wsdl.py
 	PYTHONPATH=../ ./sfa2wsdl.py --aggregate > $@
 
 sfa.wsdl: sfa2wsdl.py
-	PYTHONPATH=../ ./sfa2wsdl.py --registry --slice-manager --aggregate > $@
+	PYTHONPATH=../ ./sfa2wsdl.py --registry --aggregate > $@
 endif
 
 #################### install

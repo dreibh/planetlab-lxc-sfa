@@ -1,29 +1,39 @@
 #!/usr/bin/python
+
+# pylint: disable=c0111, c0103, w0402, w0622
+
 from __future__ import print_function
 
 import os
 import sys
 import copy
-from pprint import pformat, PrettyPrinter
+from pprint import PrettyPrinter
 from optparse import OptionParser
 
 from sfa.generic import Generic
 from sfa.util.xrn import Xrn
+from sfa.util.sfalogging import logger, init_logger
+
 from sfa.storage.record import Record
 
 from sfa.trust.hierarchy import Hierarchy
 from sfa.trust.gid import GID
 from sfa.trust.certificate import convert_public_key
 
-from sfa.client.common import optparse_listvalue_callback, optparse_dictvalue_callback, terminal_render, filter_records
+from sfa.client.common import (optparse_listvalue_callback,
+                               optparse_dictvalue_callback,
+                               terminal_render, filter_records)
 from sfa.client.candidates import Candidates
 from sfa.client.sfi import save_records_to_file
 
 pprinter = PrettyPrinter(indent=4)
 
+# if set, will output on stdout
+DEBUG = False
+
 try:
     help_basedir = Hierarchy().basedir
-except:
+except Exception:
     help_basedir = '*unable to locate Hierarchy().basedir'
 
 
@@ -54,14 +64,19 @@ class RegistryCommands(Commands):
         version = self.api.manager.GetVersion(self.api, {})
         pprinter.pprint(version)
 
-        
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='authority to list (hrn/urn - mandatory)')
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default='all')
-    @add_options('-r', '--recursive', dest='recursive', metavar='<recursive>', help='list all child records',
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='authority to list (hrn/urn - mandatory)')
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type', default='all')
+    @add_options('-r', '--recursive', dest='recursive', metavar='<recursive>',
+                 help='list all child records',
                  action='store_true', default=False)
-    @add_options('-v', '--verbose', dest='verbose', action='store_true', default=False)
+    @add_options('-v', '--verbose', dest='verbose',
+                 action='store_true', default=False)
     def list(self, xrn, type=None, recursive=False, verbose=False):
-        """List names registered at a given authority - possibly filtered by type"""
+        """
+        List names registered at a given authority, possibly filtered by type
+        """
         xrn = Xrn(xrn, type)
         options_dict = {'recursive': recursive}
         records = self.api.manager.List(
@@ -69,18 +84,22 @@ class RegistryCommands(Commands):
         list = filter_records(type, records)
         # terminal_render expects an options object
 
-        class Options:
-            pass
-        options = Options()
-        options.verbose = verbose
+        class Options:                                  # pylint: disable=r0903
+            def __init__(self, verbose):
+                self.verbose = verbose
+
+        options = Options(verbose)
         terminal_render(list, options)
 
-
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
-    @add_options('-o', '--outfile', dest='outfile', metavar='<outfile>', help='save record to file')
-    @add_options('-f', '--format', dest='format', metavar='<display>', type='choice',
-                 choices=('text', 'xml', 'simple'), help='display record in different formats')
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn (mandatory)')
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type', default=None)
+    @add_options('-o', '--outfile', dest='outfile', metavar='<outfile>',
+                 help='save record to file')
+    @add_options('-f', '--format', dest='format', metavar='<display>',
+                 type='choice', choices=('text', 'xml', 'simple'),
+                 help='display record in different formats')
     def show(self, xrn, type=None, format=None, outfile=None):
         """Display details for a registered object"""
         records = self.api.manager.Resolve(self.api, xrn, type, details=True)
@@ -90,7 +109,8 @@ class RegistryCommands(Commands):
         if outfile:
             save_records_to_file(outfile, records)
 
-    def _record_dict(self, xrn, type, email, key,
+    @staticmethod
+    def _record_dict(xrn, type, email, key,
                      slices, researchers, pis,
                      url, description, extras):
         record_dict = {}
@@ -124,11 +144,16 @@ class RegistryCommands(Commands):
             record_dict.update(extras)
         return record_dict
 
-
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn', default=None)
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type (mandatory)')
-    @add_options('-a', '--all', dest='all', metavar='<all>', action='store_true', default=False, help='check all users GID')
-    @add_options('-v', '--verbose', dest='verbose', metavar='<verbose>', action='store_true', default=False, help='verbose mode: display user\'s hrn ')
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn', default=None)
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type (mandatory)')
+    @add_options('-a', '--all', dest='all', metavar='<all>',
+                 action='store_true', default=False,
+                 help='check all users GID')
+    @add_options('-v', '--verbose', dest='verbose', metavar='<verbose>',
+                 action='store_true', default=False,
+                 help='verbose mode: display user\'s hrn ')
     def check_gid(self, xrn=None, type=None, all=None, verbose=None):
         """Check the correspondance between the GID and the PubKey"""
 
@@ -160,7 +185,7 @@ class RegistryCommands(Commands):
                 db_pubkey_str = record.reg_keys[0].key
                 try:
                     db_pubkey_obj = convert_public_key(db_pubkey_str)
-                except:
+                except Exception:
                     ERROR.append(record.hrn)
                     continue
             else:
@@ -183,81 +208,111 @@ class RegistryCommands(Commands):
             print("Users NOT having a PubKey: %s\n\
 Users having a non RSA PubKey: %s\n\
 Users having a GID/PubKey correpondence OK: %s\n\
-Users having a GID/PubKey correpondence Not OK: %s\n" % (len(NOKEY), len(ERROR), len(OK), len(NOK)))
+Users having a GID/PubKey correpondence Not OK: %s\n"
+                  % (len(NOKEY), len(ERROR), len(OK), len(NOK)))
         else:
             print("Users NOT having a PubKey: %s and are: \n%s\n\n\
 Users having a non RSA PubKey: %s and are: \n%s\n\n\
 Users having a GID/PubKey correpondence OK: %s and are: \n%s\n\n\
-Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n" % (len(NOKEY), NOKEY, len(ERROR), ERROR, len(OK), OK, len(NOK), NOK))
+Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n"
+                  % (len(NOKEY), NOKEY, len(ERROR), ERROR,
+                     len(OK), OK, len(NOK), NOK))
 
 
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn (mandatory)')
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type', default=None)
     @add_options('-e', '--email', dest='email', default="",
                  help="email (mandatory for users)")
     @add_options('-u', '--url', dest='url', metavar='<url>', default=None,
                  help="URL, useful for slices")
-    @add_options('-d', '--description', dest='description', metavar='<description>',
+    @add_options('-d', '--description', dest='description',
+                 metavar='<description>',
                  help='Description, useful for slices', default=None)
-    @add_options('-k', '--key', dest='key', metavar='<key>', help='public key string or file',
+    @add_options('-k', '--key', dest='key', metavar='<key>',
+                 help='public key string or file',
                  default=None)
-    @add_options('-s', '--slices', dest='slices', metavar='<slices>', help='Set/replace slice xrns',
-                 default='', type="str", action='callback', callback=optparse_listvalue_callback)
-    @add_options('-r', '--researchers', dest='researchers', metavar='<researchers>', help='Set/replace slice researchers',
-                 default='', type="str", action='callback', callback=optparse_listvalue_callback)
+    @add_options('-s', '--slices', dest='slices', metavar='<slices>',
+                 help='Set/replace slice xrns',
+                 default='', type="str", action='callback',
+                 callback=optparse_listvalue_callback)
+    @add_options('-r', '--researchers', dest='researchers',
+                 metavar='<researchers>', help='Set/replace slice researchers',
+                 default='', type="str", action='callback',
+                 callback=optparse_listvalue_callback)
     @add_options('-p', '--pis', dest='pis', metavar='<PIs>',
                  help='Set/replace Principal Investigators/Project Managers',
-                 default='', type="str", action='callback', callback=optparse_listvalue_callback)
-    @add_options('-X', '--extra', dest='extras', default={}, type='str', metavar="<EXTRA_ASSIGNS>",
-                 action="callback", callback=optparse_dictvalue_callback, nargs=1,
-                 help="set extra/testbed-dependent flags, e.g. --extra enabled=true")
+                 default='', type="str", action='callback',
+                 callback=optparse_listvalue_callback)
+    @add_options('-X', '--extra', dest='extras',
+                 default={}, type='str', metavar="<EXTRA_ASSIGNS>",
+                 action="callback", callback=optparse_dictvalue_callback,
+                 nargs=1,
+                 help="set extra/testbed-dependent flags,"
+                      " e.g. --extra enabled=true")
     def register(self, xrn, type=None, email='', key=None,
                  slices='', pis='', researchers='',
                  url=None, description=None, extras={}):
         """Create a new Registry record"""
-        record_dict = self._record_dict(xrn=xrn, type=type, email=email, key=key,
-                                        slices=slices, researchers=researchers, pis=pis,
-                                        url=url, description=description, extras=extras)
+        record_dict = self._record_dict(
+            xrn=xrn, type=type, email=email, key=key,
+            slices=slices, researchers=researchers, pis=pis,
+            url=url, description=description, extras=extras)
         self.api.manager.Register(self.api, record_dict)
 
-        
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
-    @add_options('-u', '--url', dest='url', metavar='<url>', help='URL', default=None)
-    @add_options('-d', '--description', dest='description', metavar='<description>',
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn (mandatory)')
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type', default=None)
+    @add_options('-u', '--url', dest='url', metavar='<url>',
+                 help='URL', default=None)
+    @add_options('-d', '--description', dest='description',
+                 metavar='<description>',
                  help='Description', default=None)
-    @add_options('-k', '--key', dest='key', metavar='<key>', help='public key string or file',
+    @add_options('-k', '--key', dest='key', metavar='<key>',
+                 help='public key string or file',
                  default=None)
-    @add_options('-s', '--slices', dest='slices', metavar='<slices>', help='Set/replace slice xrns',
-                 default='', type="str", action='callback', callback=optparse_listvalue_callback)
-    @add_options('-r', '--researchers', dest='researchers', metavar='<researchers>', help='Set/replace slice researchers',
-                 default='', type="str", action='callback', callback=optparse_listvalue_callback)
+    @add_options('-s', '--slices', dest='slices', metavar='<slices>',
+                 help='Set/replace slice xrns',
+                 default='', type="str", action='callback',
+                 callback=optparse_listvalue_callback)
+    @add_options('-r', '--researchers', dest='researchers',
+                 metavar='<researchers>', help='Set/replace slice researchers',
+                 default='', type="str", action='callback',
+                 callback=optparse_listvalue_callback)
     @add_options('-p', '--pis', dest='pis', metavar='<PIs>',
                  help='Set/replace Principal Investigators/Project Managers',
-                 default='', type="str", action='callback', callback=optparse_listvalue_callback)
-    @add_options('-X', '--extra', dest='extras', default={}, type='str', metavar="<EXTRA_ASSIGNS>",
-                 action="callback", callback=optparse_dictvalue_callback, nargs=1,
-                 help="set extra/testbed-dependent flags, e.g. --extra enabled=true")
+                 default='', type="str", action='callback',
+                 callback=optparse_listvalue_callback)
+    @add_options('-X', '--extra', dest='extras', default={}, type='str',
+                 metavar="<EXTRA_ASSIGNS>", nargs=1,
+                 action="callback", callback=optparse_dictvalue_callback,
+                 help="set extra/testbed-dependent flags,"
+                      " e.g. --extra enabled=true")
     def update(self, xrn, type=None, email='', key=None,
                slices='', pis='', researchers='',
                url=None, description=None, extras={}):
         """Update an existing Registry record"""
-        record_dict = self._record_dict(xrn=xrn, type=type, email=email, key=key,
-                                        slices=slices, researchers=researchers, pis=pis,
-                                        url=url, description=description, extras=extras)
+        record_dict = self._record_dict(
+            xrn=xrn, type=type, email=email, key=key,
+            slices=slices, researchers=researchers, pis=pis,
+            url=url, description=description, extras=extras)
         self.api.manager.Update(self.api, record_dict)
 
-
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn (mandatory)')
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type', default=None)
     def remove(self, xrn, type=None):
         """Remove given object from the registry"""
         xrn = Xrn(xrn, type)
         self.api.manager.Remove(self.api, xrn)
 
-
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn (mandatory)')
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type', default=None)
     def credential(self, xrn, type=None):
         """Invoke GetCredential"""
         cred = self.api.manager.GetCredential(
@@ -267,6 +322,8 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n" % (len(NOK
 
     def import_registry(self):
         """Run the importer"""
+        if not DEBUG:
+            init_logger('import')
         from sfa.importer import Importer
         importer = Importer()
         importer.run()
@@ -279,24 +336,33 @@ Users having a GID/PubKey correpondence NOT OK: %s and are: \n%s\n\n" % (len(NOK
         dbschema.init_or_upgrade()
 
 
-    @add_options('-a', '--all', dest='all', metavar='<all>', action='store_true', default=False,
-                 help='Remove all registry records and all files in %s area' % help_basedir)
-    @add_options('-c', '--certs', dest='certs', metavar='<certs>', action='store_true', default=False,
-                 help='Remove all cached certs/gids found in %s' % help_basedir)
-    @add_options('-0', '--no-reinit', dest='reinit', metavar='<reinit>', action='store_false', default=True,
-                 help='Prevents new DB schema from being installed after cleanup')
+    @add_options('-a', '--all', dest='all', metavar='<all>',
+                 action='store_true', default=False,
+                 help='Remove all registry records and all files in %s area'
+                 % help_basedir)
+    @add_options('-c', '--certs', dest='certs',
+                 metavar='<certs>', action='store_true', default=False,
+                 help='Remove all cached certs/gids found in %s'
+                 % help_basedir)
+    @add_options('-0', '--no-reinit', dest='reinit', metavar='<reinit>',
+                 action='store_false', default=True,
+                 help="Prevents new DB schema"
+                 " from being installed after cleanup")
     def nuke(self, all=False, certs=False, reinit=True):
-        """Cleanup local registry DB, plus various additional filesystem cleanups optionally"""
+        """
+        Cleanup local registry DB, plus various additional
+        filesystem cleanups optionally
+        """
         from sfa.storage.dbschema import DBSchema
-        from sfa.util.sfalogging import _SfaLogger
-        logger = _SfaLogger(
-            logfile='/var/log/sfa_import.log', loggername='importlog')
+        from sfa.util.sfalogging import init_logger, logger
+        init_logger('import')
         logger.setLevelFromOptVerbose(self.api.config.SFA_API_LOGLEVEL)
         logger.info("Purging SFA records from database")
         dbschema = DBSchema()
         dbschema.nuke()
 
-        # for convenience we re-create the schema here, so there's no need for an explicit
+        # for convenience we re-create the schema here,
+        # so there's no need for an explicit
         # service sfa restart
         # however in some (upgrade) scenarios this might be wrong
         if reinit:
@@ -333,9 +399,12 @@ class CertCommands(Commands):
     def import_gid(self, xrn):
         pass
 
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
-    @add_options('-t', '--type', dest='type', metavar='<type>', help='object type', default=None)
-    @add_options('-o', '--outfile', dest='outfile', metavar='<outfile>', help='output file', default=None)
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn (mandatory)')
+    @add_options('-t', '--type', dest='type', metavar='<type>',
+                 help='object type', default=None)
+    @add_options('-o', '--outfile', dest='outfile', metavar='<outfile>',
+                 help='output file', default=None)
     def export(self, xrn, type=None, outfile=None):
         """Fetch an object's GID from the Registry"""
         from sfa.storage.model import RegRecord
@@ -352,7 +421,7 @@ class CertCommands(Commands):
             try:
                 auth_info = hierarchy.get_auth_info(hrn)
                 gid = auth_info.gid_object
-            except:
+            except Exception:
                 print("Record: %s not found" % hrn)
                 sys.exit(1)
         # save to file
@@ -360,7 +429,8 @@ class CertCommands(Commands):
             outfile = os.path.abspath('./%s.gid' % gid.get_hrn())
         gid.save_to_file(outfile, save_parents=True)
 
-    @add_options('-g', '--gidfile', dest='gid', metavar='<gid>', help='path of gid file to display (mandatory)')
+    @add_options('-g', '--gidfile', dest='gid', metavar='<gid>',
+                 help='path of gid file to display (mandatory)')
     def display(self, gidfile):
         """Print contents of a GID file"""
         gid_path = os.path.abspath(gidfile)
@@ -381,15 +451,20 @@ class AggregateCommands(Commands):
         version = self.api.manager.GetVersion(self.api, {})
         pprinter.pprint(version)
 
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='object hrn/urn (mandatory)')
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='object hrn/urn (mandatory)')
     def status(self, xrn):
-        """Retrieve the status of the slivers belonging to the named slice (Status)"""
+        """
+        Retrieve the status of the slivers
+        belonging to the named slice (Status)
+        """
         urns = [Xrn(xrn, 'slice').get_urn()]
         status = self.api.manager.Status(self.api, urns, [], {})
         pprinter.pprint(status)
 
-    @add_options('-r', '--rspec-version', dest='rspec_version', metavar='<rspec_version>',
-                 default='GENI', help='version/format of the resulting rspec response')
+    @add_options('-r', '--rspec-version', dest='rspec_version',
+                 metavar='<rspec_version>', default='GENI',
+                 help='version/format of the resulting rspec response')
     def resources(self, rspec_version='GENI'):
         """Display the available resources at an aggregate"""
         options = {'geni_rspec_version': rspec_version}
@@ -397,8 +472,10 @@ class AggregateCommands(Commands):
         resources = self.api.manager.ListResources(self.api, [], options)
         print(resources)
 
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='slice hrn/urn (mandatory)')
-    @add_options('-r', '--rspec', dest='rspec', metavar='<rspec>', help='rspec file (mandatory)')
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='slice hrn/urn (mandatory)')
+    @add_options('-r', '--rspec', dest='rspec', metavar='<rspec>',
+                 help='rspec file (mandatory)')
     def allocate(self, xrn, rspec):
         """Allocate slivers"""
         xrn = Xrn(xrn, 'slice')
@@ -409,7 +486,8 @@ class AggregateCommands(Commands):
             self.api, slice_urn, [], rspec_string, options)
         print(manifest)
 
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='slice hrn/urn (mandatory)')
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='slice hrn/urn (mandatory)')
     def provision(self, xrn):
         """Provision slivers"""
         xrn = Xrn(xrn, 'slice')
@@ -419,24 +497,20 @@ class AggregateCommands(Commands):
             self.api, [slice_urn], [], options)
         print(manifest)
 
-    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>', help='slice hrn/urn (mandatory)')
+    @add_options('-x', '--xrn', dest='xrn', metavar='<xrn>',
+                 help='slice hrn/urn (mandatory)')
     def delete(self, xrn):
         """Delete slivers"""
         self.api.manager.Delete(self.api, [xrn], [], {})
 
 
-class SliceManagerCommands(AggregateCommands):
-
-    def __init__(self, *args, **kwds):
-        self.api = Generic.the_flavour().make_api(interface='slicemgr')
-
-
 class SfaAdmin:
 
-    CATEGORIES = {'certificate': CertCommands,
-                  'registry': RegistryCommands,
-                  'aggregate': AggregateCommands,
-                  'slicemgr': SliceManagerCommands}
+    CATEGORIES = {
+        'certificate': CertCommands,
+        'registry': RegistryCommands,
+        'aggregate': AggregateCommands,
+       }
 
     # returns (name,class) or (None,None)
     def find_category(self, input):
@@ -461,7 +535,6 @@ class SfaAdmin:
                 if name.startswith('_'):
                     continue
                 margin = 15
-                format = "%%-%ds" % margin
                 print("%-15s" % name, end=' ')
                 doc = getattr(method, '__doc__', None)
                 if not doc:
@@ -526,8 +599,6 @@ class SfaAdmin:
             sys.exit(0)
         except TypeError:
             print("Possible wrong number of arguments supplied")
-            #import traceback
-            # traceback.print_exc()
             print(command.__doc__)
             parser.print_help()
             sys.exit(1)

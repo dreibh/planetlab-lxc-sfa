@@ -1,6 +1,6 @@
 %define name sfa
-%define version 3.1
-%define taglevel 22
+%define version 4.0
+%define taglevel 1
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -21,7 +21,7 @@ Packager: PlanetLab Central <support@planet-lab.org>
 Distribution: PlanetLab
 URL: %{SCMURL}
 
-Summary: Server-side for SFA, generic implementation derived from PlanetLab 
+Summary: Server-side for SFA, generic implementation derived from PlanetLab
 Group: Applications/System
 BuildRequires: make
 BuildRequires: python-setuptools
@@ -38,7 +38,7 @@ Requires: python-migrate
 Requires: util-linux-ng
 # and the SFA libraries of course
 Requires: sfa-common
- 
+
 %package common
 Summary: Python libraries for SFA, generic implementation derived from PlanetLab
 Group: Applications/System
@@ -62,28 +62,13 @@ Summary: the SFA layer around MyPLC
 Group: Applications/System
 Requires: sfa
 
-%package flashpolicy
-Summary: SFA support for flash clients
-Group: Applications/System
-Requires: sfa
-
-%package federica
-Summary: the SFA layer around Federica
-Group: Applications/System
-Requires: sfa
-
-%package nitos
-Summary: the SFA layer around NITOS
-Group: Applications/System
-Requires: sfa
-
 %package iotlab
 Summary: the SFA layer around IotLab
 Group: Applications/System
 Requires: sfa
 
 %package dummy
-Summary: the SFA layer around a Dummy Testbed 
+Summary: the SFA layer around a Dummy Testbed
 Group: Applications/System
 Requires: sfa
 
@@ -97,7 +82,7 @@ Summary: unit tests suite for SFA
 Group: Applications/System
 Requires: sfa-common
 
-%description 
+%description
 This package provides the registry, aggregate manager and slice
 managers for SFA.  In most cases it is advisable to install additional
 package for a given testbed, like e.g. sfa-plc for a PlanetLab tesbed.
@@ -112,15 +97,6 @@ sfi.py, together with other utilities.
 %description plc
 This package implements the SFA interface which serves as a layer
 between the existing PlanetLab interfaces and the SFA API.
-
-%description flashpolicy
-This package provides support for adobe flash client applications.  
-
-%description federica
-The SFA driver for FEDERICA.
-
-%description nitos
-The SFA driver for NITOS.
 
 %description iotlab
 The SFA driver for IotLab.
@@ -150,13 +126,14 @@ make VERSIONTAG="%{version}-%{taglevel}" SCMURL="%{SCMURL}" install DESTDIR="$RP
 rm -rf $RPM_BUILD_ROOT
 
 %files
-/etc/init.d/sfa
+/lib/systemd/system/*.service
 %{_bindir}/sfa-start.py*
 %{_bindir}/sfaadmin.py*
 %{_bindir}/sfaadmin
 %{_bindir}/keyconvert.py*
 %{_bindir}/sfa-config-tty
 %{_bindir}/sfa-config
+%{_bindir}/sfa-setup.sh
 %config /etc/sfa/default_config.xml
 %config (noreplace) /etc/sfa/aggregates.xml
 %config (noreplace) /etc/sfa/registries.xml
@@ -192,7 +169,6 @@ rm -rf $RPM_BUILD_ROOT
 %files plc
 %defattr(-,root,root)
 %{python_sitelib}/sfa/planetlab
-%{python_sitelib}/sfa/openstack
 /etc/sfa/pl.rng
 /etc/sfa/credential.xsd
 /etc/sfa/top.xsd
@@ -200,16 +176,6 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sfa/xml.xsd
 /etc/sfa/protogeni-rspec-common.xsd
 /etc/sfa/topology
-
-%files flashpolicy
-%{_bindir}/sfa_flashpolicy.py*
-/etc/sfa/sfa_flashpolicy_config.xml
-
-%files federica
-%{python_sitelib}/sfa/federica
-
-%files nitos
-%{python_sitelib}/sfa/nitos
 
 %files iotlab
 %{python_sitelib}/sfa/iotlab
@@ -225,33 +191,42 @@ rm -rf $RPM_BUILD_ROOT
 %files tests
 %{_datadir}/sfa/tests
 
-### sfa installs the 'sfa' service
-%post 
-chkconfig --add sfa
+# arbitrary choice here, subject to manual tweaks if needed
+# this is in line with default_config.xml
+# no need to enable sfa-db, will be activated as a dependency
+%post
+systemctl enable sfa-aggregate
+systemctl enable sfa-registry
 
-%preun 
+%preun
 if [ "$1" = 0 ] ; then
-  /sbin/service sfa stop || :
-  /sbin/chkconfig --del sfa || :
+    for service in sfa-aggregate sfa-registry sfa-db; do
+        systemctl is-enabled $service && systemctl disable $service
+        systemctl is-active $service && systemctl stop $service
+    done
 fi
 
 %postun
-[ "$1" -ge "1" ] && { service sfa dbdump ; service sfa restart ; }
-
-#### sfa-cm installs the 'sfa-cm' service
-#%post cm
-#chkconfig --add sfa-cm
-#
-#%preun cm
-#if [ "$1" = 0 ] ; then
-#   /sbin/service sfa-cm stop || :
-#   /sbin/chkconfig --del sfa-cm || :
-#fi
-#
-#%postun cm
-#[ "$1" -ge "1" ] && service sfa-cm restart || :
+if [ "$1" -ge "1" ] ; then
+    for service in sfa-db sfa-registry sfa-aggregate; do
+        systemctl is-active $service && systemctl restart $service
+    done
+fi
 
 %changelog
+* Wed May 30 2018 Thierry <Parmentelat> - sfa-4.0-1
+- systemd service files install in /lib instead of /usr/lib for ubuntus
+- removed all features relating to slice manager
+- removed all features relating to component manager
+
+* Mon May 28 2018 Thierry <Parmentelat> - sfa-4.0-0
+- expose geni_api_versions as https://
+- avoid publishing non-relevant entries in GetVersion
+- fixes in the IoT-lab driver (thanks Loic)
+- reviewed logging policy, less awkward and more reliable; /var/log/sfa{,-import}.log should now be alive and time rotate
+- rewrote init-style startup script into systemd-native services: sfa-aggregate and sfa-registry, that both depend on sfa-db
+- huge cleanup, removed everything related to init.d; debian; flash-policy; max aggregate; federica, openstack/nova and nitos drivers
+
 * Fri Mar 16 2018 Thierry <Parmentelat> - sfa-3.1-22
 - pl: tweaks for exposing country / city on nodes from site tags if set
 - pl: tweaks for exposing hardware_types on nodes from node tag 'hardware_type' if set
@@ -556,7 +531,7 @@ fi
 * Tue Jul 10 2012 Tony Mack <tmack@cs.princeton.edu> - sfa-2.1-12
 - Update Openstack driver to support Essex release/
 - Fix authority xrn bug.
-  
+
 
 * Thu Jun 07 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-2.1-11
 - review packaging - site-packages/planetlab now come with sfa-plc
@@ -599,18 +574,18 @@ fi
 
 * Mon Apr 16 2012 Tony Mack <tmack@cs.princeton.edu> - sfa-2.1-5
 - make sync now supports vserver or lxc.
-- Added slice expiration and login info to SliverStatus response. 
+- Added slice expiration and login info to SliverStatus response.
 - Fixed CreateSliver bug that causes the method to fail if any node element is missing
   the 'component_name' attribute.
 - Fixed various bugs that caused SFA to generate invalid or incorrect sliver ids.
-  
+
 * Tue Mar 20 2012 Tony Mack <tmack@cs.princeton.edu> - sfa-2.1-4
 - Introduced new administrative command line script, sfaadmin.py. Removed various single
  purpose scripts and migrated their functionality into sfaadmin.py.
 - Refactored Registry import scripts.
 - Removed SQLAlchemy dependency from sfi.py.
 - Fixed bugs in sfi.py
-- Registry, Aggregate and SliceManager now support the OpenStack framework. 
+- Registry, Aggregate and SliceManager now support the OpenStack framework.
 
 * Fri Feb 24 2012 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-2.1-3
 - slice x researcher rel. in database,
@@ -640,13 +615,13 @@ fi
 
 * Wed Jan 25 2012 Tony Mack <tmack@cs.princeton.edu> - sfa-2.0-10
 - client: added -R --raw sfi cmdline option that displays raw server response.
-- client: request GENI RSpec by default. 
+- client: request GENI RSpec by default.
 - server: remove database dependencies from sfa.server.sfaapi.
 - server: increased default credential lifetime to 31 days.
 - bugfix: fixed bug in sfa.storage.record.SfaRecord.delete().
 - bugfix: fixed server key path in sfa.server.sfa-clean-peer-records.
-- bugfix: fixed bug in sfa.server.sfa-start.install_peer_certs(). 
- 
+- bugfix: fixed bug in sfa.server.sfa-start.install_peer_certs().
+
 * Sat Jan 7 2012 Tony Mack <tmack@cs.princeton.edu> - sfa-2.0-9
 - bugfix: 'geni_api' should be in the top level struct, not the code struct
 - bugfix: Display the correct host and port in 'geni_api_versions' field of the GetVersion
@@ -655,23 +630,23 @@ fi
 - bugfix: sfa.util.sfatime.datetime_to_epoch() returns integers instead of doubles.
 - bugfix: Fixed bug that prevented the rspec parser from identifying an rspec's schema when
           there is extra whitespace in the schemaLocation field.
-- bugfix: Fixed bug that caused PlanetLab initscripts from showing up in the PGv2 and GENIv3 
+- bugfix: Fixed bug that caused PlanetLab initscripts from showing up in the PGv2 and GENIv3
           advertisement rspecs.
 - bugfix: <login> RSpec element should contain the 'username' attribute.
-- bugfix: Use sfa.util.plxrn.PlXrn to parse the login_base (authority) out of a urn.      
- 
+- bugfix: Use sfa.util.plxrn.PlXrn to parse the login_base (authority) out of a urn.
+
 * Wed Jan 4 2012 Tony Mack <tmack@cs.princeton.edu> - sfa-2.0-8
-- bugfix: Fixed a bug in the sfa-import-plc.py script that caused the script to 
+- bugfix: Fixed a bug in the sfa-import-plc.py script that caused the script to
   exit when it encountered a user with an invalid public key.
 - server: imporved logging in sfa-import-plc.py
- 
+
 * Tue Jan 3 2012 Tony Mack <tmack@cs.princeton.edu> - sfa-2.0-7
 - bugfix: Fixed appending public keys in CreateSliver
 - bugfix: Fixed various bugs in the PGv2/GENIv3 request, advertisement and manifest rspecs.
 - client: -c --current option allows users to request the current/uncached rspec.
 - server: Added 'geni_api_versions' field to GetVersion() output.
 - server: Moved PLC specific code from sfa.importer.sfaImport to sfa.importer.sfa-import-plc.
-   
+
 * Fri Dec 16 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-2.0-6
 - bugfix: sfi was not sending call_id with ListResources to v2 servers
 - SFA_API_DEBUG replaced with SFA_API_LOGLEVEL
@@ -753,10 +728,10 @@ fi
 - Unicode-friendliness for user names with accents/special chars.
 - Fix bug that could cause create the client to fail when calling CreateSliver for a slice that has the same hrn as a user.
 - CreaetSliver no longer fails for users that have a capital letter in their URN.
-- Fix bug in CreateSliver that generated incorrect login bases and email addresses for ProtoGENI requests. 
+- Fix bug in CreateSliver that generated incorrect login bases and email addresses for ProtoGENI requests.
 - Allow files with .gid, .pem or .crt extension to be loaded into the server's list of trusted certs.
-- Fix bugs and missing imports     
- 
+- Fix bugs and missing imports
+
 
 * Tue Aug 30 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-35
 - new method record.get_field for sface
@@ -768,7 +743,7 @@ fi
 * Wed Aug 24 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-32
 - Fixed exploit that allowed an authorities to issue certs for objects that dont belong to them.
 - Fixed holes in certificate verification logic.
-- Aggregates no longer try to lookup slice and person records when processing CreateSliver requests. Clients are now required to specify this info in the 'users' argument. 
+- Aggregates no longer try to lookup slice and person records when processing CreateSliver requests. Clients are now required to specify this info in the 'users' argument.
 - Added 'boot_state' as an attribute of the node element in SFA rspec.
 - Non authority certificates are marked as CA:FALSE.
 
@@ -787,7 +762,7 @@ fi
 - Added SFA_MAX_SLICE_RENEW which allows operators to configure the max ammout
   of days a user can extend their slice expiration.
 - CA certs are only issued to objects of type authority
-   
+
 * Fri Aug 05 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-29
 - tag 1.0-28 was broken due to typo in the changelog
 - new class sfa/util/httpsProtocol.py that supports timeouts
@@ -798,16 +773,16 @@ fi
 - Support authority+sm type.
 - Fix rspec merging bugs.
 - Only load certs that have .gid extension from /etc/sfa/trusted_roots/
-- Created a 'planetlab' extension to the ProtoGENI v2 rspec for supporting 
- planetlab hosted initscripts using the <planetlab:initscript> tag  
-- Can now handle extraneous whitespace in the rspec without failing.   
- 
+- Created a 'planetlab' extension to the ProtoGENI v2 rspec for supporting
+ planetlab hosted initscripts using the <planetlab:initscript> tag
+- Can now handle extraneous whitespace in the rspec without failing.
+
 * Fri Jul 8 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-27
 - ProtoGENI v2 RSpec updates.
 - Convert expiration timestamps with timezone info in credentials to utc.
-- Fixed redundant logging issue. 
+- Fixed redundant logging issue.
 - Improved SliceManager and SFI client logging.
-- Support aggregates that don't support the optional 'call_id' argument. 
+- Support aggregates that don't support the optional 'call_id' argument.
 - Only call get_trusted_certs() at aggreage interfaces that support the call.
 - CreateSliver() now handles MyPLC slice attributes/tags.
 - Cache now supports persistence.
@@ -827,9 +802,9 @@ fi
 * Fri Jun 10 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-23
 - includes a change on passphrases that was intended in 1.0-22
 
-* Thu Jun 6 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-22
+* Mon Jun 6 2011 Tony Mack <tmack@cs.princeton.edu> - sfa-1.0-22
 - Added support for ProtoGENI RSpec v2
- 
+
 * Wed Mar 16 2011 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - sfa-1.0-21
 - stable sfascan
 - fix in initscript, *ENABLED tags in config now taken into account
@@ -927,24 +902,24 @@ fi
 * Tue Sep 07 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-16
 - truncate login base of external (ProtoGeni, etc) slices to 20 characters
   to avoid returning a PLCAPI exception that might confuse users.
-- Enhance PLC aggregate performace by using a better filter when querying SliceTags.      
-- fix build errors.  
+- Enhance PLC aggregate performace by using a better filter when querying SliceTags.
+- fix build errors.
 
 * Tue Aug 24 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-15
 - (Architecture) Credential format changed to match ProtoGENI xml format
 - (Architecture) All interfaces export a new set of methods that are compatible
-   with the ProtoGeni Aggregate spec. These new methods are considered a 
-   replacement  for the pervious methods exported by the interfaces. All 
-   previous methods are still exported and work as normal, but they are 
-   considered deprecated and will not be supported in future releases.  
+   with the ProtoGeni Aggregate spec. These new methods are considered a
+   replacement  for the pervious methods exported by the interfaces. All
+   previous methods are still exported and work as normal, but they are
+   considered deprecated and will not be supported in future releases.
 - (Architecture) SFI has been updated to use the new interface methods.
 - (Architecture) Changed keyconvet implementation from c to python.
 - (Architecture) Slice Manager now attempts looks for a delegated credential
   provided by the client before using its own server credential.
-- (Archiceture) Slice Interface no longers stores cache of resources on disk. 
+- (Archiceture) Slice Interface no longers stores cache of resources on disk.
   This cache now exists only in memory and is cleared when service is restarted
-  or cache lifetime is exceeded.  
-- (Performance) SliceManager sends request to Aggregates in parallel instead 
+  or cache lifetime is exceeded.
+- (Performance) SliceManager sends request to Aggregates in parallel instead
   of sequentially.
 - (Bug fix) SFA tickets now support the new rspec format.
 - (Bug fix) SFI only uses cahced credential if they aren't expired.
@@ -952,20 +927,20 @@ fi
 - (Enhancement) SFI -a --aggregatge option now sends requests directly to the
   Aggregate instead of relaying through the Slice Manager.
 - (Enhancement) Simplified caching. Accociated a global cache instance with
-  the api handler on every new server request, making it easier to access the 
-  cache and use in more general ways.     
+  the api handler on every new server request, making it easier to access the
+  cache and use in more general ways.
 
-* Thu May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
+* Tue May 11 2010 Tony Mack <tmack@cs.princeton.edu> - sfa-0.9-11
 - SfaServer now uses a pool of threads to handle requests concurrently
 - sfa.util.rspec no longer used to process/manage rspecs (deprecated). This is now handled by sfa.plc.network and is not backwards compatible
 - PIs can now get a slice credential for any slice at their site without having to be a member of the slice
 - Registry records for federated peers (defined in registries.xml, aggregates.xml) updated when sfa service is started
-- Interfaces will try to fetch and install gids from peers listed in registries.xml/aggregates.xml if gid is not found in /etc/sfa/trusted_roots dir   
-- Component manager does not install gid files if slice already has them  
+- Interfaces will try to fetch and install gids from peers listed in registries.xml/aggregates.xml if gid is not found in /etc/sfa/trusted_roots dir
+- Component manager does not install gid files if slice already has them
 - Server automatically fetches and installs peer certificats (defined in registries/aggregates.xml) when service is restarted.
 - fix credential verification exploit (verify that the trusted signer is a parent of the object it it signed)
 - made it easier for root authorities to sign their sub's certifiacate using the sfa-ca.py (sfa/server/sfa-ca.py) tool
-     
+
 * Thu Jan 21 2010 anil vengalil <avengali@sophia.inria.fr> - sfa-0.9-10
 - This tag is quite same as the previous one (sfa-0.9-9) except that the vini and max aggregate managers are also updated for urn support.  Other features are:
 - - sfa-config-tty now has the same features like plc-config-tty
@@ -1074,7 +1049,7 @@ fi
 * Sat May 30 2009 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - geniwrapper-0.2-2
 - bugfixes - still a work in progress
 
-* Fri May 18 2009 Baris Metin <tmetin@sophia.inria.fr>
+* Mon May 18 2009 Baris Metin <tmetin@sophia.inria.fr>
 - initial package
 
 

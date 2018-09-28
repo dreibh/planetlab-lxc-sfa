@@ -1,10 +1,8 @@
-##
-# This module implements a general-purpose server layer for sfa.
-# The same basic server should be usable on the registry, component, or
-# other interfaces.
-#
-# TODO: investigate ways to combine this with existing PLC server?
-##
+"""
+This module implements a general-purpose server layer for sfa.
+The same basic server should be usable on the registry or
+other interfaces.
+"""
 
 import threading
 

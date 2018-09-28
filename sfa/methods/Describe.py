@@ -4,6 +4,8 @@ from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
 from sfa.util.sfatablesRuntime import run_sfatables
 from sfa.util.faults import SfaInvalidArgument
+from sfa.util.sfalogging import logger
+
 from sfa.trust.credential import Credential
 
 from sfa.storage.parameter import Parameter, Mixed
@@ -11,15 +13,15 @@ from sfa.storage.parameter import Parameter, Mixed
 
 class Describe(Method):
     """
-    Retrieve a manifest RSpec describing the resources contained by the 
-    named entities, e.g. a single slice or a set of the slivers in a 
-    slice. This listing and description should be sufficiently 
-    descriptive to allow experimenters to use the resources.    
+    Retrieve a manifest RSpec describing the resources contained by the
+    named entities, e.g. a single slice or a set of the slivers in a
+    slice. This listing and description should be sufficiently
+    descriptive to allow experimenters to use the resources.
     @param credential list
     @param options dictionary
     @return dict
     """
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate']
     accepts = [
         Parameter(type([str]), "List of URNs"),
         Mixed(Parameter(str, "Credential string"),
@@ -29,8 +31,8 @@ class Describe(Method):
     returns = Parameter(str, "List of resources")
 
     def call(self, urns, creds, options):
-        self.api.logger.info("interface: %s\tmethod-name: %s" %
-                             (self.api.interface, self.name))
+        logger.info("interface: %s\tmethod-name: %s" %
+                    (self.api.interface, self.name))
 
         # client must specify a version
         if not options.get('geni_rspec_version'):
@@ -54,9 +56,7 @@ class Describe(Method):
         # filter rspec through sfatables
         if self.api.interface in ['aggregate']:
             chain_name = 'OUTGOING'
-        elif self.api.interface in ['slicemgr']:
-            chain_name = 'FORWARD-OUTGOING'
-        self.api.logger.debug(
+        logger.debug(
             "ListResources: sfatables on chain %s" % chain_name)
         desc['geni_rspec'] = run_sfatables(
             chain_name, '', origin_hrn, desc['geni_rspec'])

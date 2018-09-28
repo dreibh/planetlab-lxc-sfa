@@ -18,10 +18,6 @@ class pl (Generic):
         import sfa.managers.registry_manager
         return sfa.managers.registry_manager.RegistryManager
 
-    def slicemgr_manager_class(self):
-        import sfa.managers.slice_manager
-        return sfa.managers.slice_manager.SliceManager
-
     def aggregate_manager_class(self):
         import sfa.managers.aggregate_manager
         return sfa.managers.aggregate_manager.AggregateManager
@@ -30,14 +26,3 @@ class pl (Generic):
     def driver_class(self):
         import sfa.planetlab.pldriver
         return sfa.planetlab.pldriver.PlDriver
-
-    # for the component mode, to be run on board planetlab nodes
-    # manager class
-    def component_manager_class(self):
-        import sfa.managers
-        return sfa.managers.component_manager_pl
-    # driver_class
-
-    def component_driver_class(self):
-        import sfa.planetlab.plcomponentdriver
-        return sfa.planetlab.plcomponentdriver.PlComponentDriver

@@ -1,0 +1,10 @@
+[Unit]
+Description=SFA Aggregate Manager (AM)
+Requires=sfa-db.service
+After=sfa-db.service
+
+[Service]
+ExecStart=/bin/bash -c "/usr/bin/sfa-start.py -a"
+
+[Install]
+WantedBy=multi-user.target

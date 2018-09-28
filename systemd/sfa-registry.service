@@ -1,0 +1,11 @@
+# this is meant to be installed under /etc/systemd/system
+[Unit]
+Description=SFA Registry Service
+Requires=sfa-db.service
+After=sfa-db.service
+
+[Service]
+ExecStart=/bin/bash -c "/usr/bin/sfa-start.py -r"
+
+[Install]
+WantedBy=multi-user.target

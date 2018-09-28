@@ -6,7 +6,7 @@ from sfa.managers.managerwrapper import ManagerWrapper
 # a bundle is the combination of
 # (*) an api that reacts on the incoming requests to trigger the API methods
 # (*) a manager that implements the function of the service,
-#     either aggregate, registry, or slicemgr
+#     either aggregate or registry
 # (*) a driver that controls the underlying testbed
 #
 #
@@ -35,7 +35,7 @@ class Generic:
         if flavour is None:
             flavour = config.SFA_GENERIC_FLAVOUR
         flavour = flavour.lower()
-        #mixed = flavour.capitalize()
+        # mixed = flavour.capitalize()
         module_path = "sfa.generic.%s" % flavour
         classname = "%s" % flavour
         logger.debug("Generic.the_flavour with flavour=%s" % flavour)
@@ -58,11 +58,7 @@ class Generic:
 
     def registry_class(self): pass
 
-    def slicemgr_class(self): pass
-
     def aggregate_class(self): pass
-
-    def component_class(self): pass
 
     # build an API object
     # insert a manager instance
@@ -86,7 +82,7 @@ class Generic:
 
     def make_manager(self, interface):
         """
-        interface expected in ['registry', 'aggregate', 'slicemgr', 'component']
+        interface expected in ['registry', 'aggregate']
         flavour is e.g. 'pl' or 'max' or whatever
         """
         flavour = self.flavour
@@ -97,12 +93,14 @@ class Generic:
         try:
             module_or_class = getattr(self, classname)()
             logger.debug("%s : %s" % (message, module_or_class))
-            # this gets passed to ManagerWrapper that will call the class constructor
-            # if it's a class, or use the module as is if it's a module
+            # this gets passed to ManagerWrapper that will
+            # call the class constructor if it's a class,
+            # or use the module as is if it's a module
             # so bottom line is, don't try the constructor here
             return module_or_class
-        except:
-            logger.log_exc_critical(message)
+        except Exception:
+            logger.log_exc(message)
+            exit(1)
 
     # need interface to select the right driver
     def make_driver(self, api):
@@ -112,13 +110,11 @@ class Generic:
         message = "Generic.make_driver for flavour=%s and interface=%s" % (
             flavour, interface)
 
-        if interface == "component":
-            classname = "component_driver_class"
-        else:
-            classname = "driver_class"
+        classname = "driver_class"
         try:
             class_obj = getattr(self, classname)()
             logger.debug("%s : %s" % (message, class_obj))
             return class_obj(api)
-        except:
-            logger.log_exc_critical(message)
+        except Exception:
+            logger.log_exc(message)
+            exit(1)

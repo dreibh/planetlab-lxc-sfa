@@ -307,8 +307,9 @@ class PlImporter:
                 elif person_id in disabled_person_ids:
                     pass
                 else:
-                    self.logger.warning("PlImporter: cannot locate person_id {} in site {} - ignored"
-                                        .format(person_id, site_hrn))
+                    self.logger.warning(
+                        "PlImporter: cannot locate person_id {} in site {} - ignored"
+                        .format(person_id, site_hrn))
                 # make sure to NOT run this if anything is wrong
                 if not proceed:
                     continue
@@ -316,7 +317,7 @@ class PlImporter:
                 #person_hrn = email_to_hrn(site_hrn, person['email'])
                 person_hrn = person['hrn']
                 if person_hrn is None:
-                    self.logger.warn(
+                    self.logger.warning(
                         "Person {} has no hrn - skipped".format(person['email']))
                     continue
                 # xxx suspicious again
@@ -336,14 +337,16 @@ class PlImporter:
                         try:
                             pkey = convert_public_key(pubkey['key'])
                         except:
-                            self.logger.warn('PlImporter: unable to convert public key for {}'
-                                             .format(person_hrn))
+                            self.logger.warning(
+                                'PlImporter: unable to convert public key for {}'
+                                .format(person_hrn))
                             pkey = Keypair(create=True)
                     else:
                         # the user has no keys. Creating a random keypair for
                         # the user's gid
-                        self.logger.warn("PlImporter: person {} does not have a PL public key"
-                                         .format(person_hrn))
+                        self.logger.warning(
+                            "PlImporter: person {} does not have a PL public key"
+                            .format(person_hrn))
                         pkey = Keypair(create=True)
                     return (pubkey, pkey)
 

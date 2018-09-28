@@ -1,7 +1,9 @@
-#
-# sfi.py - basic SFA command-line client
-# this module is also used in sfascan
-#
+"""
+sfi.py - basic SFA command-line client
+this module is also used in sfascan
+"""
+
+# pylint: disable=c0111, c0413
 
 from __future__ import print_function
 
@@ -10,7 +12,6 @@ sys.path.append('.')
 
 import os
 import os.path
-import socket
 import re
 import datetime
 import codecs
@@ -28,7 +29,7 @@ from sfa.trust.credential import Credential
 from sfa.trust.sfaticket import SfaTicket
 
 from sfa.util.faults import SfaInvalidArgument
-from sfa.util.sfalogging import sfi_logger
+from sfa.util.sfalogging import init_logger, logger
 from sfa.util.xrn import get_leaf, get_authority, hrn_to_urn, Xrn
 from sfa.util.config import Config
 from sfa.util.version import version_core
@@ -345,8 +346,7 @@ class Sfi:
         self.options = options
         self.user = None
         self.authority = None
-        self.logger = sfi_logger
-        self.logger.enable_console()
+        logger.enable_console()
         # various auxiliary material that we keep at hand
         self.command = None
         # need to call this other than just 'config' as we have a
@@ -447,7 +447,7 @@ class Sfi:
             msg = "Invalid command\n"
             msg += "Commands: "
             msg += ','.join(commands_list)
-            self.logger.critical(msg)
+            logger.critical(msg)
             sys.exit(2)
 
         # retrieve args_string
@@ -572,7 +572,7 @@ class Sfi:
             parser.add_option("-p", "--pi", dest='delegate_pi', default=None, action='store_true',
                               help="delegate your PI credentials, so s.t. like -A your_hrn^")
             parser.add_option("-A", "--to-authority", dest='delegate_to_authority', action='store_true', default=False,
-                              help="""by default the mandatory argument is expected to be a user, 
+                              help="""by default the mandatory argument is expected to be a user,
 use this if you mean an authority instead""")
 
         if canonical in ("myslice"):
@@ -605,6 +605,7 @@ use this if you mean an authority instead""")
         return method(command_options, command_args)
 
     def main(self):
+        init_logger('cli')
         self.sfi_parser = self.create_parser_global()
         (options, args) = self.sfi_parser.parse_args()
         if options.help:
@@ -612,10 +613,10 @@ use this if you mean an authority instead""")
             sys.exit(1)
         self.options = options
 
-        self.logger.setLevelFromOptVerbose(self.options.verbose)
+        logger.setLevelFromOptVerbose(self.options.verbose)
 
         if len(args) <= 0:
-            self.logger.critical("No command given. Use -h for help.")
+            logger.critical("No command given. Use -h for help.")
             self.print_commands_help(options)
             return -1
 
@@ -644,14 +645,14 @@ use this if you mean an authority instead""")
 
         self.read_config()
         self.bootstrap()
-        self.logger.debug("Command={}".format(self.command))
+        logger.debug("Command={}".format(self.command))
 
         try:
             retcod = self.dispatch(command, command_options, command_args)
         except SystemExit:
             return 1
         except:
-            self.logger.log_exc("sfi command {} failed".format(command))
+            logger.log_exc("sfi command {} failed".format(command))
             return 1
         return retcod
 
@@ -682,14 +683,14 @@ use this if you mean an authority instead""")
                 config.save(config_file)
 
         except:
-            self.logger.critical(
+            logger.critical(
                 "Failed to read configuration file {}".format(config_file))
-            self.logger.info(
+            logger.info(
                 "Make sure to remove the export clauses and to add quotes")
             if self.options.verbose == 0:
-                self.logger.info("Re-run with -v for more details")
+                logger.info("Re-run with -v for more details")
             else:
-                self.logger.log_exc(
+                logger.log_exc(
                     "Could not read config file {}".format(config_file))
             sys.exit(1)
 
@@ -701,7 +702,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_SM"):
             self.sm_url = config.SFI_SM
         else:
-            self.logger.error(
+            logger.error(
                 "You need to set e.g. SFI_SM='http://your.slicemanager.url:12347/' in {}".format(config_file))
             errors += 1
 
@@ -711,7 +712,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_REGISTRY"):
             self.reg_url = config.SFI_REGISTRY
         else:
-            self.logger.error(
+            logger.error(
                 "You need to set e.g. SFI_REGISTRY='http://your.registry.url:12345/' in {}".format(config_file))
             errors += 1
 
@@ -721,7 +722,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_USER"):
             self.user = config.SFI_USER
         else:
-            self.logger.error(
+            logger.error(
                 "You need to set e.g. SFI_USER='plc.princeton.username' in {}".format(config_file))
             errors += 1
 
@@ -731,7 +732,7 @@ use this if you mean an authority instead""")
         elif hasattr(config, "SFI_AUTH"):
             self.authority = config.SFI_AUTH
         else:
-            self.logger.error(
+            logger.error(
                 "You need to set e.g. SFI_AUTH='plc.princeton' in {}".format(config_file))
             errors += 1
 
@@ -755,10 +756,10 @@ use this if you mean an authority instead""")
     # init self-signed cert, user credentials and gid
     def bootstrap(self):
         if self.options.verbose:
-            self.logger.info(
+            logger.info(
                 "Initializing SfaClientBootstrap with {}".format(self.reg_url))
         client_bootstrap = SfaClientBootstrap(self.user, self.reg_url, self.options.sfi_dir,
-                                              logger=self.logger)
+                                              logger=logger)
         # if -k is provided, use this to initialize private key
         if self.options.user_private_key:
             client_bootstrap.init_private_key_if_missing(
@@ -767,18 +768,18 @@ use this if you mean an authority instead""")
             # trigger legacy compat code if needed
             # the name has changed from just <leaf>.pkey to <hrn>.pkey
             if not os.path.isfile(client_bootstrap.private_key_filename()):
-                self.logger.info("private key not found, trying legacy name")
+                logger.info("private key not found, trying legacy name")
                 try:
                     legacy_private_key = os.path.join(self.options.sfi_dir, "{}.pkey"
                                                       .format(Xrn.unescape(get_leaf(self.user))))
-                    self.logger.debug("legacy_private_key={}"
+                    logger.debug("legacy_private_key={}"
                                       .format(legacy_private_key))
                     client_bootstrap.init_private_key_if_missing(
                         legacy_private_key)
-                    self.logger.info("Copied private key from legacy location {}"
+                    logger.info("Copied private key from legacy location {}"
                                      .format(legacy_private_key))
                 except:
-                    self.logger.log_exc("Can't find private key ")
+                    logger.log_exc("Can't find private key ")
                     sys.exit(1)
 
         # make it bootstrap
@@ -794,7 +795,7 @@ use this if you mean an authority instead""")
 
     def my_authority_credential_string(self):
         if not self.authority:
-            self.logger.critical(
+            logger.critical(
                 "no authority specified. Use -a or set SF_AUTH")
             sys.exit(-1)
         return self.client_bootstrap.authority_credential_string(self.authority)
@@ -819,7 +820,7 @@ use this if you mean an authority instead""")
         object_hrn = object_gid.get_hrn()
 
         if not object_cred.get_privileges().get_all_delegate():
-            self.logger.error("Object credential {} does not have delegate bit set"
+            logger.error("Object credential {} does not have delegate bit set"
                               .format(object_hrn))
             return
 
@@ -840,7 +841,7 @@ use this if you mean an authority instead""")
     def registry(self):
         # cache the result
         if not hasattr(self, 'registry_proxy'):
-            self.logger.info("Contacting Registry at: {}".format(self.reg_url))
+            logger.info("Contacting Registry at: {}".format(self.reg_url))
             self.registry_proxy \
                 = SfaServerProxy(self.reg_url, self.private_key, self.my_gid,
                                  timeout=self.options.timeout, verbose=self.options.debug)
@@ -857,7 +858,7 @@ use this if you mean an authority instead""")
                 records = self.registry().Resolve(node_hrn, self.my_credential_string)
                 records = filter_records('node', records)
                 if not records:
-                    self.logger.warning(
+                    logger.warning(
                         "No such component:{}".format(opts.component))
                 record = records[0]
                 cm_url = "http://{}:{}/".format(record['hostname'], CM_PORT)
@@ -868,7 +869,7 @@ use this if you mean an authority instead""")
                 # the config
                 if not self.sm_url.startswith('http://') or self.sm_url.startswith('https://'):
                     self.sm_url = 'http://' + self.sm_url
-                self.logger.info(
+                logger.info(
                     "Contacting Slice Manager at: {}".format(self.sm_url))
                 self.sliceapi_proxy \
                     = SfaServerProxy(self.sm_url, self.private_key, self.my_gid,
@@ -885,7 +886,7 @@ use this if you mean an authority instead""")
             cache = Cache(cache_file)
         except IOError:
             cache = Cache()
-            self.logger.info("Local cache not found at: {}".format(cache_file))
+            logger.info("Local cache not found at: {}".format(cache_file))
 
         if cache:
             version = cache.get(cache_key)
@@ -895,7 +896,7 @@ use this if you mean an authority instead""")
             version = ReturnValue.get_value(result)
             # cache version for 20 minutes
             cache.add(cache_key, version, ttl=60 * 20)
-            self.logger.info("Updating cache file {}".format(cache_file))
+            logger.info("Updating cache file {}".format(cache_file))
             cache.save_to_file(cache_file)
 
         return version
@@ -903,7 +904,7 @@ use this if you mean an authority instead""")
     # resurrect this temporarily so we can support V1 aggregates for a while
     def server_supports_options_arg(self, server):
         """
-        Returns true if server support the optional call_id arg, false otherwise. 
+        Returns true if server support the optional call_id arg, false otherwise.
         """
         server_version = self.get_cached_server_version(server)
         result = False
@@ -952,7 +953,7 @@ use this if you mean an authority instead""")
         if (os.path.isfile(file)):
             return file
         else:
-            self.logger.critical("No such rspec file {}".format(rspec))
+            logger.critical("No such rspec file {}".format(rspec))
             sys.exit(1)
 
     def get_record_file(self, record):
@@ -963,7 +964,7 @@ use this if you mean an authority instead""")
         if (os.path.isfile(file)):
             return file
         else:
-            self.logger.critical(
+            logger.critical(
                 "No such registry record file {}".format(record))
             sys.exit(1)
 
@@ -1097,7 +1098,7 @@ use this if you mean an authority instead""")
             hrn, self.my_credential_string, resolve_options)
         record_dicts = filter_records(options.type, record_dicts)
         if not record_dicts:
-            self.logger.error("No record of type {}".format(options.type))
+            logger.error("No record of type {}".format(options.type))
             return
         # user has required to focus on some keys
         if options.keys:
@@ -1127,8 +1128,8 @@ use this if you mean an authority instead""")
     @declare_command("[xml-filename]", "", ['add'])
     def register(self, options, args):
         """
-        create new record in registry (Register) 
-        from command line options (recommended) 
+        create new record in registry (Register)
+        from command line options (recommended)
         old-school method involving an xml file still supported
         """
         if len(args) > 1:
@@ -1170,8 +1171,8 @@ use this if you mean an authority instead""")
     @declare_command("[xml-filename]", "")
     def update(self, options, args):
         """
-        update record into registry (Update) 
-        from command line options (recommended) 
+        update record into registry (Update)
+        from command line options (recommended)
         old-school method involving an xml file still supported
         """
         if len(args) > 1:
@@ -1302,8 +1303,8 @@ use this if you mean an authority instead""")
     @declare_command("slice_hrn", "")
     def describe(self, options, args):
         """
-        shows currently allocated/provisioned resources 
-        of the named slice or set of slivers (Describe) 
+        shows currently allocated/provisioned resources
+        of the named slice or set of slivers (Describe)
         """
         if len(args) != 1:
             self.print_help()
@@ -1690,7 +1691,7 @@ use this if you mean an authority instead""")
         else:
             filename = os.sep.join(
                 [self.options.sfi_dir, '{}.gid'.format(target_hrn)])
-        self.logger.info("writing {} gid to {}".format(target_hrn, filename))
+        logger.info("writing {} gid to {}".format(target_hrn, filename))
         GID(string=gid).save_to_file(filename)
         # xxx should analyze result
         return 0
@@ -1757,7 +1758,7 @@ use this if you mean an authority instead""")
             filename = os.path.join(self.options.sfi_dir,
                                     "{}_for_{}.{}.cred".format(message, to_hrn, to_type))
             delegated_credential.save_to_file(filename, save_parents=True)
-            self.logger.info("delegated credential for {} to {} and wrote to {}"
+            logger.info("delegated credential for {} to {} and wrote to {}"
                              .format(message, to_hrn, filename))
 
     ####################
@@ -1791,7 +1792,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
     * compute all the slices that you currently have credentials on
     * refresh all your credentials (you as a user and pi, your slices)
     * upload them to the manifold backend server
-    for last phase, sfi_config is read to look for the [myslice] section, 
+    for last phase, sfi_config is read to look for the [myslice] section,
     and namely the 'backend', 'delegate' and 'user' settings
         """
 
@@ -1800,7 +1801,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             self.print_help()
             sys.exit(1)
         # enable info by default
-        self.logger.setLevelFromOptVerbose(self.options.verbose + 1)
+        logger.setLevelFromOptVerbose(self.options.verbose + 1)
         # the rough sketch goes like this
         # (0) produce a p12 file
         self.client_bootstrap.my_pkcs12()
@@ -1826,36 +1827,36 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             sys.exit(1)
 
         # (b) figure whether we are PI for the authority where we belong
-        self.logger.info("Resolving our own id {}".format(self.user))
+        logger.info("Resolving our own id {}".format(self.user))
         my_records = self.registry().Resolve(self.user, self.my_credential_string)
         if len(my_records) != 1:
             print("Cannot Resolve {} -- exiting".format(self.user))
             sys.exit(1)
         my_record = my_records[0]
         my_auths_all = my_record['reg-pi-authorities']
-        self.logger.info(
+        logger.info(
             "Found {} authorities that we are PI for".format(len(my_auths_all)))
-        self.logger.debug("They are {}".format(my_auths_all))
+        logger.debug("They are {}".format(my_auths_all))
 
         my_auths = my_auths_all
         if options.delegate_auths:
             my_auths = list(set(my_auths_all).intersection(
                 set(options.delegate_auths)))
-            self.logger.debug(
+            logger.debug(
                 "Restricted to user-provided auths {}".format(my_auths))
 
         # (c) get the set of slices that we are in
         my_slices_all = my_record['reg-slices']
-        self.logger.info(
+        logger.info(
             "Found {} slices that we are member of".format(len(my_slices_all)))
-        self.logger.debug("They are: {}".format(my_slices_all))
+        logger.debug("They are: {}".format(my_slices_all))
 
         my_slices = my_slices_all
         # if user provided slices, deal only with these - if they are found
         if options.delegate_slices:
             my_slices = list(set(my_slices_all).intersection(
                 set(options.delegate_slices)))
-            self.logger.debug(
+            logger.debug(
                 "Restricted to user-provided slices: {}".format(my_slices))
 
         # (d) make sure we have *valid* credentials for all these
@@ -1887,16 +1888,16 @@ $ sfi m -b http://mymanifold.foo.com:7080/
                                     .format(hrn, htype, delegatee_hrn, delegatee_type))
             with open(filename, 'w') as f:
                 f.write(delegated_credential)
-            self.logger.debug("(Over)wrote {}".format(filename))
+            logger.debug("(Over)wrote {}".format(filename))
             hrn_delegated_credentials.append(
                 (hrn, htype, delegated_credential, filename, ))
 
         # (f) and finally upload them to manifold server
         # xxx todo add an option so the password can be set on the command line
         # (but *NOT* in the config file) so other apps can leverage this
-        self.logger.info("Uploading on backend at {}".format(
+        logger.info("Uploading on backend at {}".format(
             myslice_dict['backend']))
-        uploader = ManifoldUploader(logger=self.logger,
+        uploader = ManifoldUploader(logger=logger,
                                     url=myslice_dict['backend'],
                                     platform=myslice_dict['platform'],
                                     username=myslice_dict['username'],
@@ -1911,7 +1912,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             if uploader.upload(delegated_credential, message=message):
                 count_success += 1
             count_all += 1
-        self.logger.info("Successfully uploaded {}/{} credentials"
+        logger.info("Successfully uploaded {}/{} credentials"
                          .format(count_success, count_all))
 
         # at first I thought we would want to save these,
@@ -1942,7 +1943,7 @@ $ sfi m -b http://mymanifold.foo.com:7080/
             gid = GID(string=trusted_cert)
             gid.dump()
             cert = Certificate(string=trusted_cert)
-            self.logger.debug('Sfi.trusted -> {}'.format(cert.get_subject()))
+            logger.debug('Sfi.trusted -> {}'.format(cert.get_subject()))
             print("Certificate:\n{}\n\n".format(trusted_cert))
         # xxx should analyze result
         return 0

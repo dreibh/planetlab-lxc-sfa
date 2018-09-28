@@ -28,17 +28,14 @@ try:
 except:
     version_tag='cleaningup'
 
-scripts = glob("clientbin/*.py") + \
-    [
+scripts = glob("clientbin/*.py") + [
     'config/sfa-config-tty',
     'config/sfa-config',
-#    'config/gen-sfa-cm-config.py',
     'sfa/server/sfa-start.py',
-#    'sfa/server/sfa_component_setup.py',
+    'systemd/sfa-setup.sh',
     'sfatables/sfatables',
     'keyconvert/keyconvert.py',
-    'flashpolicy/sfa_flashpolicy.py',
-    ]
+]
 
 packages = [
     'sfa',
@@ -56,50 +53,56 @@ packages = [
     'sfa/rspecs/versions',
     'sfa/client',
     'sfa/planetlab',
-    'sfa/nitos',
     'sfa/dummy',
-    'sfa/openstack',
-    'sfa/federica',
     'sfa/iotlab',
     'sfatables',
     'sfatables/commands',
     'sfatables/processors',
     ]
 
-initscripts = [ 'sfa' ]
-if not os.path.isfile('/etc/redhat-release'):
-    initscripts.append('functions.sfa')
+data_files = [
+    ('/etc/sfa/',
+     [  'config/aggregates.xml',
+        'config/registries.xml',
+        'config/default_config.xml',
+        'config/api_versions.xml',
+        'config/sfi_config',
+        'config/topology',
+        'sfa/managers/pl/pl.rng',
+        'sfa/trust/credential.xsd',
+        'sfa/trust/top.xsd',
+        'sfa/trust/sig.xsd',
+        'sfa/trust/xml.xsd',
+        'sfa/trust/protogeni-rspec-common.xsd',
+    ]),
+    ('/etc/sfatables/matches/', glob('sfatables/matches/*.xml')),
+    ('/etc/sfatables/targets/', glob('sfatables/targets/*.xml')),
+    ('/usr/share/sfa/migrations', glob('sfa/storage/migrations/*.*') ),
+    ('/usr/share/sfa/migrations/versions', glob('sfa/storage/migrations/versions/*') ),
+    ('/usr/share/sfa/examples/', glob('sfa/examples/*' ) + [ 'cron.d/sfa.cron' ] ),
+]
 
-data_files = [ ('/etc/sfa/', [ 'config/aggregates.xml',
-                              'config/registries.xml',
-                              'config/default_config.xml',
-                              'config/api_versions.xml',
-                              'config/sfi_config',
-                              'config/topology',
-                              'sfa/managers/pl/pl.rng',
-                              'sfa/trust/credential.xsd',
-                              'sfa/trust/top.xsd',
-                              'sfa/trust/sig.xsd',
-                              'sfa/trust/xml.xsd',
-                              'sfa/trust/protogeni-rspec-common.xsd',
-                              'flashpolicy/sfa_flashpolicy_config.xml',
-                            ]),
-               ('/etc/sfatables/matches/', glob('sfatables/matches/*.xml')),
-               ('/etc/sfatables/targets/', glob('sfatables/targets/*.xml')),
-               ('/etc/init.d/', [ "init.d/%s"%x for x in initscripts ]),
-               ('/usr/share/sfa/migrations', glob('sfa/storage/migrations/*.*') ),
-               ('/usr/share/sfa/migrations/versions', glob('sfa/storage/migrations/versions/*') ),
-               ('/usr/share/sfa/examples/', glob('sfa/examples/*' ) + [ 'cron.d/sfa.cron' ] ),
-              ]
+# use /lib/systemd instead of /usr/lib/systemd
+# the latter would work on fedora only, the former
+# will work on both fedora and ubuntu
+services = ['sfa-db', 'sfa-aggregate', 'sfa-registry']
+data_files.append(
+    ('/lib/systemd/system',
+     ['systemd/{}.service'.format(service)
+      for service in services]))
 
-# add sfatables processors as data_files
-processor_files = [f for f in glob('sfatables/processors/*') if os.path.isfile(f)]
+
+# sfatables processors
+processor_files = [f for f in glob('sfatables/processors/*')
+                   if os.path.isfile(f)]
 data_files.append(('/etc/sfatables/processors/', processor_files))
-processor_subdirs = [d for d in glob('sfatables/processors/*') if os.path.isdir(d)]
+processor_subdirs = [d for d in glob('sfatables/processors/*')
+                     if os.path.isdir(d)]
 for d in processor_subdirs:
     etc_dir = os.path.join("/etc/sfatables/processors", os.path.basename(d))
     d_files = [f for f in glob(d + '/*') if os.path.isfile(f)]
     data_files.append((etc_dir, processor_files))
+
 
 if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     python_path = sys.path
@@ -107,7 +110,9 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
     site_packages_path += [ os.path.join(p, 'sfatables') for p in python_path if p.endswith('site-packages')]
     remove_dirs = ['/etc/sfa/', '/etc/sfatables'] + site_packages_path
     remove_bins = [ '/usr/bin/' + os.path.basename(bin) for bin in scripts ]
-    remove_files = remove_bins + [ "/etc/init.d/%s"%x for x in initscripts ]
+    remove_files = (remove_bins
+                    + ["/lib/systemd/system/{}".format(x)
+                       for x in services])
 
     # remove files
     def feedback (file, msg):
@@ -116,14 +121,14 @@ if sys.argv[1] in ['uninstall', 'remove', 'delete', 'clean']:
         try:
             os.remove(filepath)
             feedback(filepath, "success")
-        except: 
+        except:
             feedback(filepath, "failed")
     # remove directories
     for directory in remove_dirs:
         try:
             shutil.rmtree(directory)
             feedback (directory, "success")
-        except: 
+        except:
             feedback (directory, "failed")
 else:
     # avoid repeating what's in the specfile already
@@ -153,4 +158,3 @@ else:
         long_description = long_description,
         scripts          = scripts,
 )
-

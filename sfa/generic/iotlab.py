@@ -19,10 +19,6 @@ class iotlab (Generic):
         import sfa.managers.registry_manager
         return sfa.managers.registry_manager.RegistryManager
 
-    def slicemgr_manager_class(self):
-        import sfa.managers.slice_manager
-        return sfa.managers.slice_manager.SliceManager
-
     def aggregate_manager_class(self):
         import sfa.managers.aggregate_manager
         return sfa.managers.aggregate_manager.AggregateManager
@@ -30,10 +26,3 @@ class iotlab (Generic):
     def driver_class(self):
         import sfa.iotlab.iotlabdriver
         return sfa.iotlab.iotlabdriver.IotLabDriver
-
-    def component_manager_class(self):
-        return None
-    # driver_class
-
-    def component_driver_class(self):
-        return None

@@ -1,15 +1,15 @@
 #
-## (Re)builds Python metafile (__init__.py) 
-# 
+## (Re)builds Python metafile (__init__.py)
+#
 # overwritten by the specfile
 DESTDIR="/"
 PREFIX=/usr
 ##########
-all: python wsdl 
+all: python wsdl
 
 install: python-install wsdl-install tests-install
 
-clean: python-clean wsdl-clean 
+clean: python-clean wsdl-clean
 
 uninstall: python-uninstall tests-uninstall
 
@@ -25,7 +25,7 @@ SCMURL=git://git.onelab.eu/sfa.git
 
 python: version
 
-version: sfa/util/version.py 
+version: sfa/util/version.py
 sfa/util/version.py: sfa/util/version.py.in force
 	sed -e "s,@VERSIONTAG@,$(VERSIONTAG),g" -e "s,@SCMURL@,$(SCMURL),g" sfa/util/version.py.in > $@
 
@@ -44,49 +44,19 @@ python-clean: version-clean
 version-clean:
 	rm -f sfa/util/version.py
 
-.PHONY: python version python-install python-clean version-clean 
+.PHONY: python version python-install python-clean version-clean
 ##########
-wsdl: 
-	$(MAKE) -C wsdl 
+wsdl:
+	$(MAKE) -C wsdl
 
 # propagate DESTDIR from the specfile
 wsdl-install:
-	$(MAKE) -C wsdl install 
+	$(MAKE) -C wsdl install
 
 wsdl-clean:
 	$(MAKE) -C wsdl clean
 
 .PHONY: wsdl wsdl-install wsdl-clean
-
-######################################## debian packaging
-# The 'debian' target is called from the build with the following variables set 
-# (see build/Makefile and target_debian)
-# (.) RPMTARBALL
-# (.) RPMVERSION
-# (.) RPMRELEASE
-# (.) RPMNAME
-#
-PROJECT=$(RPMNAME)
-DEBVERSION=$(RPMVERSION).$(RPMRELEASE)
-DEBTARBALL=../$(PROJECT)_$(DEBVERSION).orig.tar.bz2
-
-DATE=$(shell date -u +"%a, %d %b %Y %T")
-
-debian: debian/changelog debian.source debian.package
-
-debian/changelog: debian/changelog.in
-	sed -e "s|@VERSION@|$(DEBVERSION)|" -e "s|@DATE@|$(DATE)|" debian/changelog.in > debian/changelog
-
-debian.source: force 
-	rsync -a $(RPMTARBALL) $(DEBTARBALL)
-
-debian.package:
-	debuild -uc -us -b 
-
-debian.clean:
-	$(MAKE) -f debian/rules clean
-	rm -rf build/ MANIFEST ../*.tar.gz ../*.dsc ../*.build
-	find . -name '*.pyc' -delete
 
 ##########
 tests-install:
@@ -100,7 +70,7 @@ tests-uninstall:
 
 ########## refreshing methods package metafile
 # Metafiles - manage Legacy/ and Accessors by hand
-init := sfa/methods/__init__.py 
+init := sfa/methods/__init__.py
 
 index: $(init)
 
@@ -115,7 +85,7 @@ methods_files := $(sort $(notdir $(methods_paths:.py=)))
 ifneq ($(methods_now),$(methods_files))
 sfa/methods/__init__.py: force
 endif
-sfa/methods/__init__.py: 
+sfa/methods/__init__.py:
 	(echo '## Please use make index to update this file' ; echo 'all = """' ; cd sfa/methods; ls -1 *.py | grep -v __init__ | sed -e 's,.py$$,,' ; echo '""".split()') > $@
 
 force:
@@ -123,12 +93,12 @@ force:
 ##########
 # a lot of stuff in the working dir is just noise
 files:
-	@find . -type f | egrep -v '^\./\.|/\.git/|/\.svn/|TAGS|AA-|~$$|egg-info|\.(py[co]|doc|html|pdf|png|svg|out|bak|dg|pickle)$$' 
+	@find . -type f | egrep -v '^\./\.|/\.git/|/\.svn/|TAGS|AA-|~$$|egg-info|\.(py[co]|doc|html|pdf|png|svg|out|bak|dg|pickle)$$'
 
 git-files:
 	@git ls-files | egrep -v '\.(doc|html|pdf)$$'
 
-tags:	
+tags:
 	$(MAKE) git-files | xargs etags
 
 .PHONY: files tags
@@ -149,7 +119,7 @@ PYPI_TARBALL_TOPDIR=/build/sfa
 # and I could not find out why
 # so I went for the manual method instead
 # there also was a web dialog prompting for a zip file that would
-# be used to initialize the project's home dir but this too 
+# be used to initialize the project's home dir but this too
 # did not seem to work the way I was trying to use it, so ...
 
 # this target is still helpful to produce the readme in html from README.md
@@ -161,7 +131,7 @@ index.zip index.html: README.md
 # we need to re-run make so the version is right
 git_pypi: git pypi
 
-git: 
+git:
 	git pull
 	$(MAKE) version
 
@@ -200,7 +170,7 @@ endif
 endif
 endif
 
-synccheck: 
+synccheck:
 ifeq (,$(SSHURL))
 	@echo "sync: I need more info from the command line, e.g."
 	@echo "  make sync PLC=boot.planetlab.eu"
@@ -209,7 +179,7 @@ ifeq (,$(SSHURL))
 	@exit 1
 endif
 
-LOCAL_RSYNC_EXCLUDES	+= --exclude '*.pyc' 
+LOCAL_RSYNC_EXCLUDES	+= --exclude '*.pyc'
 LOCAL_RSYNC_EXCLUDES	+= --exclude '*.png' --exclude '*.svg' --exclude '*.out'
 RSYNC_EXCLUDES		:= --exclude .svn --exclude .git --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
@@ -217,7 +187,7 @@ RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) --no-owner $(RSYNC_EXCLUDES)
 
 CLIENTS = $(shell ls clientbin/*.py)
 
-BINS =	./config/sfa-config-tty ./config/gen-sfa-cm-config.py \
+BINS =	./config/sfa-config-tty ./config/gen-sfa-cm-config.py ./systemd/sfa-setup.sh \
 	./sfa/server/sfa-start.py \
 	./clientbin/sfaadmin.py \
 	$(CLIENTS)
@@ -232,8 +202,9 @@ syncmigrations:
 	+$(RSYNC) ./sfa/storage/migrations/versions/*.py $(SSHURL)/usr/share/sfa/migrations/versions/
 syncbin: synccheck
 	+$(RSYNC)  $(BINS) $(SSHURL)/usr/bin/
-syncinit: synccheck
-	+$(RSYNC) ./init.d/sfa  $(SSHURL)/etc/init.d/
+syncservices: synccheck
+	+$(RSYNC) ./systemd/*.service  $(SSHURL)/lib/systemd/system
+	+$(RSYNC) ./systemd/sfa-setup.sh  $(SSHURL)/usr/bin
 syncconfig:
 	+$(RSYNC) ./config/default_config.xml $(SSHURL)/etc/sfa/
 synctest: synccheck
@@ -247,8 +218,8 @@ syncmig:
 
 
 # full-fledged
-sync: synclib syncbin syncinit syncconfig syncrestart
-syncdeb: synclibdeb syncbin syncinit syncconfig syncrestart
+sync: synclib syncbin syncservices syncconfig syncrestart
+syncdeb: synclibdeb syncbin syncservices syncconfig syncrestart
 # 99% of the time this is enough
 syncfast: synclib syncrestart
 
@@ -260,9 +231,9 @@ sfa/examples/miniclient.py \
 sfa/__init__.py \
 sfa/client/{sfaserverproxy,sfaclientlib,__init__}.py \
 sfa/trust/{certificate,__init__}.py \
-sfa/util/{sfalogging,faults,genicode,enumeration,__init__}.py 
+sfa/util/{sfalogging,faults,genicode,enumeration,__init__}.py
 
-clientlibsync: 
+clientlibsync:
 	@[ -d "$(CLIENTLIBTARGET)" ] || { echo "You need to set the make variable CLIENTLIBTARGET"; exit 1; }
 	rsync -av --relative $(CLIENTLIBFILES) $(CLIENTLIBTARGET)
 

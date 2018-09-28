@@ -41,10 +41,8 @@ def sfa_users_arg(records, slice_record):
         # note that reg-email is not yet available
         pl_fields = ['email', 'person_id',
                      'first_name', 'last_name', 'key_ids']
-        nitos_fields = ['email', 'user_id']
-        extra_fields = list(set(pl_fields).union(set(nitos_fields)))
         # try to fill all these in
-        for field in extra_fields:
+        for field in pl_fields:
             if field in record:
                 user[field] = record[field]
         users.append(user)

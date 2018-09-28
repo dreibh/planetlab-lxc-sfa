@@ -1,6 +1,7 @@
 from sfa.util.faults import RecordNotFound, ConnectionKeyGIDMismatch
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.trust.certificate import Certificate
 
@@ -10,11 +11,11 @@ from sfa.storage.parameter import Parameter, Mixed
 class GetSelfCredential(Method):
     """
     Retrive a credential for an object
-    @param cert certificate string 
+    @param cert certificate string
     @param type type of object (user | slice | sa | ma | node)
     @param hrn human readable name of object (hrn or urn)
 
-    @return the string representation of a credential object  
+    @return the string representation of a credential object
     """
 
     interfaces = ['registry']
@@ -51,8 +52,8 @@ class GetSelfCredential(Method):
         self.api.auth.verify_object_belongs_to_me(hrn)
 
         origin_hrn = Certificate(string=cert).get_subject()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
-                             (self.api.interface, origin_hrn, hrn, self.name))
+        logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                    (self.api.interface, origin_hrn, hrn, self.name))
 
         # authenticate the gid
         # import here so we can load this module at build-time for sfa2wsdl
@@ -78,12 +79,12 @@ class GetSelfCredential(Method):
         certificate = Certificate(string=cert)
         if not certificate.is_pubkey(gid.get_pubkey()):
             for (obj, name) in [(certificate, "CERT"), (gid, "GID"), ]:
-                self.api.logger.debug("ConnectionKeyGIDMismatch, %s pubkey: %s" % (
+                logger.debug("ConnectionKeyGIDMismatch, %s pubkey: %s" % (
                     name, obj.get_pubkey().get_pubkey_string()))
-                self.api.logger.debug(
+                logger.debug(
                     "ConnectionKeyGIDMismatch, %s dump: %s" % (name, obj.dump_string()))
                 if hasattr(obj, 'filename'):
-                    self.api.logger.debug(
+                    logger.debug(
                         "ConnectionKeyGIDMismatch, %s filename: %s" % (name, obj.filename))
             raise ConnectionKeyGIDMismatch(gid.get_subject())
 

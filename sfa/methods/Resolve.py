@@ -1,5 +1,6 @@
 from sfa.util.xrn import Xrn, urn_to_hrn
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.trust.credential import Credential
 
@@ -11,8 +12,8 @@ class Resolve(Method):
     Resolve a record.
 
     @param cred credential string authorizing the caller
-    @param hrn human readable name to resolve (hrn or urn) 
-    @return a list of record dictionaries or empty list     
+    @param hrn human readable name to resolve (hrn or urn)
+    @return a list of record dictionaries or empty list
     """
 
     interfaces = ['registry']
@@ -49,8 +50,8 @@ class Resolve(Method):
         # log the call
         origin_hrn = Credential(
             string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
-                             (self.api.interface, origin_hrn, hrns, self.name))
+        logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                    (self.api.interface, origin_hrn, hrns, self.name))
 
         # send the call to the right manager
         return self.api.manager.Resolve(self.api, xrns, type, details=details)

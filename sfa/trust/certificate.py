@@ -64,7 +64,7 @@ from sfa.util.faults import (CertExpired, CertMissingParent,
 from sfa.util.sfalogging import logger
 
 # this tends to generate quite some logs for little or no value
-debug_verify_chain = False
+debug_verify_chain = True
 
 glo_passphrase_callback = None
 
@@ -410,7 +410,7 @@ class Certificate:
         # certs)
 
         if string is None or string.strip() == "":
-            logger.warn("Empty string in load_from_string")
+            logger.warning("Empty string in load_from_string")
             return
 
         string = string.strip()
@@ -441,7 +441,7 @@ class Certificate:
             OpenSSL.crypto.FILETYPE_PEM, parts[0])
 
         if self.x509 is None:
-            logger.warn(
+            logger.warning(
                 "Loaded from string but cert is None: {}".format(string))
 
         # if there are more certs, then create a parent and let the parent load
@@ -467,7 +467,7 @@ class Certificate:
 
     def save_to_string(self, save_parents=True):
         if self.x509 is None:
-            logger.warn("None cert in certificate.save_to_string")
+            logger.warning("None cert in certificate.save_to_string")
             return ""
         string = OpenSSL.crypto.dump_certificate(
             OpenSSL.crypto.FILETYPE_PEM, self.x509)
@@ -694,7 +694,7 @@ class Certificate:
         # pyOpenSSL does not have a way to get extensions
         m2x509 = M2Crypto.X509.load_cert_string(certstr)
         if m2x509 is None:
-            logger.warn("No cert loaded in get_extension")
+            logger.warning("No cert loaded in get_extension")
             return None
         if m2x509.get_ext(name) is None:
             return None
@@ -714,7 +714,9 @@ class Certificate:
         if field in self.data:
             raise Exception("Cannot set {} more than once".format(field))
         self.data[field] = string
-        self.add_extension(field, 0, string)
+        # call str() because we've seen unicode there
+        # and the underlying C code doesn't like it
+        self.add_extension(field, 0, str(string))
 
     ##
     # Return the data string that was previously set with set_data
@@ -789,8 +791,10 @@ class Certificate:
     # @param cert certificate object
 
     def is_signed_by_cert(self, cert):
-        logger.debug("Certificate.is_signed_by_cert -> invoking verify")
         k = cert.get_pubkey()
+        logger.debug("Certificate.is_signed_by_cert -> verify on {}\n"
+                     "with pubkey {}"
+                     .format(self, k))
         result = self.verify(k)
         return result
 
@@ -867,7 +871,7 @@ class Certificate:
                                               trusted_cert.pretty_name()))
             else:
                 logger.debug("verify_chain: not a direct"
-                             " descendant of a trusted root")
+                             " descendant of trusted root #{}".format(i))
 
         # if there is no parent, then no way to verify the chain
         if not self.parent:
@@ -903,8 +907,8 @@ class Certificate:
         # extension and hope there are no other basicConstraints
         if not self.parent.isCA and not (
                 self.parent.get_extension('basicConstraints') == 'CA:TRUE'):
-            logger.warn("verify_chain: cert {}'s parent {} is not a CA"
-                        .format(self.pretty_name(), self.parent.pretty_name()))
+            logger.warning("verify_chain: cert {}'s parent {} is not a CA"
+                            .format(self.pretty_name(), self.parent.pretty_name()))
             raise CertNotSignedByParent("{}: Parent {} not a CA"
                                         .format(self.pretty_name(),
                                                 self.parent.pretty_name()))

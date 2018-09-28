@@ -28,15 +28,11 @@ usual_variables = [
     "SFA_REGISTRY_ROOT_AUTH",
     "SFA_REGISTRY_HOST",
     "SFA_AGGREGATE_HOST",
-    "SFA_SM_HOST",
     "SFA_DB_HOST",
 ]
 
 flavour_xml_section_hash = {
     'pl': 'sfa_plc',
-    'openstack': 'sfa_nova',
-    'fd': 'sfa_federica',
-    'nitos': 'sfa_nitos',
     'dummy': 'sfa_dummy',
 }
 configuration = {
@@ -223,18 +219,20 @@ def consolidate(default_config, site_config, consolidated_config):
 
 
 def reload_service():
-    global service
-    os.system("set -x ; service %s reload" % service)
+    reload = "sfa-setup.sh reload"
+    print("Running: {}".format(reload))
+    os.system(reload)
 
 ####################
 
 
 def restart_service():
-    global service
-    print("==================== Stopping %s" % service)
-    os.system("service %s stop" % service)
-    print("==================== Starting %s" % service)
-    os.system("service %s start" % service)
+    services = ('sfa-db', 'sfa-aggregate', 'sfa-registry')
+    for service in services:
+        restart = ("systemctl -q is-active {s} && "
+                   "{{ echo restarting {s} ; systemctl restart {s}; }}"
+                   .format(s=service))
+        os.system(restart)
 
 ####################
 

@@ -3,7 +3,7 @@
 <!--
 Default SFA configuration file
 
-Thierry Parmentelat 
+Thierry Parmentelat
 
 -->
 
@@ -21,7 +21,7 @@ Thierry Parmentelat
         <variable id="generic_flavour" type="string">
           <name>Generic Flavour</name>
           <value>pl</value>
-          <description>This string refers to a class located in sfa.generic that describes 
+          <description>This string refers to a class located in sfa.generic that describes
           which specific implementation needs to be used for api, manager and driver objects.
           PlanetLab users do not need to change this setting.
           </description>
@@ -44,7 +44,7 @@ Thierry Parmentelat
           <value>0</value>
           <description>Logging level; 0=minimum, 1=info, 2=debug</description>
         </variable>
-    
+
         <variable id="max_slice_renew" type="int">
           <name>Max Slice Renew</name>
           <value>60</value>
@@ -55,11 +55,11 @@ Thierry Parmentelat
             <name>User Session Keys Path </name>
             <value>/var/lib/sfa/session_keys</value>
             <description>Some services will peform operations on behalf of a user, but make
-            it look like the user is the one performing the operation. Doing this requires a 
-            valid key pair and credential for the user. This option defines the path where 
+            it look like the user is the one performing the operation. Doing this requires a
+            valid key pair and credential for the user. This option defines the path where
             key pairs and credentials are generated and stored.
-            This functionality is used by the SFA web GUI. 
-            </description> 
+            This functionality is used by the SFA web GUI.
+            </description>
         </variable>
 
          <variable id="data_dir" type="string">
@@ -107,44 +107,6 @@ Thierry Parmentelat
 	</variable>
 
     </variablelist>
-    </category>
-
-    <!-- ======================================== -->
-    <category id="sfa_sm">
-      <name>Slice Manager</name>
-      <description>The settings that affect the slice manager that will run
-      as part of this SFA instance.</description>
-
-      <variablelist>
-	<variable id="enabled" type="boolean">
-	  <name>Enable Slice Manager</name>
-	  <value>false</value>
-	  <description>Allows this local SFA instance to run as a
-	  slice manager. Warning, this feature is not really supported
-	  any longer.</description>
-	</variable>
-
-	<variable id="host" type="hostname">
-	  <name>Hostname</name>
-	  <value>localhost</value>
-	  <description>The hostname where the slice manager is expected to
-	  be found.</description>
-	</variable>
-
-	<variable id="port" type="int">
-	  <name>Port number</name>
-	  <value>12347</value>
-	  <description>The port where the slice manager is to be found.</description>
-	</variable>
-
-	<variable id="caching" type="boolean">
-	  <name>Cache advertisement rspec</name>
-	  <value>false</value>
-	  <description>Enable caching of the global advertisement, as
-	  returned by ListResources without a slice argument. </description>
-	  </variable>
-
-      </variablelist>
     </category>
 
     <!-- ======================================== -->
@@ -232,32 +194,6 @@ Thierry Parmentelat
     </category>
 
     <!-- ======================================== -->
-    <category id="sfa_flashpolicy">
-      <name>SFA Flash Policy</name>
-      <description>The settings that affect the flash policy server that will run
-      as part of this SFA instance.</description>
-
-      <variablelist>
-        <variable id="enabled" type="boolean">
-          <name>Enable Flash Policy Server</name>
-          <value>false</value>
-          <description>Allows this local SFA instance to run a
-          flash policy server.</description>
-        </variable>
-        <variable id="config_file" type="string">
-          <name>Flash policy config file</name>
-          <value>/etc/sfa/sfa_flashpolicy_config.xml</value>
-          <description>The path to where the flash policy config file can be reached.</description>
-        </variable>
-        <variable id="port" type="int">
-          <name>Flash policy port</name>
-          <value>843</value>
-          <description>The flash policy server port.</description>
-        </variable>
-      </variablelist>
-    </category>
-
-    <!-- ======================================== -->
     <category id="sfa_plc">
       <name></name>
       <description>The settings that tell this SFA instance how to interact with the underlying PLC. Refer to plc-config-tty on this installation for more information.</description>
@@ -281,64 +217,6 @@ Thierry Parmentelat
 	  <description>Full URL of PLC interface.</description>
 	</variable>
 
-      </variablelist>
-    </category>
-
-    <!-- ======================================== -->
-    <category id="sfa_federica">
-      <name></name>
-      <description>The settings that tell this SFA instance how to interact with the FEDERICA testbed.</description>
-
-      <variablelist>
-	<variable id="url" type="string">
-	  <name>XMLRPC URL</name>
-	  <value>https://root:password@federica.sfa.wrapper.com:8443/fedewrapper/xmlrpc/</value>
-	  <description>URL for the federica xmlrpc API; login and password need to be set like in http://login:password@hostname:port/the/path </description>
-	</variable>
-      </variablelist>
-    </category>
-
-    <!-- ======================================== -->
-    <category id="sfa_nova">
-      <name>SFA Flash Policy</name>
-      <description>The settings that affect how SFA connects to 
-                   the Nova/EC2 API</description>
-      <variablelist>
-        <variable id="user" type="string">
-          <name>Sfa nova user</name>
-          <value>novaadmin</value>
-          <description>Account/context to use when performing 
-                       administrative nova operations</description>
-        </variable>
-        <variable id="api_url" type="string">
-          <name>Nova API url</name>
-          <value>127.0.0.1</value>
-          <description>The Nova/EC2 API url </description>
-        </variable>
-        <variable id="api_port" type="int">
-          <name>Nova API Port</name>
-          <value>8773</value>
-          <description>The Nova/EC2 API port.</description>
-        </variable>
-        <variable id="novarc" type="string">
-          <name>novarc</name>
-          <value>/root/novarc</value>
-          <description>Path to novarc client config file</description>
-        </variable>
-      </variablelist>
-    </category>
-
-    <!-- ======================================== -->
-    <category id="sfa_nitos">
-      <name></name>
-      <description>The settings that tell this SFA instance how to interact with the NITOS testbed.</description>
-
-      <variablelist>
-        <variable id="url" type="string">
-          <name>XMLRPC URL</name>
-          <value>http://195.251.17.239:8080/RPC2</value>
-          <description>URL for the NITOS Scheduler xmlrpc API</description>
-        </variable>
       </variablelist>
     </category>
 

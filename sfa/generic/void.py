@@ -23,12 +23,6 @@ class void (Generic):
         import sfa.managers.registry_manager
         return sfa.managers.registry_manager.RegistryManager
 
-    def slicemgr_manager_class(self):
-        import sfa.managers.slice_manager
-        return sfa.managers.slice_manager.SliceManager
-    # most likely you'll want to turn OFF the aggregate in sfa-config-tty
-    # SFA_AGGREGATE_ENABLED=false
-
     def aggregate_manager_class(self):
         import sfa.managers.aggregate_manager
         return sfa.managers.aggregate_manager.AggregateManager

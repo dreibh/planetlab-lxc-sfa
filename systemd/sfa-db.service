@@ -1,0 +1,16 @@
+[Unit]
+Description=SFA Database service
+Requires=postgresql.service
+After=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "/usr/bin/sfa-setup.sh start-db"
+RemainAfterExit=true
+# systemd insists that we define this one
+# that does not seem useful in our case
+ExecStop=/bin/true
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

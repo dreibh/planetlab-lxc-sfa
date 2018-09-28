@@ -1,6 +1,7 @@
 
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.storage.parameter import Parameter, Mixed
 from sfa.trust.credential import Credential
@@ -41,7 +42,7 @@ class CreateGid(Method):
         # log the call
         origin_hrn = Credential(
             string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
-                             (self.api.interface, origin_hrn, xrn, self.name))
+        logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                    (self.api.interface, origin_hrn, xrn, self.name))
 
         return self.api.manager.CreateGid(self.api, xrn, cert)

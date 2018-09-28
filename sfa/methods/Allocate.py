@@ -11,14 +11,14 @@ from sfa.util.sfalogging import logger
 
 class Allocate(Method):
     """
-    Allocate resources as described in a request RSpec argument 
-    to a slice with the named URN. On success, one or more slivers 
-    are allocated, containing resources satisfying the request, and 
-    assigned to the given slice. This method returns a listing and 
-    description of the resources reserved for the slice by this 
-    operation, in the form of a manifest RSpec. Allocated slivers 
-    are held for an aggregate-determined period. Clients must Renew 
-    or Provision slivers before the expiration time (given in the 
+    Allocate resources as described in a request RSpec argument
+    to a slice with the named URN. On success, one or more slivers
+    are allocated, containing resources satisfying the request, and
+    assigned to the given slice. This method returns a listing and
+    description of the resources reserved for the slice by this
+    operation, in the form of a manifest RSpec. Allocated slivers
+    are held for an aggregate-determined period. Clients must Renew
+    or Provision slivers before the expiration time (given in the
     return struct), or the aggregate will automatically Delete them.
 
     @param slice_urn (string) URN of slice to allocate to
@@ -31,12 +31,12 @@ class Allocate(Method):
 
     This option can take 3 values
       (*) options['pltags'] == 'ignore' (default)
-          This is the recommended mode; in this mode all slice tags passed 
-          here are ignore, which correspond to the <planetlab:attribute> XML tags in 
+          This is the recommended mode; in this mode all slice tags passed
+          here are ignore, which correspond to the <planetlab:attribute> XML tags in
           the <sliver_type> areas of incoming rspec to Allocate.
           In other words you are guaranteed to leave slice tags alone.
       (*) options['pltags'] == 'append'
-          All incoming slice tags are added to corresponding slivers, 
+          All incoming slice tags are added to corresponding slivers,
           unless an exact match can be found in the PLC db
       (*) options['pltags'] == 'sync'
           The historical mode, that attempts to leave the PLC db in a state
@@ -45,7 +45,7 @@ class Allocate(Method):
     See also http://svn.planet-lab.org/wiki/SFASliceTags
 
     """
-    interfaces = ['aggregate', 'slicemgr']
+    interfaces = ['aggregate']
     accepts = [
         Parameter(str, "Slice URN"),
         Parameter(type([dict]), "List of credentials"),
@@ -66,7 +66,7 @@ class Allocate(Method):
         # the slivers should expire.
         expiration = datetime_to_string(the_credential.expiration)
 
-        self.api.logger.debug(
+        logger.debug(
             "Allocate, received expiration from credential: %s" % expiration)
 
 # turned off, as passing an empty rspec is indeed useful for cleaning up the slice
@@ -78,12 +78,10 @@ class Allocate(Method):
         # flter rspec through sfatables
         if self.api.interface in ['aggregate']:
             chain_name = 'INCOMING'
-        elif self.api.interface in ['slicemgr']:
-            chain_name = 'FORWARD-INCOMING'
-        self.api.logger.debug("Allocate: sfatables on chain %s" % chain_name)
+        logger.debug("Allocate: sfatables on chain %s" % chain_name)
         actual_caller_hrn = the_credential.actual_caller_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
-                             (self.api.interface, actual_caller_hrn, xrn.get_hrn(), self.name))
+        logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                    (self.api.interface, actual_caller_hrn, xrn.get_hrn(), self.name))
         rspec = run_sfatables(chain_name, xrn.get_hrn(),
                               actual_caller_hrn, rspec)
 # turned off, as passing an empty rspec is indeed useful for cleaning up the slice

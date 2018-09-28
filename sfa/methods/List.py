@@ -1,6 +1,7 @@
 
 from sfa.util.xrn import urn_to_hrn
 from sfa.util.method import Method
+from sfa.util.sfalogging import logger
 
 from sfa.trust.credential import Credential
 
@@ -9,11 +10,11 @@ from sfa.storage.parameter import Parameter, Mixed
 
 class List(Method):
     """
-    List the records in an authority. 
+    List the records in an authority.
 
     @param cred credential string specifying the rights of the caller
     @param hrn human readable name of authority to list (hrn or urn)
-    @return list of record dictionaries         
+    @return list of record dictionaries
     """
     interfaces = ['registry']
 
@@ -35,7 +36,7 @@ class List(Method):
         # log the call
         origin_hrn = Credential(
             string=valid_creds[0]).get_gid_caller().get_hrn()
-        self.api.logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
-                             (self.api.interface, origin_hrn, hrn, self.name))
+        logger.info("interface: %s\tcaller-hrn: %s\ttarget-hrn: %s\tmethod-name: %s" %
+                    (self.api.interface, origin_hrn, hrn, self.name))
 
         return self.api.manager.List(self.api, xrn, options=options)

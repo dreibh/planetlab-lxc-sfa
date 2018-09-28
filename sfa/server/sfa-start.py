@@ -25,25 +25,26 @@
 # TODO: Can all three servers use the same "registry" certificate?
 ##
 
-# xxx todo not in the config yet
-component_port = 12346
 import os
 import os.path
 import traceback
 import sys
 from optparse import OptionParser
 
-from sfa.util.sfalogging import logger
+from sfa.util.sfalogging import init_logger, logger
 from sfa.util.xrn import get_authority, hrn_to_urn
 from sfa.util.config import Config
+
 from sfa.trust.gid import GID
 from sfa.trust.trustedroots import TrustedRoots
 from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.hierarchy import Hierarchy
 from sfa.trust.gid import GID
+
 from sfa.server.sfaapi import SfaApi
 from sfa.server.registry import Registries
 from sfa.server.aggregate import Aggregates
+
 from sfa.client.return_value import ReturnValue
 
 
@@ -66,14 +67,15 @@ def daemon():
     # when installed in standalone we might not have httpd installed
     if not os.path.isdir(logdir):
         os.mkdir('/var/log/httpd')
-    crashlog = os.open('%s/sfa_access_log' % logdir, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
+    crashlog = os.open('%s/sfa_access_log' % logdir,
+                       os.O_RDWR | os.O_APPEND | os.O_CREAT, 0644)
     os.dup2(crashlog, 1)
     os.dup2(crashlog, 2)
 
 
 def install_peer_certs(server_key_file, server_cert_file):
     """
-    Attempt to install missing trusted gids and db records for 
+    Attempt to install missing trusted gids and db records for
     our federated interfaces
     """
     # Attempt to get any missing peer gids
@@ -129,18 +131,18 @@ def install_peer_certs(server_key_file, server_cert_file):
                         gid.save_to_file(gid_filename, save_parents=True)
                         message = "installed trusted cert for %s" % new_hrn
                     # log the message
-                    api.logger.info(message)
-        except:
+                    logger.info(message)
+        except Exception:
             message = "interface: %s\tunable to install trusted gid for %s" % \
                 (api.interface, new_hrn)
-            api.logger.log_exc(message)
+            logger.log_exc(message)
     # doesnt matter witch one
     update_cert_records(peer_gids)
 
 
 def update_cert_records(gids):
     """
-    Make sure there is a record in the registry for the specified gids. 
+    Make sure there is a record in the registry for the specified gids.
     Removes old records from the db.
     """
     # import db stuff here here so this module can be loaded by PlcComponentApi
@@ -167,11 +169,12 @@ def update_cert_records(gids):
         record = dbsession.query(RegRecord).filter_by(
             hrn=hrn, type=type, pointer=-1).first()
         if not record:
-            record = RegRecord(dict={'type': type,
-                                     'hrn': hrn,
-                                     'authority': get_authority(hrn),
-                                     'gid': gid.save_to_string(save_parents=True),
-                                     })
+            record = RegRecord(
+                dict={'type': type,
+                      'hrn': hrn,
+                      'authority': get_authority(hrn),
+                      'gid': gid.save_to_string(save_parents=True),
+                      })
             dbsession.add(record)
     dbsession.commit()
 
@@ -181,19 +184,17 @@ def main():
     parser = OptionParser(usage="sfa-start.py [options]")
     parser.add_option("-r", "--registry", dest="registry", action="store_true",
                       help="run registry server", default=False)
-    parser.add_option("-s", "--slicemgr", dest="sm", action="store_true",
-                      help="run slice manager", default=False)
     parser.add_option("-a", "--aggregate", dest="am", action="store_true",
                       help="run aggregate manager", default=False)
-    parser.add_option("-c", "--component", dest="cm", action="store_true",
-                      help="run component server", default=False)
-    parser.add_option("-t", "--trusted-certs", dest="trusted_certs", action="store_true",
+    parser.add_option("-t", "--trusted-certs",
+                      dest="trusted_certs", action="store_true",
                       help="refresh trusted certs", default=False)
     parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
                       help="Run as daemon.", default=False)
     (options, args) = parser.parse_args()
 
     config = Config()
+    init_logger('server')
     logger.setLevelFromOptVerbose(config.SFA_API_LOGLEVEL)
 
     # ge the server's key and cert
@@ -224,21 +225,9 @@ def main():
                       server_key_file, server_cert_file)
         a.start()
 
-    # start slice manager
-    if (options.sm):
-        from sfa.server.slicemgr import SliceMgr
-        s = SliceMgr("", config.SFA_SM_PORT, server_key_file, server_cert_file)
-        s.start()
-
-    if (options.cm):
-        from sfa.server.component import Component
-        c = Component("", config.component_port,
-                      server_key_file, server_cert_file)
-#        c = Component("", config.SFA_COMPONENT_PORT, server_key_file, server_cert_file)
-        c.start()
-
 if __name__ == "__main__":
     try:
         main()
-    except:
-        logger.log_exc_critical("SFA server is exiting")
+    except Exception:
+        logger.log_exc("SFA server is exiting")
+        exit(1)

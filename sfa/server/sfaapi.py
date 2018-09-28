@@ -1,8 +1,10 @@
+# pylint: disable=c0111
+
 import os
 import os.path
 import datetime
 
-from sfa.util.faults import SfaFault, SfaAPIError, RecordNotFound
+from sfa.util.faults import SfaFault, RecordNotFound
 from sfa.util.genicode import GENICODE
 from sfa.util.config import Config
 from sfa.util.cache import Cache
@@ -20,19 +22,19 @@ from sfa.storage.alchemy import alchemy
 ####################
 
 
-class SfaApi (XmlrpcApi):
+class SfaApi(XmlrpcApi):
     """
     An SfaApi instance is a basic xmlrpc service
     augmented with the local cryptographic material and hrn
 
     It also has the notion of its own interface (a string describing
-    whether we run a registry, aggregate or slicemgr) and has 
-    the notion of neighbour sfa services as defined 
+    whether we run a registry, or aggregate) and has
+    the notion of neighbour sfa services as defined
     in /etc/sfa/{aggregates,registries}.xml
 
     Finally it contains a cache instance
 
-    It gets augmented by the generic layer with 
+    It gets augmented by the generic layer with
     (*) an instance of manager (actually a manager module for now)
         beware that this is shared among all instances of api
     (*) an instance of a testbed driver
@@ -77,8 +79,8 @@ class SfaApi (XmlrpcApi):
     def server_proxy(self, interface, cred, timeout=30):
         """
         Returns a connection to the specified interface. Use the specified
-        credential to determine the caller and look for the caller's key/cert 
-        in the registry hierarchy cache. 
+        credential to determine the caller and look for the caller's key/cert
+        in the registry hierarchy cache.
         """
         from sfa.trust.hierarchy import Hierarchy
         if not isinstance(cred, Credential):
@@ -147,8 +149,8 @@ class SfaApi (XmlrpcApi):
         return delegated_cred
 
     def _getCredential(self):
-        """ 
-        Get our credential from a remote registry 
+        """
+        Get our credential from a remote registry
         """
         from sfa.server.registry import Registries
         registries = Registries()
@@ -260,10 +262,10 @@ class SfaApi (XmlrpcApi):
 
     def prepare_response(self, result, method=""):
         """
-        Converts the specified result into a standard GENI compliant 
-        response  
+        Converts the specified result into a standard GENI compliant
+        response
         """
         # as of dec 13 2011 we only support API v2
-        if self.interface.lower() in ['aggregate', 'slicemgr']:
+        if self.interface.lower() in ['aggregate']:
             result = self.prepare_response_am(result)
         return XmlrpcApi.prepare_response(self, result, method)

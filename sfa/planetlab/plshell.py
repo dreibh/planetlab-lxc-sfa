@@ -13,32 +13,34 @@ class PlShell:
     For safety this is limited to a set of hard-coded calls
     """
 
-    direct_calls = ['AddNode', 'AddPerson', 'AddPersonKey', 'AddPersonToSite',
-                    'AddPersonToSlice', 'AddRoleToPerson', 'AddSite', 'AddSiteTag', 'AddSlice',
-                    'AddSliceTag', 'AddSliceToNodes', 'BindObjectToPeer', 'DeleteKey',
-                    'DeleteNode', 'DeletePerson', 'DeletePersonFromSlice', 'DeleteSite',
-                    'DeleteSlice', 'DeleteSliceFromNodes', 'DeleteSliceTag', 'GetInitScripts',
-                    'GetInterfaces', 'GetKeys', 'GetNodeTags', 'GetPeers',
-                    'GetPersons', 'GetSlices', 'GetSliceTags', 'GetTagTypes',
-                    'UnBindObjectFromPeer', 'UpdateNode', 'UpdatePerson', 'UpdateSite',
-                    'UpdateSlice', 'UpdateSliceTag',
-                    # also used as-is in importer
-                    'GetSites', 'GetNodes', 'GetSiteTags',
-                    # Lease management methods
-                    'GetLeases', 'GetLeaseGranularity', 'DeleteLeases', 'UpdateLeases',
-                    'AddLeases',
-                    # HRN management methods
-                    'SetPersonHrn', 'GetPersonHrn', 'SetSliceHrn', 'GetSliceHrn',
-                    'SetNodeHrn', 'GetNodeHrn', 'GetSiteHrn', 'SetSiteHrn',
-                    # Tag slice/person/site created by SFA
-                    'SetPersonSfaCreated', 'GetPersonSfaCreated', 'SetSliceSfaCreated',
-                    'GetSliceSfaCreated', 'SetNodeSfaCreated', 'GetNodeSfaCreated',
-                    'GetSiteSfaCreated', 'SetSiteSfaCreated',
-                    ]
+    direct_calls = [
+        'AddNode', 'AddPerson', 'AddPersonKey', 'AddPersonToSite',
+        'AddPersonToSlice', 'AddRoleToPerson', 'AddSite', 'AddSiteTag', 'AddSlice',
+        'AddSliceTag', 'AddSliceToNodes', 'BindObjectToPeer', 'DeleteKey',
+        'DeleteNode', 'DeletePerson', 'DeletePersonFromSlice', 'DeleteSite',
+        'DeleteSlice', 'DeleteSliceFromNodes', 'DeleteSliceTag', 'GetInitScripts',
+        'GetInterfaces', 'GetKeys', 'GetNodeTags', 'GetPeers',
+        'GetPersons', 'GetSlices', 'GetSliceTags', 'GetTagTypes',
+        'UnBindObjectFromPeer', 'UpdateNode', 'UpdatePerson', 'UpdateSite',
+        'UpdateSlice', 'UpdateSliceTag',
+        # also used as-is in importer
+        'GetSites', 'GetNodes', 'GetSiteTags',
+        # Lease management methods
+        'GetLeases', 'GetLeaseGranularity', 'DeleteLeases', 'UpdateLeases',
+        'AddLeases',
+        # HRN management methods
+        'SetPersonHrn', 'GetPersonHrn', 'SetSliceHrn', 'GetSliceHrn',
+        'SetNodeHrn', 'GetNodeHrn', 'GetSiteHrn', 'SetSiteHrn',
+        # Tag slice/person/site created by SFA
+        'SetPersonSfaCreated', 'GetPersonSfaCreated', 'SetSliceSfaCreated',
+        'GetSliceSfaCreated', 'SetNodeSfaCreated', 'GetNodeSfaCreated',
+        'GetSiteSfaCreated', 'SetSiteSfaCreated',
+    ]
     # support for other names - this is experimental
-    alias_calls = {'get_authorities': 'GetSites',
-                   'get_nodes': 'GetNodes',
-                   }
+    alias_calls = {
+        'get_authorities': 'GetSites',
+        'get_nodes': 'GetNodes',
+    }
 
     # use the 'capability' auth mechanism for higher performance when the PLC
     # db is local
@@ -72,19 +74,21 @@ class PlShell:
             except:
                 plc_direct_access = False
         if is_local and plc_direct_access:
-            logger.info('plshell access - capability')
-            self.plauth = {'AuthMethod': 'capability',
-                           'Username':   str(config.SFA_PLC_USER),
-                           'AuthString': str(config.SFA_PLC_PASSWORD),
-                           }
+            logger.debug('plshell access - capability')
+            self.plauth = {
+                'AuthMethod': 'capability',
+                'Username': str(config.SFA_PLC_USER),
+                'AuthString': str(config.SFA_PLC_PASSWORD),
+            }
             self.proxy = PLC.Shell.Shell()
 
         else:
-            logger.info('plshell access - xmlrpc')
-            self.plauth = {'AuthMethod': 'password',
-                           'Username':   str(config.SFA_PLC_USER),
-                           'AuthString': str(config.SFA_PLC_PASSWORD),
-                           }
+            logger.debug('plshell access - xmlrpc')
+            self.plauth = {
+                'AuthMethod': 'password',
+                'Username':   str(config.SFA_PLC_USER),
+                'AuthString': str(config.SFA_PLC_PASSWORD),
+            }
             self.proxy = xmlrpclib.Server(url, verbose=False, allow_none=True)
 
     def __getattr__(self, name):
