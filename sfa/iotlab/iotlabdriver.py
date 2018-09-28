@@ -194,6 +194,7 @@ class IotLabDriver(Driver):
         # parse rspec
         rspec = RSpec(rspec_string)
 
+        logger.warning(options)
         caller_hrn = options.get('actual_caller_hrn', [])
         geni_users = options.get('geni_users', [])
         caller_user = [user for user in geni_users if
@@ -206,11 +207,12 @@ class IotLabDriver(Driver):
         if login:
             nodes_list, start_time, duration = \
                 self._get_experiment(rspec)
+            # [0-9A-Za-z_] with onelab.inria.test_iotlab
+            exp_name = '_'.join((xrn.hrn.replace('\\.','')).split('.'))
             logger.warning("iotlabdriver allocate submit OAR job :"
                            " %s %s %s %s" %
-                           (xrn.hrn, start_time, duration, nodes_list))
-            # [0-9A-Za-z_] with onelab.inria.test_iotlab
-            exp_name = '_'.join((xrn.hrn).split('.'))
+                           (exp_name, start_time, duration, nodes_list))
+
             # submit OAR job
             ret = self.shell.reserve_nodes(login,
                                            exp_name,
