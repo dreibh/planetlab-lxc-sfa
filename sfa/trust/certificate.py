@@ -182,7 +182,8 @@ class Keypair:
     # @param filename name of file to store the keypair in
 
     def save_to_file(self, filename):
-        open(filename, 'w').write(self.as_pem())
+        with open(filename, 'w') as output:
+            output.write(self.as_pem())
         self.filename = filename
 
     ##
@@ -583,7 +584,6 @@ class Certificate:
         data = self.get_data(field='subjectAltName')
         if data:
             message += " SubjectAltName:"
-            counter = 0
             filtered = [self.filter_chunk(chunk) for chunk in data.split()]
             message += " ".join([f for f in filtered if f])
             omitted = len([f for f in filtered if not f])
@@ -791,11 +791,11 @@ class Certificate:
     # @param cert certificate object
 
     def is_signed_by_cert(self, cert):
-        k = cert.get_pubkey()
+        key = cert.get_pubkey()
         logger.debug("Certificate.is_signed_by_cert -> verify on {}\n"
                      "with pubkey {}"
-                     .format(self, k))
-        result = self.verify(k)
+                     .format(self, key))
+        result = self.verify(key)
         return result
 
     ##
