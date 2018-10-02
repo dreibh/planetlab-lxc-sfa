@@ -68,6 +68,8 @@ class Auth:
         error = (None, None)
 
         def log_invalid_cred(cred, exception):
+            if isinstance(cred, dict) and 'geni_value' in cred:
+                cred = cred['geni_value']
             if not isinstance(cred, StringType):
                 logger.info(
                     "{}: cannot validate credential {}"
