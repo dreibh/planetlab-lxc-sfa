@@ -838,7 +838,6 @@ class Certificate:
         # the public key contained in it's parent. The chain is recursed
         # until a certificate is found that is signed by a trusted root.
 
-        logger.debug("Certificate.verify_chain {}".format(self.pretty_name()))
         # verify expiration time
         if self.x509.has_expired():
             if debug_verify_chain:
@@ -848,7 +847,8 @@ class Certificate:
 
         # if this cert is signed by a trusted_cert, then we are set
         for i, trusted_cert in enumerate(trusted_certs, 1):
-            logger.debug("Certificate.verify_chain - trying trusted #{} : {}"
+            logger.debug(5*'-' +
+                         " Certificate.verify_chain - trying trusted #{} : {}"
                          .format(i, trusted_cert.pretty_name()))
             if self.is_signed_by_cert(trusted_cert):
                 # verify expiration of trusted_cert ?

@@ -232,7 +232,9 @@ class GID(Certificate):
     # planetlab.us.arizona cannot sign a GID for planetlab.us.princeton.foo.
 
     def verify_chain(self, trusted_certs=None):
-        logger.debug("GID.verify_chain with {} trusted certs".format(len(trusted_certs)))
+        logger.debug(10*'=' + " GID.verify_chain with {} trusted certs"
+                     .format(len(trusted_certs)))
+        logger.debug("on {}".format(self.pretty_name()))
         # do the normal certificate verification stuff
         trusted_root = Certificate.verify_chain(self, trusted_certs)
 

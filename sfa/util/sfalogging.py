@@ -123,7 +123,7 @@ def logging_config(context):
     if context == 'server':
         handlername = 'file'
         filename = '/var/log/sfa.log'
-        level = 'INFO'
+        level = 'DEBUG'
     elif context == 'import':
         handlername = 'file'
         filename = '/var/log/sfa-import.log'
@@ -168,7 +168,7 @@ def logging_config(context):
             'level': level,
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
-            }
+        }
     else:
         config['handlers']['file'] = {
             'filename': filename,
@@ -179,7 +179,7 @@ def logging_config(context):
             'when': 'w0',
             'interval': 1,
             'backupCount': 12,
-            }
+        }
     return config
 
 
