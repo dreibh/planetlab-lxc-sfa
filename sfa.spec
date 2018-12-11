@@ -39,13 +39,17 @@ Requires: sfa-common
 %package common
 Summary: Python libraries for SFA, generic implementation derived from PlanetLab
 Group: Applications/System
-Requires: python >= 2.7
-Requires: pyOpenSSL >= 0.7
+Requires: python
+Requires: pyOpenSSL
 Requires: m2crypto
-Requires: python-dateutil
-Requires: python-lxml
-Requires: libxslt-python
+Requires: python2-dateutil
+Requires: python2-lxml
+%if "%{distro}" == "Fedora" && "%{distrorelease}" <= "27"
 Requires: python-ZSI
+%else
+Requires: python2-zsi
+%endif
+Requires: libxslt-python
 Requires: xmlsec1-openssl-devel
 
 %package client
