@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 from testXrn import *
 #from testNamespace import *
 # xxx broken-test

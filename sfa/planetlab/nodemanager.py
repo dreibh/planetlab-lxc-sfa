@@ -18,7 +18,7 @@ class NodeManager:
         method = self.method
         sfa_slice_prefix = self.config.SFA_CM_SLICE_PREFIX
         sfa_slice = sfa_slice_prefix + "_sfacm"
-        python = "/usr/bin/python"
+        python = "/usr/bin/python2"
         vserver_path = "/vservers/%s" % (sfa_slice)
         script_path = "/tmp/"
         path = "%(vserver_path)s/%(script_path)s" % locals()

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 # Copyright 2004,2009 Toby Dickenson
 #
 # Permission is hereby granted, free of charge, to any person obtaining

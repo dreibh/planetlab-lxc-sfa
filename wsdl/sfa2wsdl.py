@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 #
 # Sapan Bhatia <sapanb@cs.princeton.edu>
 #

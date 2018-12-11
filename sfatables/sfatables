@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/env python2 
 
 # This file parses an sfatables command and generates XML files that parameterize
 # matches and targets. Each such XML file defines a rule. Rules are dropped in directories

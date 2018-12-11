@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 from lxml import etree
 from sfa.util.faults import InvalidXML
 from sfa.rspecs.elements.element import Element
