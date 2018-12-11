@@ -24,19 +24,16 @@ URL: %{SCMURL}
 Summary: Server-side for SFA, generic implementation derived from PlanetLab
 Group: Applications/System
 BuildRequires: make
-BuildRequires: python-setuptools
 
+# for uuidgen - used in db password generation
+Requires: util-linux-ng
 # for the registry
 Requires: postgresql >= 8.2, postgresql-server >= 8.2
 Requires: postgresql-python
-Requires: python-psycopg2
-# f8=0.4 - f12=0.5 f14=0.6 f16=0.7
-Requires: python-sqlalchemy
-Requires: python-migrate
-# for uuidgen - used in db password generation
-# on f8 this actually comes with e2fsprogs, go figure
-Requires: util-linux-ng
-# and the SFA libraries of course
+Requires: python2-psycopg2
+Requires: python2-sqlalchemy
+Requires: python2-migrate
+# and of course the bulk of it
 Requires: sfa-common
 
 %package common
