@@ -1,6 +1,6 @@
 %define name sfa
 %define version 4.0
-%define taglevel 1
+%define taglevel 2
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -215,6 +215,15 @@ if [ "$1" -ge "1" ] ; then
 fi
 
 %changelog
+* Mon Jan 07 2019 Thierry <Parmentelat> - sfa-4.0-2
+- have shebangs mention python2 since it is what this version runs on
+- use rpm names in python2-something for expressing dependencies
+- remove build dependency to python-setuptools
+- Handle C-BAS hrn format with "\" (Loic)
+- sfa-start does not daemonize anymore (this is handled by systemd)
+- a little nicer logs when troubleshooting auth issues
+- use systemctl in Makefile when syncing
+
 * Wed May 30 2018 Thierry <Parmentelat> - sfa-4.0-1
 - systemd service files install in /lib instead of /usr/lib for ubuntus
 - removed all features relating to slice manager
