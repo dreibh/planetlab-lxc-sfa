@@ -16,7 +16,7 @@ command.add_nodefile_option()
 command.prep()
 
 if not command.opts.nodefile:
-    print "Missing node list -- exiting"
+    print("Missing node list -- exiting")
     command.parser.print_help()
     sys.exit(1)
 
@@ -42,5 +42,5 @@ try:
 except:
     logger.log_exc("sfiAddSliver failed with nodes %s" % nodes)
     sys.exit(1)
-print >>outfile, request_rspec.toxml()
+print(request_rspec.toxml(), file=outfile)
 sys.exit(0)

@@ -19,4 +19,4 @@ if command.opts.infile:
     for link in links:
         ifname1 = Xrn(link['interface1']['component_id']).get_leaf()
         ifname2 = Xrn(link['interface2']['component_id']).get_leaf()
-        print "%s %s" % (ifname1, ifname2)
+        print("%s %s" % (ifname1, ifname2))

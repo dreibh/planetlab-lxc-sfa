@@ -136,7 +136,7 @@ class PlDriver (Driver):
 
         elif type == 'slice':
             acceptable_fields = ['url', 'instantiation', 'name', 'description']
-            for key in pl_record.keys():
+            for key in list(pl_record.keys()):
                 if key not in acceptable_fields:
                     pl_record.pop(key)
             slices = self.shell.GetSlices(
@@ -234,7 +234,7 @@ class PlDriver (Driver):
             #    this. I copied the field names from UpdatePerson.py...
             update_fields = {}
             all_fields = new_sfa_record
-            for key in all_fields.keys():
+            for key in list(all_fields.keys()):
                 if key in ['first_name', 'last_name', 'title', 'email',
                            'password', 'phone', 'url', 'bio', 'accepted_aup',
                            'enabled']:

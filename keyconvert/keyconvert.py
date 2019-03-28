@@ -108,7 +108,7 @@ def convert(fin, fout):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print "Usage: %s <input-file> <output-file>"
+        print("Usage: %s <input-file> <output-file>")
         sys.exit(1)
 
     fin = sys.argv[1]

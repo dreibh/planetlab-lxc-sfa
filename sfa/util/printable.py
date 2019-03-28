@@ -11,7 +11,7 @@ def printable(record_s):
     if isinstance(record_s, list):
         return "[" + "\n".join([printable(r) for r in record_s]) + "]"
     if isinstance(record_s, dict):
-        return "{" + " , ".join(["%s:%s" % (k, beginning(v)) for k, v in record_s.iteritems()]) + "}"
+        return "{" + " , ".join(["%s:%s" % (k, beginning(v)) for k, v in record_s.items()]) + "}"
     if isinstance(record_s, str):
         return record_s
     return "unprintable [[%s]]" % record_s

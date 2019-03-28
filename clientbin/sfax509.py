@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 
 # something like openssl x509
 # but when used on a gid file we show all the parts

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import threading
 import time
@@ -63,7 +63,7 @@ class _call_ids_impl (dict):
     def _purge(self):
         now = time.time()
         o_keys = []
-        for (k, v) in self.iteritems():
+        for (k, v) in self.items():
             if (now - v) >= _call_ids_impl.purge_timeout:
                 o_keys.append(k)
         for k in o_keys:
@@ -73,7 +73,7 @@ class _call_ids_impl (dict):
             del self[k]
         if debug:
             logger.debug("AFTER PURGE")
-            for (k, v) in self.iteritems():
+            for (k, v) in self.items():
                 logger.debug("%s -> %s" %
                              (k, time.strftime("%H:%M:%S", time.localtime(v))))
 

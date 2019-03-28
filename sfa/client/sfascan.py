@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 import sys
 import os.path
@@ -6,7 +6,7 @@ import pickle
 import time
 import socket
 import traceback
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 try:
     import pygraphviz
@@ -65,7 +65,7 @@ class VersionCache:
             logger.debug("Cannot load version cache, restarting from scratch")
             self.url2version = {}
         logger.debug("loaded version cache with %d entries %s" % (len(self.url2version),
-                                                                  self.url2version.keys()))
+                                                                  list(self.url2version.keys())))
 
     def save(self):
         try:
@@ -87,7 +87,7 @@ class VersionCache:
         entries = len(self.url2version)
         print("version cache from file %s has %d entries" %
               (self.filename, entries))
-        key_values = self.url2version.items()
+        key_values = list(self.url2version.items())
 
         def old_first(kv1, kv2): return int(kv1[1][0] - kv2[1][0])
         key_values.sort(old_first)
@@ -312,16 +312,16 @@ class Scanner:
                     logger.info(
                         "<EMPTY GetVersion(); offline or cannot authenticate>")
                 else:
-                    for (k, v) in version.iteritems():
+                    for (k, v) in version.items():
                         if not isinstance(v, dict):
                             logger.debug("\r\t%s:%s" % (k, v))
                         else:
                             logger.debug(k)
-                            for (k1, v1) in v.iteritems():
+                            for (k1, v1) in v.items():
                                 logger.debug("\r\t\t%s:%s" % (k1, v1))
                 # proceed with neighbours
                 if 'peers' in version:
-                    for (next_name, next_url) in version['peers'].iteritems():
+                    for (next_name, next_url) in version['peers'].items():
                         next_interface = Interface(
                             next_url, mentioned_in=interface.url())
                         # locate or create node in graph
@@ -342,7 +342,7 @@ class Scanner:
             for node in graph.nodes():
                 interface = node2interface.get(node, None)
                 if interface:
-                    for (k, v) in interface.get_layout().iteritems():
+                    for (k, v) in interface.get_layout().items():
                         node.attr[k] = v
                 else:
                     logger.error("MISSED interface with node %s" % node)

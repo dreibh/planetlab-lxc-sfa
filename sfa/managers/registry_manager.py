@@ -1,11 +1,11 @@
 # pylint: disable=c0111, w1202
 
-from __future__ import print_function
+
 
 # for get_key_from_incoming_ip
 import tempfile
 import os
-import commands
+import subprocess
 
 from sfa.util.faults import (
     RecordNotFound, AccountNotEnabled, PermissionError, MissingAuthority,
@@ -86,7 +86,7 @@ class RegistryManager:
     # The GENI GetVersion call
     def GetVersion(self, api, options):
         peers = {hrn: interface.get_url()
-                 for (hrn, interface) in api.registries.iteritems()
+                 for (hrn, interface) in api.registries.items()
                  if hrn != api.hrn}
         xrn = Xrn(api.hrn, type='authority')
         return version_core({'interface': 'registry',
@@ -191,7 +191,7 @@ class RegistryManager:
         xrn_dict = {}
         registries = api.registries
         tree = prefixTree()
-        registry_hrns = registries.keys()
+        registry_hrns = list(registries.keys())
         tree.load(registry_hrns)
         for xrn in xrns:
             registry_hrn = tree.best_match(urn_to_hrn(xrn)[0])
@@ -279,7 +279,7 @@ class RegistryManager:
         # the longest matching prefix
         hrn, type = urn_to_hrn(xrn)
         registries = api.registries
-        registry_hrns = registries.keys()
+        registry_hrns = list(registries.keys())
         tree = prefixTree()
         tree.load(registry_hrns)
         registry_hrn = tree.best_match(hrn)
@@ -682,7 +682,7 @@ class RegistryManager:
         all_commands = [scp_key_command, scp_gid_command]
 
         for command in all_commands:
-            (status, output) = commands.getstatusoutput(command)
+            (status, output) = subprocess.getstatusoutput(command)
             if status:
                 raise Exception(output)
 

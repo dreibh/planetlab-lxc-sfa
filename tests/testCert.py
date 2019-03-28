@@ -112,7 +112,7 @@ class TestCert(unittest.TestCase):
       cert.sign()
 
       result = cert.verify(issuerKey)
-      self.assert_(result)
+      self.assertTrue(result)
 
       # create another key
       issuerKey2 = Keypair(create=True)
@@ -120,14 +120,14 @@ class TestCert(unittest.TestCase):
 
       # and make sure it doesn't verify
       result = cert.verify(issuerKey2)
-      self.assert_(not result)
+      self.assertTrue(not result)
 
       # load the cert from a string, and verify again
       cert2 = Certificate(string = cert.save_to_string())
       result = cert2.verify(issuerKey)
-      self.assert_(result)
+      self.assertTrue(result)
       result = cert2.verify(issuerKey2)
-      self.assert_(not result)
+      self.assertTrue(not result)
 
    def test_is_signed_by(self):
       cert1 = Certificate(subject="one")
@@ -150,9 +150,9 @@ class TestCert(unittest.TestCase):
       cert2.set_issuer(key1, cert=cert1)
 
       # cert2 is signed by cert1
-      self.assert_(cert2.is_signed_by_cert(cert1))
+      self.assertTrue(cert2.is_signed_by_cert(cert1))
       # cert1 is not signed by cert2
-      self.assert_(not cert1.is_signed_by_cert(cert2))
+      self.assertTrue(not cert1.is_signed_by_cert(cert2))
 
    def test_parents(self):
       cert_root = Certificate(subject="root")
@@ -181,9 +181,9 @@ class TestCert(unittest.TestCase):
       cert3.set_parent(cert2)
       cert3.sign()
 
-      self.assert_(cert1.verify(key_root))
-      self.assert_(cert2.is_signed_by_cert(cert1))
-      self.assert_(cert3.is_signed_by_cert(cert2))
+      self.assertTrue(cert1.verify(key_root))
+      self.assertTrue(cert2.is_signed_by_cert(cert1))
+      self.assertTrue(cert3.is_signed_by_cert(cert2))
 
       cert3.verify_chain([cert_root])
 

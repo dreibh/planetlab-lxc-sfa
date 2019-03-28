@@ -143,7 +143,7 @@ class Method:
 
             # Indent struct fields and mixed types
             if isinstance(param, dict):
-                for name, subparam in param.iteritems():
+                for name, subparam in param.items():
                     text += param_text(name, subparam, indent + step, step)
             elif isinstance(param, Mixed):
                 for subparam in param:
@@ -176,9 +176,9 @@ class Method:
         """
 
         # Inspect call. Remove self from the argument list.
-        max_args = self.call.func_code.co_varnames[
-            1:self.call.func_code.co_argcount]
-        defaults = self.call.func_defaults
+        max_args = self.call.__code__.co_varnames[
+            1:self.call.__code__.co_argcount]
+        defaults = self.call.__defaults__
         if defaults is None:
             defaults = ()
 
@@ -288,14 +288,14 @@ class Method:
         # If a struct with particular (or required) types of items is
         # expected.
         elif isinstance(expected, dict):
-            for key in value.keys():
+            for key in list(value.keys()):
                 if key in expected:
                     self.type_check(name + "['%s']" %
                                     key, value[key], expected[key], args)
-            for key, subparam in expected.iteritems():
+            for key, subparam in expected.items():
                 if isinstance(subparam, Parameter) and \
                    subparam.optional is not None and \
-                   not subparam.optional and key not in value.keys():
+                   not subparam.optional and key not in list(value.keys()):
                     raise SfaInvalidArgument("'%s' not specified" % key, name)
 
         # if auth is not None:

@@ -11,7 +11,7 @@ from sfa.planetlab.plxrn import (PlXrn, hrn_to_pl_slicename, xrn_to_hostname,
                                  top_auth, hash_loginbase)
 from sfa.storage.model import SliverAllocation
 
-MAXINT = 2L**31 - 1
+MAXINT = 2**31 - 1
 
 
 class PlSlices:
@@ -51,7 +51,7 @@ class PlSlices:
 
         # Build up list of keys
         key_ids = set()
-        for person in all_persons.values():
+        for person in list(all_persons.values()):
             key_ids.update(person['key_ids'])
         key_ids = list(key_ids)
         # Get user account keys
@@ -92,17 +92,13 @@ class PlSlices:
             sliver_attributes = []
 
             if node is not None:
-                for sliver_attribute in filter(
-                        lambda a: a['node_id'] == node['node_id'],
-                        slice_tags):
+                for sliver_attribute in [a for a in slice_tags if a['node_id'] == node['node_id']]:
                     sliver_attributes.append(sliver_attribute['tagname'])
                     attributes.append({'tagname': sliver_attribute['tagname'],
                                        'value': sliver_attribute['value']})
 
             # set nodegroup slice attributes
-            for slice_tag in filter(
-                    lambda a: a['nodegroup_id'] in node['nodegroup_ids'],
-                    slice_tags):
+            for slice_tag in [a for a in slice_tags if a['nodegroup_id'] in node['nodegroup_ids']]:
                 # Do not set any nodegroup slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
@@ -110,9 +106,7 @@ class PlSlices:
                     attributes.append({'tagname': slice_tag['tagname'],
                                        'value': slice_tag['value']})
 
-            for slice_tag in filter(
-                    lambda a: a['node_id'] is None,
-                    slice_tags):
+            for slice_tag in [a for a in slice_tags if a['node_id'] is None]:
                 # Do not set any global slice attributes for
                 # which there is at least one sliver attribute
                 # already set.
@@ -237,7 +231,7 @@ class PlSlices:
         current_slivers = [node['hostname'] for node in nodes]
 
         # remove nodes not in rspec
-        deleted_nodes = list(set(current_slivers).difference(slivers.keys()))
+        deleted_nodes = list(set(current_slivers).difference(list(slivers.keys())))
 
         # add nodes from rspec
         added_nodes = list(set(slivers.keys()).difference(current_slivers))

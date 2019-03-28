@@ -55,7 +55,7 @@ class AlchemyObj(Record):
         self._i = iter(object_mapper(self).columns)
         return self
 
-    def next(self):
+    def __next__(self):
         n = self._i.next().name
         return n, getattr(self, n)
 
@@ -529,7 +529,7 @@ def make_record_dict(record_dict):
 def make_record_xml(xml_str):
     xml = XML(xml_str)
     xml_dict = xml.todict()
-    logger.info("load from xml, keys=%s" % xml_dict.keys())
+    logger.info("load from xml, keys=%s" % list(xml_dict.keys()))
     return make_record_dict(xml_dict)
 
 ####################
@@ -581,7 +581,7 @@ def augment_with_sfa_builtins(local_record):
     # search in map according to record type
     type_map = augment_map.get(local_record.type, {})
     # use type-dep. map to do the job
-    for (field_name, attribute) in type_map.items():
+    for (field_name, attribute) in list(type_map.items()):
         # get related objects
         related_records = getattr(local_record, attribute, [])
         hrns = [r.hrn for r in related_records]

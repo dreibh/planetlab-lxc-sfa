@@ -10,10 +10,10 @@ import sys
 import socket
 import traceback
 import threading
-from Queue import Queue
-import SocketServer
-import BaseHTTPServer
-import SimpleXMLRPCServer
+from queue import Queue
+import socketserver
+import http.server
+import xmlrpc.server
 from OpenSSL import SSL
 
 from sfa.util.sfalogging import logger
@@ -86,7 +86,7 @@ def verify_callback(conn, x509, err, depth, preverify):
 # handler
 
 
-class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
+class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
     """Secure XML-RPC request handler class.
 
     It it very similar to SimpleXMLRPCRequestHandler but it uses HTTPS for transporting XML data.
@@ -151,7 +151,7 @@ class SecureXMLRpcRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 # Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
 
 
-class SecureXMLRPCServer(BaseHTTPServer.HTTPServer, SimpleXMLRPCServer.SimpleXMLRPCDispatcher):
+class SecureXMLRPCServer(http.server.HTTPServer, xmlrpc.server.SimpleXMLRPCDispatcher):
 
     def __init__(self, server_address, HandlerClass, key_file, cert_file, logRequests=True):
         """
@@ -170,11 +170,11 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer, SimpleXMLRPCServer.SimpleXML
         HandlerClass.cache = Cache()
         # for compatibility with python 2.4 (centos53)
         if sys.version_info < (2, 5):
-            SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(self)
+            xmlrpc.server.SimpleXMLRPCDispatcher.__init__(self)
         else:
-            SimpleXMLRPCServer.SimpleXMLRPCDispatcher.__init__(
+            xmlrpc.server.SimpleXMLRPCDispatcher.__init__(
                 self, True, None)
-        SocketServer.BaseServer.__init__(self, server_address, HandlerClass)
+        socketserver.BaseServer.__init__(self, server_address, HandlerClass)
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         ctx.use_privatekey_file(key_file)
         ctx.use_certificate_file(cert_file)
@@ -202,7 +202,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer, SimpleXMLRPCServer.SimpleXML
     def _dispatch(self, method, params):
         logger.debug("SecureXMLRPCServer._dispatch, method=%s" % method)
         try:
-            return SimpleXMLRPCServer.SimpleXMLRPCDispatcher._dispatch(self, method, params)
+            return xmlrpc.server.SimpleXMLRPCDispatcher._dispatch(self, method, params)
         except:
             # can't use format_exc() as it is not available in jython yet
             # (even in trunk).
@@ -244,7 +244,7 @@ class SecureXMLRPCServer(BaseHTTPServer.HTTPServer, SimpleXMLRPCServer.SimpleXML
 # for each request, requests are processed by of pool of reusable threads.
 
 
-class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
+class ThreadPoolMixIn(socketserver.ThreadingMixIn):
     """
     use a thread pool instead of a new thread on every request
     """
@@ -277,7 +277,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
         obtain request from queue instead of directly from server socket
         """
         while True:
-            SocketServer.ThreadingMixIn.process_request_thread(
+            socketserver.ThreadingMixIn.process_request_thread(
                 self, *self.requests.get())
 
     def handle_request(self):

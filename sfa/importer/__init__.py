@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # pylint: disable=c0111, w1201, w0622
 

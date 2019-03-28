@@ -109,7 +109,7 @@ class VLink:
         my_ip = VLink.get_virt_ip(link['interface1'], link['interface2'])
         remote_ip = VLink.get_virt_ip(link['interface2'], link['interface1'])
         net = VLink.get_virt_net(link)
-        bw = format_tc_rate(long(link['capacity']))
+        bw = format_tc_rate(int(link['capacity']))
         return (link['interface2']['id'], ipaddr, bw, my_ip, remote_ip, net)
 
     @staticmethod

@@ -52,7 +52,7 @@ class ManifoldUploader:
 
     def username(self):
         if not self._username:
-            self._username = raw_input("Enter your manifold username: ")
+            self._username = input("Enter your manifold username: ")
         return self._username
 
     def password(self):
@@ -64,7 +64,7 @@ class ManifoldUploader:
 
     def platform(self):
         if not self._platform:
-            self._platform = raw_input(
+            self._platform = input(
                 "Enter your manifold platform [%s]: " % DEFAULT_PLATFORM)
             if self._platform.strip() == "":
                 self._platform = DEFAULT_PLATFORM
@@ -72,7 +72,7 @@ class ManifoldUploader:
 
     def url(self):
         if not self._url:
-            self._url = raw_input(
+            self._url = input(
                 "Enter the URL for your manifold API [%s]: " % DEFAULT_URL)
             if self._url.strip() == "":
                 self._url = DEFAULT_URL
@@ -146,7 +146,7 @@ class ManifoldUploader:
             self.logger.info("  V2 Update returned code %s and error >>%s<<" % (
                 retcod2['code'], retcod2['description']))
             self.logger.debug("****** full retcod2")
-            for k, v in retcod2.items():
+            for k, v in list(retcod2.items()):
                 self.logger.debug("**** %s: %s" % (k, v))
             return False
         except Exception as e:

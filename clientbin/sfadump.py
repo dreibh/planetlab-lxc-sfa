@@ -61,10 +61,10 @@ def save_gid(gid):
     filename = lastpart + ".gid"
 
     if os.path.exists(filename):
-        print filename, ": already exists... skipping"
+        print(filename, ": already exists... skipping")
         return
 
-    print filename, ": extracting gid of", hrn
+    print(filename, ": extracting gid of", hrn)
 
     gid.save_to_file(filename, save_parents=True)
 
@@ -87,18 +87,18 @@ def extract_gids(cred, extract_parents):
 
 def verify_input_object(obj, kind, options):
     if options.trusted_roots:
-        print "CHECKING...",
+        print("CHECKING...", end=' ')
         message = "against [" + (" + ".join(options.trusted_roots)) + "]"
         try:
             if kind == 'credential':
-                print "verify", message,
+                print("verify", message, end=' ')
                 obj.verify(options.trusted_roots)
             elif kind in ('certificate', 'gid'):
-                print "verify_chain", message,
+                print("verify_chain", message, end=' ')
                 obj.verify_chain(options.trusted_roots)
-            print "--> OK"
+            print("--> OK")
         except Exception as inst:
-            print "--> KO", type(inst).__name__
+            print("--> KO", type(inst).__name__)
 
 
 def handle_input(filename, options):
@@ -107,24 +107,24 @@ def handle_input(filename, options):
     # dump methods current do 'print' so let's go this road for now
     if kind == "certificate":
         cert = Certificate(filename=filename)
-        print '--------------------', filename, 'IS A', kind
+        print('--------------------', filename, 'IS A', kind)
         cert.dump(show_extensions=options.show_extensions)
         verify_input_object(cert, kind, options)
     elif kind == "credential":
         cred = Credential(filename=filename)
-        print '--------------------', filename, 'IS A', kind
+        print('--------------------', filename, 'IS A', kind)
         cred.dump(dump_parents=options.dump_parents, show_xml=options.show_xml)
         if options.extract_gids:
-            print '--------------------', filename, 'embedded GIDs'
+            print('--------------------', filename, 'embedded GIDs')
             extract_gids(cred, extract_parents=options.dump_parents)
         verify_input_object(cred, kind, options)
     elif kind == "gid":
         gid = GID(filename=filename)
-        print '--------------------', filename, 'IS A', kind
+        print('--------------------', filename, 'IS A', kind)
         gid.dump(dump_parents=options.dump_parents)
         verify_input_object(gid, kind, options)
     else:
-        print "%s: unknown filekind '%s'" % (filename, kind)
+        print("%s: unknown filekind '%s'" % (filename, kind))
 
 
 def main():

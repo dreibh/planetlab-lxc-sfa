@@ -2,7 +2,7 @@
 # SFA XML-RPC and SOAP interfaces
 #
 
-import string
+from importlib import import_module
 
 # SOAP support is optional
 try:
@@ -26,15 +26,20 @@ from sfa.util.py23 import xmlrpc_client
 # avoiding
 # [#x7F-#x84], [#x86-#x9F], [#xFDD0-#xFDDF]
 
-invalid_codepoints = range(0x0, 0x8) + [0xB, 0xC] + range(0xE, 0x1F)
-# broke with f24, somehow we get a unicode as an incoming string to be translated
-str_xml_escape_table = string.maketrans("".join((chr(x) for x in invalid_codepoints)),
-                                        "?" * len(invalid_codepoints))
+invalid_codepoints = list(range(0x0, 0x8)) + [0xB, 0xC] + list(range(0xE, 0x1F))
+# broke with f24, somehow we get a unicode
+# as an incoming string to be translated
+str_xml_escape_table = \
+    str.maketrans("".join((chr(x) for x in invalid_codepoints)),
+                  "?" * len(invalid_codepoints))
 # loosely inspired from
-# http://stackoverflow.com/questions/1324067/how-do-i-get-str-translate-to-work-with-unicode-strings
-unicode_xml_escape_table = { invalid : u"?" for invalid in invalid_codepoints}
+# http://stackoverflow.com/questions/1324067/
+# how-do-i-get-str-translate-to-work-with-unicode-strings
+unicode_xml_escape_table = \
+    {invalid: "?" for invalid in invalid_codepoints}
 
-def xmlrpclib_escape(s, replace = string.replace):
+
+def xmlrpclib_escape(s, replace=str.replace):
     """
     xmlrpclib does not handle invalid 7-bit control characters. This
     function augments xmlrpclib.escape, which by default only replaces
@@ -66,22 +71,22 @@ def xmlrpclib_dump(self, value, write):
 
     # Use our escape function
     args = [self, value, write]
-    if isinstance(value, (str, unicode)):
+    if isinstance(value, str):
         args.append(xmlrpclib_escape)
 
     try:
         # Try for an exact match first
         f = self.dispatch[type(value)]
     except KeyError:
-        raise
         # Try for an isinstance() match
-        for Type, f in self.dispatch.iteritems():
+        for Type, f in self.dispatch.items():
             if isinstance(value, Type):
                 f(*args)
                 return
         raise TypeError("cannot marshal %s objects" % type(value))
     else:
         f(*args)
+
 
 # You can't hide from me!
 # Note: not quite  sure if this will still cause
@@ -102,8 +107,7 @@ class XmlrpcApi:
         self.source = None
 
         # flat list of method names
-        self.methods_module = methods_module = __import__(
-            methods, fromlist=[methods])
+        self.methods_module = methods_module = import_module(methods)
         self.methods = methods_module.all
 
     def callable(self, method):
@@ -117,8 +121,8 @@ class XmlrpcApi:
         # Get new instance of method
         try:
             classname = method.split(".")[-1]
-            module = __import__(self.methods_module.__name__ +
-                                "." + method, globals(), locals(), [classname])
+            module = import_module(
+                self.methods_module.__name__ + "." + method)
             callablemethod = getattr(module, classname)(self)
             return getattr(module, classname)(self)
         except (ImportError, AttributeError):

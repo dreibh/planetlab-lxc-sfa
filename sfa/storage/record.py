@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 from sfa.util.sfatime import utcparse, datetime_to_string
 from datetime import datetime
@@ -49,14 +49,14 @@ class Record:
 
         def exclude(k, v):
             return k.startswith('_') or isinstance(v, exclude_types)
-        keys = [k for k, v in d.items() if not exclude(k, v)]
+        keys = [k for k, v in list(d.items()) if not exclude(k, v)]
         return {k: d[k] for k in keys}
 
     def toxml(self):
         return self.save_as_xml()
 
     def load_from_dict(self, d):
-        for (k, v) in d.iteritems():
+        for (k, v) in d.items():
             # experimental
             if isinstance(v, StringType) and v.lower() in ['true']:
                 v = True
@@ -68,7 +68,7 @@ class Record:
     # for this purpose only, we need the subclasses to define 'fields' as either
     # a list or a dictionary
     def fields(self):
-        fields = self.__dict__.keys()
+        fields = list(self.__dict__.keys())
         return fields
 
     def save_as_xml(self):

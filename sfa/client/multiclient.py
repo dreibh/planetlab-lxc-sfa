@@ -1,9 +1,9 @@
-from __future__ import print_function
+
 
 import threading
 import traceback
 import time
-from Queue import Queue
+from queue import Queue
 from sfa.util.sfalogging import logger
 
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
     def e(name, n, sleep=1):
         nums = []
-        for i in range(n, n + 3) + ['n', 'b']:
+        for i in list(range(n, n + 3)) + ['n', 'b']:
             print("%s: 1 + %s:" % (name, i))
             nums.append(i + 1)
             time.sleep(sleep)

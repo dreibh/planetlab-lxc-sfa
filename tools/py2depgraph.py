@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2004,2009 Toby Dickenson
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -49,7 +49,7 @@ class mymf(modulefinder.ModuleFinder):
             if fqname.startswith(start):
                 keep = True
         if not keep:
-            print >> sys.stderr, "Trimmed fqname", fqname
+            print("Trimmed fqname", fqname, file=sys.stderr)
             return
         r = modulefinder.ModuleFinder.import_module(
             self, partnam, fqname, parent)
@@ -58,7 +58,8 @@ class mymf(modulefinder.ModuleFinder):
                 r.__name__] = 1
         return r
 
-    def load_module(self, fqname, fp, pathname, (suffix, mode, type)):
+    def load_module(self, fqname, fp, pathname, xxx_todo_changeme):
+        (suffix, mode, type) = xxx_todo_changeme
         r = modulefinder.ModuleFinder.load_module(
             self, fqname, fp, pathname, (suffix, mode, type))
         if r is not None:

@@ -5,7 +5,7 @@ this module is also used in sfascan
 
 # pylint: disable=c0111, c0413
 
-from __future__ import print_function
+
 
 import sys
 sys.path.append('.')
@@ -310,7 +310,7 @@ def declare_command(args_string, example, aliases=None):
 
 
 def remove_none_fields(record):
-    none_fields = [k for (k, v) in record.items() if v is None]
+    none_fields = [k for (k, v) in list(record.items()) if v is None]
     for k in none_fields:
         del record[k]
 

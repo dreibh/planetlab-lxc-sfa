@@ -1,6 +1,6 @@
 import sys
 import socket
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from sfa.util.sfalogging import logger
 from sfa.util.py23 import xmlrpc_client

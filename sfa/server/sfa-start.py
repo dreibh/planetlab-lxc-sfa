@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # PlanetLab SFA implementation
 #
@@ -60,7 +60,7 @@ def install_peer_certs(server_key_file, server_cert_file):
     api = SfaApi(key_file=server_key_file, cert_file=server_cert_file)
     registries = Registries()
     aggregates = Aggregates()
-    interfaces = dict(registries.items() + aggregates.items())
+    interfaces = dict(list(registries.items()) + list(aggregates.items()))
     gids_current = api.auth.trusted_cert_list
     hrns_current = [gid.get_hrn() for gid in gids_current]
     hrns_expected = set([hrn for hrn in interfaces])

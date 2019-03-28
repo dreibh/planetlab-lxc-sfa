@@ -389,7 +389,7 @@ class DummyDriver (Driver):
         # hard-wire the code for slice/user for now, could be smarter if needed
         if subject_type == 'slice' and target_type == 'user' and relation_name == 'researcher':
             subject = self.shell.GetSlices({'slice_id': subject_id})[0]
-            if 'user_ids' not in subject.keys():
+            if 'user_ids' not in list(subject.keys()):
                 subject['user_ids'] = []
             current_target_ids = subject['user_ids']
             add_target_ids = list(

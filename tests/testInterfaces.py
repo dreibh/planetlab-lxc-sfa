@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import sys
 import os
 import random
@@ -30,7 +30,7 @@ class Client:
     def __init__(self, options):
         try: self.config = config = Config(options.config_file)
         except:
-            print "failed to read config_file %s" % options.config_file
+            print("failed to read config_file %s" % options.config_file)
             sys.exit(1)
         key_path = os.path.dirname(options.config_file)
         user_name = self.config.SFI_USER.split('.')[-1:][0]

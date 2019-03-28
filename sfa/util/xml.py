@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from lxml import etree
 from sfa.util.faults import InvalidXML
 from sfa.rspecs.elements.element import Element
@@ -29,7 +29,7 @@ class XpathFilter:
         xpath = ""
         if filter:
             filter_list = []
-            for (key, value) in filter.items():
+            for (key, value) in list(filter.items()):
                 if key == 'text':
                     key = 'text()'
                 else:
@@ -116,11 +116,11 @@ class XmlElement:
         if fields is None:
             fields = []
         if not fields and hasattr(instance, 'keys'):
-            fields = instance.keys()
+            fields = list(instance.keys())
         elem = self.add_element(name)
         for field in fields:
             if field in instance and instance[field]:
-                elem.set(field, unicode(instance[field]))
+                elem.set(field, str(instance[field]))
         return elem
 
     def remove_elements(self, name):
@@ -210,7 +210,7 @@ class XML:
 
         self.root = XmlElement(root, self.namespaces)
         # set schema
-        for key in self.root.attrib.keys():
+        for key in list(self.root.attrib.keys()):
             if key.endswith('schemaLocation'):
                 # schemaLocation should be at the end of the list.
                 # Use list comprehension to filter out empty strings
@@ -231,7 +231,7 @@ class XML:
             element.text = text
 
         # handle repeating fields
-        for (key, value) in d.items():
+        for (key, value) in list(d.items()):
             if isinstance(value, list):
                 value = d.pop(key)
                 for val in value:
@@ -243,7 +243,7 @@ class XML:
                             element, key).text = val
 
             elif isinstance(value, int):
-                d[key] = unicode(d[key])
+                d[key] = str(d[key])
             elif value is None:
                 d.pop(key)
 
@@ -251,7 +251,7 @@ class XML:
         # dcitionary.
         d = d.copy()
         # looks like iteritems won't stand side-effects
-        for k in d.keys():
+        for k in list(d.keys()):
             if not isinstance(d[k], StringType):
                 del d[k]
 

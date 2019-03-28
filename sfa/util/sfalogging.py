@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 A reroutable logger that can handle deep tracebacks
@@ -34,7 +34,7 @@ Implementation:
 
 # pylint: disable=c0111, c0103, w1201
 
-from __future__ import print_function
+
 
 import os
 import os.path

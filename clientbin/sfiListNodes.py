@@ -25,4 +25,4 @@ if command.opts.infile:
         if node.get('component_id'):
             hostname = xrn_to_hostname(node['component_id'])
         if hostname:
-            print hostname
+            print(hostname)

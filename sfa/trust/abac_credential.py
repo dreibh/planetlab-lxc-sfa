@@ -21,7 +21,7 @@
 # IN THE WORK.
 #----------------------------------------------------------------------
 
-from __future__ import print_function
+
 
 from sfa.trust.credential import Credential, append_sub, DEFAULT_CREDENTIAL_LIFETIME
 from sfa.util.sfalogging import logger

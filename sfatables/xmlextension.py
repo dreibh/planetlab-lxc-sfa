@@ -37,7 +37,7 @@ class Xmlextension:
         context = p.xpathEval('//attributes/attribute[@terminal="yes"]')
         self.terminal = (context != [])
 
-        self.arguments = map(lambda (name,help,target):{'name':name.content,'help':help.content,'target':target.content}, zip(name,help,target))
+        self.arguments = [{'name':name_help_target[0].content,'help':name_help_target[1].content,'target':name_help_target[2].content} for name_help_target in zip(name,help,target)]
         
         p.xpathFreeContext()
         self.xmldoc.freeDoc()

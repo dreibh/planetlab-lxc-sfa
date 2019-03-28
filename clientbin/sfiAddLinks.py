@@ -16,7 +16,7 @@ command.add_linkfile_option()
 command.prep()
 
 if not command.opts.linkfile:
-    print "Missing link list -- exiting"
+    print("Missing link list -- exiting")
     command.parser.print_help()
     sys.exit(1)
 
@@ -30,7 +30,7 @@ else:
     outfile = sys.stdout
 ad_rspec = RSpec(infile)
 links = open(command.opts.linkfile).read().split('\n')
-link_tuples = map(lambda x: tuple(x.split()), links)
+link_tuples = [tuple(x.split()) for x in links]
 
 version_manager = VersionManager()
 try:
@@ -44,5 +44,5 @@ try:
 except:
     logger.log_exc("sfiAddLinks FAILED with links %s" % links)
     sys.exit(1)
-print >>outfile, request_rspec.toxml()
+print(request_rspec.toxml(), file=outfile)
 sys.exit(0)

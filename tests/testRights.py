@@ -11,24 +11,24 @@ class TestRight(unittest.TestCase):
 
    def testRightCanPerform(self):
       right = Right("embed")
-      self.assert_(right.can_perform("getticket"))
-      self.assert_(not right.can_perform("resolve"))
+      self.assertTrue(right.can_perform("getticket"))
+      self.assertTrue(not right.can_perform("resolve"))
 
    def testIsSuperset(self):
       pright = Right("sa")
       cright = Right("embed")
-      self.assert_(pright.is_superset(cright))
-      self.assert_(not cright.is_superset(pright))
+      self.assertTrue(pright.is_superset(cright))
+      self.assertTrue(not cright.is_superset(pright))
 
       pright = Right("embed")
       cright = Right("embed")
-      self.assert_(pright.is_superset(cright))
-      self.assert_(cright.is_superset(pright))
+      self.assertTrue(pright.is_superset(cright))
+      self.assertTrue(cright.is_superset(pright))
 
       pright = Right("control")
       cright = Right("embed")
-      self.assert_(not pright.is_superset(cright))
-      self.assert_(not cright.is_superset(pright))
+      self.assertTrue(not pright.is_superset(cright))
+      self.assertTrue(not cright.is_superset(pright))
 
 class TestRights(unittest.TestCase):
     def setUp(self):
@@ -53,33 +53,33 @@ class TestRights(unittest.TestCase):
 
     def testCanPerform(self):
         rightList = Rights(string="embed")
-        self.assert_(rightList.can_perform("getticket"))
-        self.assert_(not rightList.can_perform("resolve"))
+        self.assertTrue(rightList.can_perform("getticket"))
+        self.assertTrue(not rightList.can_perform("resolve"))
 
         rightList = Rights(string="embed,resolve")
-        self.assert_(rightList.can_perform("getticket"))
-        self.assert_(rightList.can_perform("resolve"))
+        self.assertTrue(rightList.can_perform("getticket"))
+        self.assertTrue(rightList.can_perform("resolve"))
 
     def testIsSuperset(self):
         pRights = Rights(string="sa")
         cRights = Rights(string="embed")
-        self.assert_(pRights.is_superset(cRights))
-        self.assert_(not cRights.is_superset(pRights))
+        self.assertTrue(pRights.is_superset(cRights))
+        self.assertTrue(not cRights.is_superset(pRights))
 
         pRights = Rights(string="embed")
         cRights = Rights(string="embed")
-        self.assert_(pRights.is_superset(cRights))
-        self.assert_(cRights.is_superset(pRights))
+        self.assertTrue(pRights.is_superset(cRights))
+        self.assertTrue(cRights.is_superset(pRights))
 
         pRights = Rights(string="control")
         cRights = Rights(string="embed")
-        self.assert_(not pRights.is_superset(cRights))
-        self.assert_(not cRights.is_superset(pRights))
+        self.assertTrue(not pRights.is_superset(cRights))
+        self.assertTrue(not cRights.is_superset(pRights))
 
         pRights = Rights(string="control,sa")
         cRights = Rights(string="embed")
-        self.assert_(pRights.is_superset(cRights))
-        self.assert_(not cRights.is_superset(pRights))
+        self.assertTrue(pRights.is_superset(cRights))
+        self.assertTrue(not cRights.is_superset(pRights))
 
 
 if __name__ == "__main__":

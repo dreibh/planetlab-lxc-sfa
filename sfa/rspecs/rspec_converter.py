@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-from __future__ import print_function
+
 
 from sfa.rspecs.pg_rspec_converter import PGRSpecConverter
 from sfa.rspecs.sfa_rspec_converter import SfaRSpecConverter

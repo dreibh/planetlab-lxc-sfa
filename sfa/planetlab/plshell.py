@@ -1,7 +1,7 @@
 import sys
-import xmlrpclib
+import xmlrpc.client
 import socket
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from sfa.util.sfalogging import logger
 
@@ -93,7 +93,7 @@ class PlShell:
             import ssl
             ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
             ssl_context.verify_mode = ssl.CERT_NONE
-            self.proxy = xmlrpclib.ServerProxy(
+            self.proxy = xmlrpc.client.ServerProxy(
                 url, verbose=False, allow_none=True, context=ssl_context)
 
     def __getattr__(self, name):

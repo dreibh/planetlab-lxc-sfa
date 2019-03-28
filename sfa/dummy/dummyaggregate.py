@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn
 from sfa.util.sfatime import utcparse, datetime_to_string
 from sfa.util.sfalogging import logger
@@ -46,7 +46,7 @@ class DummyAggregate:
 
         # sort slivers by node id
         slice_nodes = []
-        if 'node_ids' in slice.keys():
+        if 'node_ids' in list(slice.keys()):
             slice_nodes = self.driver.shell.GetNodes(
                 {'node_ids': slice['node_ids']})
         for node in slice_nodes:
@@ -99,7 +99,7 @@ class DummyAggregate:
         users = []
         user_ids = []
         for slice in slices:
-            if 'user_ids' in slice.keys():
+            if 'user_ids' in list(slice.keys()):
                 user_ids.extend(slice['user_ids'])
         if user_ids:
             users = self.driver.shell.GetUsers({'user_ids': user_ids})
@@ -121,7 +121,7 @@ class DummyAggregate:
             slice['node_ids'] = node_ids
         nodes_dict = self.get_slice_nodes(slice, options)
         slivers = []
-        for node in nodes_dict.values():
+        for node in list(nodes_dict.values()):
             node.update(slice)
             sliver_hrn = '%s.%s-%s' % (self.driver.hrn,
                                        slice['slice_id'], node['node_id'])

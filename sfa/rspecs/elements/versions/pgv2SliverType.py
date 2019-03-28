@@ -43,7 +43,7 @@ class PGv2SliverType:
                     '{%s}info' % self.namespaces['flack'])
                 try:
                     attrib_dict = eval(tag['value'])
-                    for (key, value) in attrib_dict.items():
+                    for (key, value) in list(attrib_dict.items()):
                         attrib_elem.set(key, value)
                 except Exception as e:
                     logger.warning(

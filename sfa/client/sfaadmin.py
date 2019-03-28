@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # pylint: disable=c0111, c0103, w0402, w0622
 
-from __future__ import print_function
+
 
 import os
 import sys
@@ -514,7 +514,7 @@ class SfaAdmin:
 
     # returns (name,class) or (None,None)
     def find_category(self, input):
-        full_name = Candidates(SfaAdmin.CATEGORIES.keys()).only_match(input)
+        full_name = Candidates(list(SfaAdmin.CATEGORIES.keys())).only_match(input)
         if not full_name:
             return (None, None)
         return (full_name, SfaAdmin.CATEGORIES[full_name])
@@ -528,7 +528,7 @@ class SfaAdmin:
         for c in categories:
             cls = SfaAdmin.CATEGORIES[c]
             print("==================== category=%s" % c)
-            names = cls.__dict__.keys()
+            names = list(cls.__dict__.keys())
             names.sort()
             for name in names:
                 method = cls.__dict__[name]
@@ -587,7 +587,7 @@ class SfaAdmin:
         cmd_kwds = vars(opts)
 
         # dont overrride meth
-        for k, v in cmd_kwds.items():
+        for k, v in list(cmd_kwds.items()):
             if v is None:
                 del cmd_kwds[k]
 

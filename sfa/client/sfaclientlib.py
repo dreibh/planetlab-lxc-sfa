@@ -3,7 +3,7 @@
 a minimal library for writing "lightweight" SFA clients
 """
 
-from __future__ import print_function
+
 
 # xxx todo
 # this library should probably check for the expiration date of the various
@@ -226,7 +226,7 @@ class SfaClientBootstrap:
 # when leaving this empty on the mac, result can't seem to be loaded in
 # keychain..
     def my_pkcs12_produce(self, filename):
-        password = raw_input("Enter password for p12 certificate: ")
+        password = input("Enter password for p12 certificate: ")
         openssl_command = ['openssl', 'pkcs12', "-export"]
         openssl_command += ["-password", "pass:{}".format(password)]
         openssl_command += ["-inkey", self.private_key_filename()]

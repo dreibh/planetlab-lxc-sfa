@@ -10,7 +10,7 @@ from sfa.storage.model import SliverAllocation
 
 from sfa.dummy.dummyxrn import DummyXrn, hrn_to_dummy_slicename
 
-MAXINT = 2L**31 - 1
+MAXINT = 2**31 - 1
 
 
 class DummySlices:
@@ -73,10 +73,10 @@ class DummySlices:
         all_nodes = self.driver.shell.GetNodes()
         requested_slivers = []
         for node in all_nodes:
-            if node['hostname'] in slivers.keys():
+            if node['hostname'] in list(slivers.keys()):
                 requested_slivers.append(node['node_id'])
 
-        if 'node_ids' not in slice.keys():
+        if 'node_ids' not in list(slice.keys()):
             slice['node_ids'] = []
         nodes = self.driver.shell.GetNodes({'node_ids': slice['node_ids']})
         current_slivers = [node['node_id'] for node in nodes]

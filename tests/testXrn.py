@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import sys
 import unittest
 
@@ -12,13 +12,13 @@ verbose=False
 class TestXrn(unittest.TestCase):
 
     def __hrn(self,h,t,exp_urn):
-        if verbose: print 'testing (',h,t,') expecting',exp_urn
+        if verbose: print('testing (',h,t,') expecting',exp_urn)
         xrn=Xrn(h,type=t)
-        if verbose: print xrn.dump_string()
+        if verbose: print(xrn.dump_string())
         urn=xrn.get_urn()
         (h1,t1) = Xrn(urn).get_hrn_type()
         if h1!=h or t1!=t or urn!=exp_urn:
-            print "hrn->urn->hrn : MISMATCH with in=(%s,%s) -- out=(%s,%s) -- urn=%s"%(h,t,h1,t1,urn)
+            print("hrn->urn->hrn : MISMATCH with in=(%s,%s) -- out=(%s,%s) -- urn=%s"%(h,t,h1,t1,urn))
         self.assertEqual(h1,h)
         self.assertEqual(t1,t)
         self.assertEqual(urn,exp_urn)

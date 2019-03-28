@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -36,10 +36,10 @@ def print_dict(rdict, options, counter=1):
 
     if not isinstance(rdict, dict):
         raise "%s not a dict" % rdict
-    for (key, value) in rdict.iteritems():
+    for (key, value) in rdict.items():
         if isinstance(value, StringType):
             if (attributes and key in attributes) or not attributes:
-                print tab * counter + "%s: %s" % (key, value)
+                print(tab * counter + "%s: %s" % (key, value))
         elif isinstance(value, list):
             for listitem in value:
                 if isinstance(listitem, dict):
@@ -50,12 +50,12 @@ def print_dict(rdict, options, counter=1):
     if counter == 1 or print_children:
         for (key, listitem) in lists:
             if isinstance(listitem, dict):
-                print tab * (counter - 1) + key
+                print(tab * (counter - 1) + key)
                 print_dict(listitem, options, counter + 1)
     elif not attributes or (attributes and 'children' in attributes):
         keys = set([key for (key, listitem) in lists])
         if keys:
-            print tab * (counter) + "(children: %s)" % (",".join(keys))
+            print(tab * (counter) + "(children: %s)" % (",".join(keys)))
 
 
 #
@@ -67,14 +67,14 @@ def main():
     parser = create_parser()
     (options, args) = parser.parse_args()
     if not options.infile:
-        print "RSpec file not specified"
+        print("RSpec file not specified")
         return
 
     rspec = RSpec()
     try:
         rspec.parseFile(options.infile)
     except:
-        print "Error reading rspec file"
+        print("Error reading rspec file")
 
     if options.tag:
         tag_name = options.tag
@@ -92,4 +92,4 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         raise
-        print e
+        print(e)

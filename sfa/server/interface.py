@@ -63,11 +63,11 @@ class Interfaces(dict):
         # load config file
         required_fields = set(self.default_fields.keys())
         self.interface_info = XML(conf_file).todict()
-        for value in self.interface_info.values():
+        for value in list(self.interface_info.values()):
             if isinstance(value, list):
                 for record in value:
                     if isinstance(record, dict) and \
-                            required_fields.issubset(record.keys()):
+                            required_fields.issubset(list(record.keys())):
                         hrn, address, port = record[
                             'hrn'], record['addr'], record['port']
                         # sometime this is called at a very early stage with no config loaded

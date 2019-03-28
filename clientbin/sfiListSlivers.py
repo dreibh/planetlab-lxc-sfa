@@ -21,17 +21,17 @@ if command.opts.infile:
     if command.opts.showatt:
         defaults = rspec.version.get_default_sliver_attributes()
         if defaults:
-            print "ALL NODES"
+            print("ALL NODES")
             for (name, value) in defaults:
-                print "  %s: %s" % (name, value)
+                print("  %s: %s" % (name, value))
 
     for node in nodes:
         hostname = None
         if node.get('component_id'):
             hostname = xrn_to_hostname(node['component_id'])
         if hostname:
-            print hostname
+            print(hostname)
             if command.opts.showatt:
                 atts = rspec.version.get_sliver_attributes(hostname)
                 for (name, value) in atts:
-                    print "  %s: %s" % (name, value)
+                    print("  %s: %s" % (name, value))

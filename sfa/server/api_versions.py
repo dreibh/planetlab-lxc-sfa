@@ -35,13 +35,13 @@ class ApiVersions:
 
     def get_versions(self):
         versions = {}
-        for value in self.xml.todict().values():
+        for value in list(self.xml.todict().values()):
             if not value:
                 continue
             if isinstance(value, list):
                 for item in value:
                     if isinstance(item, dict) and \
-                       set(ApiVersions.required_fields).issubset(item.keys()) and \
+                       set(ApiVersions.required_fields).issubset(list(item.keys())) and \
                        item['version'] != '' and item['url'] != '':
                         versions[str(item['version'])] = item['url']
         return versions

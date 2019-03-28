@@ -2,27 +2,9 @@
 import sys
 PY3 = sys.version_info[0] == 3
 
-try:
-    StringType = basestring
-except:
-    StringType = str
+StringType = str
+from io import StringIO
 
-try:
-    from StringIO import StringIO
-except:
-    from io import StringIO
-
-try:
-    import xmlrpclib as xmlrpc_client
-except:
-    from xmlrpc import client as xmlrpc_client
-
-try:
-    import httplib as http_client
-except:
-    from http import client as http_client
-
-try:
-    import ConfigParser
-except:
-    import configparser as ConfigParser
+import xmlrpc.client as xmlrpc_client
+import http.client as http_client
+import configparser as ConfigParser

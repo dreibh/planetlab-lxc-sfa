@@ -18,7 +18,7 @@ def get_peer(pldriver, hrn):
     peers = pldriver.shell.GetPeers(
         {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
     for peer_record in peers:
-        names = [name.lower() for name in peer_record.values()
+        names = [name.lower() for name in list(peer_record.values())
                  if isinstance(name, StringType)]
         if site_authority in names:
             peer = peer_record['shortname']

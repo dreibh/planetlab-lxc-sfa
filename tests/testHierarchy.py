@@ -26,25 +26,25 @@ class TestHierarchy(unittest.TestCase):
 
         h.create_auth(name, create_parents=True)
         auth_info = h.get_auth_info(name)
-        self.assert_(auth_info)
+        self.assertTrue(auth_info)
 
         gid = auth_info.get_gid_object()
-        self.assert_(gid)
+        self.assertTrue(gid)
         self.assertEqual(gid.get_subject(), name)
 
         pubkey = auth_info.get_pkey_object()
-        self.assert_(gid)
+        self.assertTrue(gid)
 
         # try to get it again, make sure it's still there
         auth_info2 = h.get_auth_info(name)
-        self.assert_(auth_info2)
+        self.assertTrue(auth_info2)
 
         gid = auth_info2.get_gid_object()
-        self.assert_(gid)
+        self.assertTrue(gid)
         self.assertEqual(gid.get_subject(), name)
 
         pubkey = auth_info2.get_pkey_object()
-        self.assert_(gid)
+        self.assertTrue(gid)
 
 
 if __name__ == "__main__":

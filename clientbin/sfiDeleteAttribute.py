@@ -29,7 +29,7 @@ if command.opts.infile:
         f.close()
 
     for name in attrs:
-        print >> sys.stderr, name, attrs[name]
+        print(name, attrs[name], file=sys.stderr)
         for value in attrs[name]:
             if not nodes:
                 try:
@@ -46,4 +46,4 @@ if command.opts.infile:
                         logger.log_exc(
                             "sfiDeleteAttribute FAILED on node %s: %s=%s" % (node, name, value))
 
-    print rspec.toxml()
+    print(rspec.toxml())

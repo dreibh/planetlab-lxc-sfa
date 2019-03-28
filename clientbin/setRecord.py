@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 Updates record objects
@@ -58,7 +58,7 @@ def replaceDict(newval, recordDict, options):
     Replaces field in dict
     """
     # Check type of old field matches type of new field
-    for (key, val) in newval.iteritems():
+    for (key, val) in newval.items():
         recordDict[key] = val
 
 
@@ -66,7 +66,7 @@ def modDict(newval, recordDict, options):
     """
     Checks type of existing field, addends new field
     """
-    for (key, val) in newval.iteritems():
+    for (key, val) in newval.items():
         if (type(recordDict[key]) == list):
             if (type(val) == list):
                 recordDict[key] = recordDict[key] + val
@@ -98,7 +98,7 @@ def main():
     if args:
         editDict(args, record_dict, options)
     if options.DEBUG:
-        print "New Record:\n%s" % record_dict
+        print("New Record:\n%s" % record_dict)
 
     record.parse_dict(record_dict)
     s = record.toxml()
@@ -108,4 +108,4 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        print e
+        print(e)

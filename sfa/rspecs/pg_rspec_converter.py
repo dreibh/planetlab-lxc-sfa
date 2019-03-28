@@ -1,5 +1,5 @@
-#!/usr/bin/env python2
-from __future__ import print_function
+#!/usr/bin/env python3
+
 
 from lxml import etree
 from sfa.util.xrn import Xrn, urn_to_hrn
@@ -64,7 +64,7 @@ class PGRSpecConverter:
         nodes_with_slivers = pg_rspec.version.get_nodes_with_slivers()
         i = 1
         for pg_node in pg_nodes_elements:
-            attribs = dict(pg_node.items())
+            attribs = dict(list(pg_node.items()))
             attribs['id'] = 'n' + str(i)
 
             node_element = network_element.add_element('node')

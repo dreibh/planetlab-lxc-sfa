@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # Sapan Bhatia <sapanb@cs.princeton.edu>
 #
@@ -259,7 +259,7 @@ class WSDLGen:
 
 
     def add_wsdl_services(self):
-        for service in self.services.keys():
+        for service in list(self.services.keys()):
             if (getattr(self.interface_options,service)):
                 service_el = self.wsdl.lastChild.appendChild(self.wsdl.createElement("service"))
                 service_el.setAttribute("name", service)
@@ -325,7 +325,7 @@ class WSDLGen:
 
     def pretty_print(self):
         if (self.wsdl):
-             print xml.dom.minidom.Document.toprettyxml(self.wsdl)
+             print(xml.dom.minidom.Document.toprettyxml(self.wsdl))
         else:
              raise Exception("Empty WSDL")
 

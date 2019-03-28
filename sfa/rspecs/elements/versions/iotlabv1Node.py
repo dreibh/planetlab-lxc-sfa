@@ -55,8 +55,8 @@ class Iotlabv1Node:
                 ['ssh ' + ldap_username + '@' + site + '.iotlab.info'
                  for site in sites_set]
             network_elem.set('ssh',
-                             unicode(iotlab_network_dict['ssh']))
-            network_elem.set('login', unicode(iotlab_network_dict['login']))
+                             str(iotlab_network_dict['ssh']))
+            network_elem.set('login', str(iotlab_network_dict['login']))
 
     @staticmethod
     def add_nodes(xml, nodes, rspec_content_type=None):

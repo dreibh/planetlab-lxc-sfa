@@ -24,7 +24,7 @@
 # implements SFA tickets
 #
 
-from __future__ import print_function
+
 
 from sfa.trust.certificate import Certificate
 from sfa.trust.gid import GID
@@ -142,7 +142,7 @@ class SfaTicket(Certificate):
             gidObject.dump(8, dump_parents)
 
         print("  attributes:")
-        for attrname in self.get_attributes().keys():
+        for attrname in list(self.get_attributes().keys()):
             print("        ", attrname, self.get_attributes()[attrname])
 
         print("       rspec:")

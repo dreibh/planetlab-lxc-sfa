@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2004 Toby Dickenson
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -46,8 +46,8 @@ class pydepgraphdot:
         p, t = self.get_data()
 
         # normalise our input data
-        for k, d in p.items():
-            for v in d.keys():
+        for k, d in list(p.items()):
+            for v in list(d.keys()):
                 if v not in p:
                     p[v] = {}
 
@@ -58,12 +58,12 @@ class pydepgraphdot:
         #f.write('ordering = out;\n')
         f.write('ranksep=1.0;\n')
         f.write('node [style=filled,fontname=Helvetica,fontsize=10];\n')
-        allkd = p.items()
+        allkd = list(p.items())
         allkd.sort()
         for k, d in allkd:
             tk = t.get(k)
             if self.use(k, tk):
-                allv = d.keys()
+                allv = list(d.keys())
                 allv.sort()
                 for v in allv:
                     tv = t.get(v)

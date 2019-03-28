@@ -21,7 +21,7 @@
 # IN THE WORK.
 #----------------------------------------------------------------------
 
-from __future__ import print_function
+
 
 from sfa.util.sfalogging import logger
 from sfa.trust.credential import Credential

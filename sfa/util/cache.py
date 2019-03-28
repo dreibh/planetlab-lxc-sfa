@@ -1,7 +1,7 @@
 #
 # This module implements general purpose caching system
 #
-from __future__ import with_statement
+
 import time
 import threading
 import pickle

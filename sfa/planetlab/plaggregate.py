@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from collections import defaultdict
 from sfa.util.xrn import Xrn, hrn_to_urn, urn_to_hrn, get_authority, get_leaf
 from sfa.util.sfatime import utcparse, datetime_to_string
@@ -215,7 +215,7 @@ class PlAggregate:
         pltags_dict = self.get_pltags_by_node_id(slice)
         nodes_dict = self.get_slice_nodes(slice, options)
         slivers = []
-        for node in nodes_dict.values():
+        for node in list(nodes_dict.values()):
             node.update(slice)
             # slice-global tags
             node['slice-tags'] = pltags_dict['slice-global']
@@ -281,7 +281,7 @@ class PlAggregate:
         ]
         # only doing this because protogeni rspec needs
         # to advertise available initscripts
-        rspec_node['pl_initscripts'] = pl_initscripts.values()
+        rspec_node['pl_initscripts'] = list(pl_initscripts.values())
         # add site/interface info to nodes.
         # assumes that sites, interfaces and tags have already been prepared.
         if site['longitude'] and site['latitude']:

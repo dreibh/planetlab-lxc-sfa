@@ -6,7 +6,7 @@ from iotlabcli import auth
 from iotlabcli import rest
 from iotlabcli import helpers
 from iotlabcli import experiment
-from urllib2 import HTTPError
+from urllib.error import HTTPError
 
 
 class IotLABShell(object):

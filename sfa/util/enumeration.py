@@ -26,8 +26,8 @@ class Enum(set):
 
     def __init__(self, *args, **kwds):
         set.__init__(self)
-        enums = dict(zip(args, [object() for i in range(len(args))]), **kwds)
-        for (key, value) in enums.items():
+        enums = dict(list(zip(args, [object() for i in range(len(args))])), **kwds)
+        for (key, value) in list(enums.items()):
             setattr(self, key, value)
             self.add(eval('self.%s' % key))
 

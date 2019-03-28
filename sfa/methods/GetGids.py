@@ -41,7 +41,7 @@ class GetGids(Method):
 
         allowed_fields = ['hrn', 'type', 'gid']
         for record in records:
-            for key in record.keys():
+            for key in list(record.keys()):
                 if key not in allowed_fields:
                     del(record[key])
         return records

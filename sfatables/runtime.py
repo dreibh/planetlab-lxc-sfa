@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -44,7 +44,7 @@ class SFATablesRules:
 
     def create_xml_node(self, name, context_dict):
         node = libxml2.newNode(name)
-        for k in context_dict.keys():
+        for k in list(context_dict.keys()):
             if (type(context_dict[k])==dict):
                 childNode = self.create_xml_node(k, context_dict[k])
                 node.addChild(childNode)
@@ -87,22 +87,22 @@ class SFATablesRules:
 
     def print_rules(self):
         for rule in self.sorted_rule_list:
-            print rule.processors
+            print(rule.processors)
 
 def main():
     incoming = SFATablesRules('INCOMING')
     incoming.set_context({'sfa':{'user':{'hrn':'plc.princeton.sapanb'}}})
 
     outgoing = SFATablesRules('OUTGOING')
-    print "%d rules loaded for INCOMING chain"%len(incoming.sorted_rule_list)
+    print("%d rules loaded for INCOMING chain"%len(incoming.sorted_rule_list))
     incoming.print_rules()
 
-    print "%d rules loaded for OUTGOING chain"%len(outgoing.sorted_rule_list)
+    print("%d rules loaded for OUTGOING chain"%len(outgoing.sorted_rule_list))
     outgoing.print_rules()
 
     rspec = open(sys.argv[1]).read()
     newrspec = incoming.apply(rspec)
-    print newrspec
+    print(newrspec)
     return
 
 if __name__=="__main__":

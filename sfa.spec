@@ -29,27 +29,27 @@ BuildRequires: make
 Requires: util-linux-ng
 # for the registry
 Requires: postgresql >= 8.2, postgresql-server >= 8.2
-Requires: postgresql-python
-Requires: python2-psycopg2
-Requires: python2-sqlalchemy
-Requires: python2-migrate
+Requires: postgresql3-python
+Requires: python3-psycopg2
+Requires: python3-sqlalchemy
+Requires: python3-migrate
 # and of course the bulk of it
 Requires: sfa-common
 
 %package common
 Summary: Python libraries for SFA, generic implementation derived from PlanetLab
 Group: Applications/System
-Requires: python
-Requires: pyOpenSSL
-Requires: m2crypto
-Requires: python2-dateutil
-Requires: python2-lxml
-%if "%{distro}" == "Fedora" && "%{distrorelease}" <= "27"
-Requires: python-ZSI
-%else
-Requires: python2-zsi
-%endif
-Requires: libxslt-python
+Requires: python3
+Requires: python3-pyOpenSSL
+Requires: python3-m2crypto
+Requires: python3-dateutil
+Requires: python3-lxml
+# %if "%{distro}" == "Fedora" && "%{distrorelease}" <= "27"
+# Requires: python-ZSI
+# %else
+# Requires: python2-zsi
+# %endif
+# Requires: libxslt-python
 Requires: xmlsec1-openssl-devel
 
 %package client

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 """
 Filters/Prints record objects
@@ -24,11 +24,11 @@ def create_parser():
     description = """getRecord will parse a supplied (via stdin) record and print all values or key/values, and filter results based on a given key or set of keys."""
     parser = OptionParser(usage=usage, description=description)
     parser.add_option("-d", "--debug", dest="DEBUG", action="store_true",
-                      default=False,  help="record file path")
+                      default=False, help="record file path")
     parser.add_option("-k", "--key", dest="withkey", action="store_true",
-                      default=False,  help="print SSH keys and certificates")
+                      default=False, help="print SSH keys and certificates")
     parser.add_option("-p", "--plinfo", dest="plinfo", action="store_true",
-                      default=False,  help="print PlanetLab specific internal fields")
+                      default=False, help="print PlanetLab specific internal fields")
 
     return parser
 
@@ -38,18 +38,18 @@ def printRec(record_dict, filters, options):
     if len(filters):
         for filter in filters:
             if options.DEBUG:
-                print "Filtering on %s" % filter
+                print("Filtering on %s" % filter)
             line += "%s: %s\n" % (filter,
                                   printVal(record_dict.get(filter, None)))
-        print line
+        print(line)
     else:
         # print the wole thing
-        for (key, value) in record_dict.iteritems():
+        for (key, value) in record_dict.items():
             if (not options.withkey and key in ('gid', 'keys')) or\
                     (not options.plinfo and key == 'pl_info'):
                 continue
             line += "%s: %s\n" % (key, printVal(value))
-        print line
+        print(line)
 
 
 # fix the iteratable values
@@ -74,7 +74,7 @@ def main():
 
     if options.DEBUG:
         pprint(record.toxml())
-        print "#####################################################"
+        print("#####################################################")
 
     printRec(record_dict, args, options)
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     try:
         main()
     except ExpatError as e:
-        print "RecordError.  Is your record valid XML?"
-        print e
+        print("RecordError.  Is your record valid XML?")
+        print(e)
     except Exception as e:
-        print e
+        print(e)

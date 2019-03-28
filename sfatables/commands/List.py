@@ -38,8 +38,8 @@ class List(Command):
             names = [n.content for n in name_nodes]
             values = [v.content for v in value_nodes]
 
-            name_values = zip(names,values)
-            name_value_pairs = map(lambda (n,v):n+'='+v, name_values)
+            name_values = list(zip(names,values))
+            name_value_pairs = [n_v[0]+'='+n_v[1] for n_v in name_values]
 
             argument_str = ",".join(name_value_pairs)
 
@@ -58,13 +58,13 @@ class List(Command):
                     (magic,number,type) = file.split('-')
                     rule_numbers[int(number)]=1
 
-        rule_list = rule_numbers.keys()
+        rule_list = list(rule_numbers.keys())
         rule_list.sort()
         return rule_list
 
     def call(self, command_options, match_options, target_options):
         if (len(command_options.args) < 1):
-            print "Please specify the name of the chain you would like to list, e.g. sfatables -L INCOMING."
+            print("Please specify the name of the chain you would like to list, e.g. sfatables -L INCOMING.")
             return
 
         chain = command_options.args[0]

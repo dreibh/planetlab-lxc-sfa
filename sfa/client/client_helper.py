@@ -55,7 +55,7 @@ def sfa_to_pg_users_arg(users):
     new_users = []
     fields = ['urn', 'keys']
     for user in users:
-        new_user = dict([item for item in user.items()
+        new_user = dict([item for item in list(user.items())
                          if item[0] in fields])
         new_users.append(new_user)
     return new_users

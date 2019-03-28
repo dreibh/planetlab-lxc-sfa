@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 
 from sfa.rspecs.elements.element import Element
 from sfa.rspecs.elements.sliver import Sliver
@@ -39,7 +39,7 @@ class Iotlabv1Sliver:
                     attrib_elem = xml.add_element(
                         '{%s}info' % self.namespaces['flack'])
                     attrib_dict = eval(tag['value'])
-                    for (key, value) in attrib_dict.items():
+                    for (key, value) in list(attrib_dict.items()):
                         attrib_elem.set(key, value)
 
     @staticmethod

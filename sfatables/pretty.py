@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 class Pretty:
     rows = []
@@ -19,7 +19,7 @@ class Pretty:
         return
 
     def pprint (self):
-        print '\n'
+        print('\n')
 
         for rule in self.rows:
             cur_line = ""
@@ -33,6 +33,6 @@ class Pretty:
                     cur_line = cur_line + padding
                 num = num + 1
 
-            print cur_line
+            print(cur_line)
 
 

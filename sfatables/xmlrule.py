@@ -3,7 +3,7 @@ import sys,os
 import libxml2
 # allow to run sfa2wsdl if this is missing (for mac)
 try:import libxslt
-except: print >>sys.stderr, "WARNING, could not import libxslt"
+except: print("WARNING, could not import libxslt", file=sys.stderr)
 
 from sfatables.globals import sfatables_config
 

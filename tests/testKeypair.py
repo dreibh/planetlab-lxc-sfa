@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import sys
 sys.path.append('..')
 
@@ -30,14 +30,14 @@ class TestKeypair(unittest.TestCase):
       k.create()
 
       m2 = k.get_m2_pubkey()
-      self.assert_(m2 != None)
+      self.assertTrue(m2 != None)
 
    def test_get_openssl_pkey(self):
       k = Keypair()
       k.create()
 
       pk = k.get_openssl_pkey()
-      self.assert_(pk != None)
+      self.assertTrue(pk != None)
 
    def test_sign_verify(self):
       k = Keypair()
@@ -46,7 +46,7 @@ class TestKeypair(unittest.TestCase):
       data = "this is a test"
       sig = k.sign_string(data)
 
-      print k.verify_string(data, sig)
+      print(k.verify_string(data, sig))
 
 if __name__ == "__main__":
     unittest.main()

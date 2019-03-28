@@ -45,7 +45,7 @@
 #
 
 
-from __future__ import print_function
+
 
 import functools
 import os
@@ -521,7 +521,7 @@ class Certificate:
                 req = OpenSSL.crypto.X509Req()
                 reqSubject = req.get_subject()
                 if isinstance(subject, dict):
-                    for key in reqSubject.keys():
+                    for key in list(reqSubject.keys()):
                         setattr(reqSubject, key, subject[key])
                 else:
                     setattr(reqSubject, "CN", subject)
@@ -548,7 +548,7 @@ class Certificate:
         req = OpenSSL.crypto.X509Req()
         subj = req.get_subject()
         if isinstance(name, dict):
-            for key in name.keys():
+            for key in list(name.keys()):
                 setattr(subj, key, name[key])
         else:
             setattr(subj, "CN", name)
@@ -937,7 +937,7 @@ class Certificate:
         return triples
 
     def get_data_names(self):
-        return self.data.keys()
+        return list(self.data.keys())
 
     def get_all_datas(self):
         triples = self.get_extensions()

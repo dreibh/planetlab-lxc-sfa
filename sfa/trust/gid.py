@@ -25,7 +25,7 @@
 # descendant of the certificate class.
 ##
 
-from __future__ import print_function
+
 
 import uuid
 

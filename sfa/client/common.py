@@ -1,6 +1,6 @@
 # a few utilities common to sfi and sfaadmin
 
-from __future__ import print_function
+
 
 
 def optparse_listvalue_callback(option, opt, value, parser):
@@ -106,7 +106,7 @@ def terminal_render(records, options):
         if type not in grouped_by_type:
             grouped_by_type[type] = []
         grouped_by_type[type].append(record)
-    group_types = grouped_by_type.keys()
+    group_types = list(grouped_by_type.keys())
     group_types.sort()
     for type in group_types:
         group = grouped_by_type[type]

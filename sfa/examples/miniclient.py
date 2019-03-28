@@ -3,7 +3,7 @@
 # this is designed to use a totally empty new directory
 # so we demonstrate how to bootstrap the whole thing
 
-from __future__ import print_function
+
 
 # init logging on console
 import logging
@@ -70,7 +70,7 @@ def get_version(url):
     server_proxy = bootstrap.server_proxy_simple(url)
     server_version = server_proxy.GetVersion()
     print("miniclient: GetVersion at %s returned:" % (url))
-    for (k, v) in server_version.iteritems():
+    for (k, v) in server_version.items():
         print("miniclient: \tversion[%s]=%s" % (k, truncate(v)))
 
 # version_dict = {'type': 'SFA', 'version': '1', }

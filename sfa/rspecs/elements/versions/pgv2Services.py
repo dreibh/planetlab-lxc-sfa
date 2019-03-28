@@ -16,7 +16,7 @@ class PGv2Services:
             child_elements = {'install': Install.fields,
                               'execute': Execute.fields,
                               'login': Login.fields}
-            for (name, fields) in child_elements.items():
+            for (name, fields) in list(child_elements.items()):
                 child = service.get(name)
                 if not child:
                     continue

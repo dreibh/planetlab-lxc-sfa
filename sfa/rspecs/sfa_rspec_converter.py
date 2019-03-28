@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-from __future__ import print_function
+
 
 from sfa.util.xrn import hrn_to_urn
 from sfa.rspecs.rspec import RSpec

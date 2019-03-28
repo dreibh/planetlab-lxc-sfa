@@ -1,4 +1,4 @@
-import SimpleXMLRPCServer
+import xmlrpc.server
 import time
 
 dummy_api_addr = ("localhost", 8080)
@@ -14,9 +14,9 @@ for i in range(1, 11):
 slices_list = []
 for i in range(1, 3):
     slice = {'slice_name': 'slice' + str(i),
-             'user_ids': range(i, 4, 2),
+             'user_ids': list(range(i, 4, 2)),
              'slice_id': i,
-             'node_ids': range(i, 10, 2),
+             'node_ids': list(range(i, 10, 2)),
              'enabled': True,
              'expires': int(time.time()) + 60 * 60 * 24 * 30}
     slices_list.append(slice)
@@ -37,7 +37,7 @@ def FilterList(myfilter, mylist):
     result = []
     result.extend(mylist)
     for item in mylist:
-        for key in myfilter.keys():
+        for key in list(myfilter.keys()):
             if 'ids' in key:
                 pass
             else:
@@ -109,7 +109,7 @@ def AddNode(node):
     global DB
     if not isinstance(node, dict):
         return False
-    for key in node.keys():
+    for key in list(node.keys()):
         if key not in ['hostname', 'type']:
             return False
     node['node_id'] = DB['node_index']
@@ -122,7 +122,7 @@ def AddSlice(slice):
     global DB
     if not isinstance(slice, dict):
         return False
-    for key in slice.keys():
+    for key in list(slice.keys()):
         if key not in ['slice_name', 'user_ids', 'node_ids', 'enabled', 'expires']:
             return False
     slice['slice_id'] = DB['slice_index']
@@ -136,7 +136,7 @@ def AddUser(user):
     global DB
     if not isinstance(user, dict):
         return False
-    for key in user.keys():
+    for key in list(user.keys()):
         if key not in ['user_name', 'email', 'keys']:
             return False
     user['user_id'] = DB['user_index']
@@ -152,7 +152,7 @@ def AddUserKey(param):
     try:
         for user in DB['users_list']:
             if param['user_id'] == user['user_id']:
-                if 'keys' in user.keys():
+                if 'keys' in list(user.keys()):
                     user['keys'].append(param['key'])
                 else:
                     user['keys'] = [param['key']]
@@ -297,7 +297,7 @@ def UpdateNode(param):
     try:
         for node in DB['nodes_list']:
             if param['node_id'] == node['node_id']:
-                for key in param['fields'].keys():
+                for key in list(param['fields'].keys()):
                     if key in ['hostname', 'type']:
                         node[key] = param['fields'][key]
                 return True
@@ -313,7 +313,7 @@ def UpdateSlice(param):
     try:
         for slice in DB['slices_list']:
             if param['slice_id'] == slice['slice_id']:
-                for key in param['fields'].keys():
+                for key in list(param['fields'].keys()):
                     if key in ['slice_name']:
                         slice[key] = param['fields'][key]
                 return True
@@ -329,7 +329,7 @@ def UpdateUser(param):
     try:
         for user in DB['users_list']:
             if param['user_id'] == user['user_id']:
-                for key in param['fields'].keys():
+                for key in list(param['fields'].keys()):
                     if key in ['user_name', 'email']:
                         user[key] = param['fields'][key]
                 return True
@@ -339,7 +339,7 @@ def UpdateUser(param):
 
 
 # Instantiate the XMLRPC server
-dummy_api_server = SimpleXMLRPCServer.SimpleXMLRPCServer(dummy_api_addr)
+dummy_api_server = xmlrpc.server.SimpleXMLRPCServer(dummy_api_addr)
 
 # RPC functions registration
 dummy_api_server.register_function(GetTestbedInfo)

@@ -139,7 +139,7 @@ git:
 pypi: index.html
 	setup.py sdist upload -r $(PYPI_TARGET)
 	ssh $(PYPI_TARBALL_HOST) mkdir -p $(PYPI_TARBALL_TOPDIR)/$(VERSIONTAG)
-	rsync -av dist/sfa-$(VERSIONTAG).tar.gz $(PYPI_TARBALL_HOST):$(PYPI_TARBALL_TOPDIR)/$(VERSIONTAG)
+	rsync -ai dist/sfa-$(VERSIONTAG).tar.gz $(PYPI_TARBALL_HOST):$(PYPI_TARBALL_TOPDIR)/$(VERSIONTAG)
 
 # cleanup
 clean: readme-clean
@@ -183,7 +183,7 @@ LOCAL_RSYNC_EXCLUDES	+= --exclude '*.pyc'
 LOCAL_RSYNC_EXCLUDES	+= --exclude '*.png' --exclude '*.svg' --exclude '*.out'
 RSYNC_EXCLUDES		:= --exclude .svn --exclude .git --exclude '*~' --exclude TAGS $(LOCAL_RSYNC_EXCLUDES)
 RSYNC_COND_DRY_RUN	:= $(if $(findstring n,$(MAKEFLAGS)),--dry-run,)
-RSYNC			:= rsync -a -v $(RSYNC_COND_DRY_RUN) --no-owner $(RSYNC_EXCLUDES)
+RSYNC			:= rsync -ai $(RSYNC_COND_DRY_RUN) --no-owner $(RSYNC_EXCLUDES)
 
 CLIENTS = $(shell ls clientbin/*.py)
 
@@ -193,11 +193,7 @@ BINS =	./config/sfa-config-tty ./systemd/sfa-setup.sh \
 	$(CLIENTS)
 
 synclib: synccheck
-	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/lib\*/python2.\*/site-packages/
-synclib3: synccheck
 	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/lib\*/python3.\*/site-packages/
-synclibdeb: synccheck
-	+$(RSYNC) --relative ./sfa/ --exclude migrations $(SSHURL)/usr/share/pyshared/
 syncmigrations:
 	+$(RSYNC) ./sfa/storage/migrations/versions/*.py $(SSHURL)/usr/share/sfa/migrations/versions/
 syncbin: synccheck
@@ -236,7 +232,7 @@ sfa/util/{sfalogging,faults,genicode,enumeration,__init__}.py
 
 clientlibsync:
 	@[ -d "$(CLIENTLIBTARGET)" ] || { echo "You need to set the make variable CLIENTLIBTARGET"; exit 1; }
-	rsync -av --relative $(CLIENTLIBFILES) $(CLIENTLIBTARGET)
+	rsync -ai --relative $(CLIENTLIBFILES) $(CLIENTLIBTARGET)
 
 #################### convenience, for debugging only
 # make +foo : prints the value of $(foo)
