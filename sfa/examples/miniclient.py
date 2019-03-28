@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # this is designed to use a totally empty new directory
 # so we demonstrate how to bootstrap the whole thing

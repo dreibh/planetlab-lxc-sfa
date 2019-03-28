@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # inspired from tophat/bin/uploadcredential.py
 #
