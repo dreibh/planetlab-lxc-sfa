@@ -206,12 +206,13 @@ class Keypair:
                 OpenSSL.crypto.FILETYPE_PEM, string,
                 functools.partial(glo_passphrase_callback, self, string))
             self.m2key = M2Crypto.EVP.load_key_string(
-                string, functools.partial(glo_passphrase_callback,
-                                          self, string))
+                string.encode(encoding="utf-8"),
+                functools.partial(glo_passphrase_callback, self, string))
         else:
             self.key = OpenSSL.crypto.load_privatekey(
                 OpenSSL.crypto.FILETYPE_PEM, string)
-            self.m2key = M2Crypto.EVP.load_key_string(string)
+            self.m2key = M2Crypto.EVP.load_key_string(
+                string.encode(encoding="utf-8"))
 
     ##
     #  Load the public key from a string. No private key is loaded.
@@ -274,7 +275,8 @@ class Keypair:
     def get_m2_pubkey(self):
         import M2Crypto
         if not self.m2key:
-            self.m2key = M2Crypto.EVP.load_key_string(self.as_pem())
+            self.m2key = M2Crypto.EVP.load_key_string(
+                self.as_pem().encode(encoding="utf-8"))
         return self.m2key
 
     ##
