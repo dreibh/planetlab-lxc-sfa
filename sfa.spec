@@ -198,6 +198,7 @@ rm -rf $RPM_BUILD_ROOT
 %post
 systemctl enable sfa-aggregate
 systemctl enable sfa-registry
+true
 
 %preun
 if [ "$1" = 0 ] ; then
@@ -206,6 +207,7 @@ if [ "$1" = 0 ] ; then
         systemctl is-active $service && systemctl stop $service
     done
 fi
+true
 
 %postun
 if [ "$1" -ge "1" ] ; then
@@ -213,6 +215,7 @@ if [ "$1" -ge "1" ] ; then
         systemctl is-active $service && systemctl restart $service
     done
 fi
+true
 
 %changelog
 * Mon Jan 07 2019 Thierry <Parmentelat> - sfa-4.0-2
