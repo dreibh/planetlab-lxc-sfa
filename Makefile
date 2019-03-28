@@ -5,11 +5,11 @@
 DESTDIR="/"
 PREFIX=/usr
 ##########
-all: python wsdl
+all: python
 
-install: python-install wsdl-install tests-install
+install: python-install tests-install
 
-clean: python-clean wsdl-clean
+clean: python-clean
 
 uninstall: python-uninstall tests-uninstall
 
@@ -45,18 +45,6 @@ version-clean:
 	rm -f sfa/util/version.py
 
 .PHONY: python version python-install python-clean version-clean
-##########
-wsdl:
-	$(MAKE) -C wsdl
-
-# propagate DESTDIR from the specfile
-wsdl-install:
-	$(MAKE) -C wsdl install
-
-wsdl-clean:
-	$(MAKE) -C wsdl clean
-
-.PHONY: wsdl wsdl-install wsdl-clean
 
 ##########
 tests-install:

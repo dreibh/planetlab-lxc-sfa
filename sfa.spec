@@ -141,7 +141,6 @@ rm -rf $RPM_BUILD_ROOT
 %config (noreplace) /etc/sfa/api_versions.xml
 /usr/share/sfa/migrations
 /usr/share/sfa/examples
-/var/www/html/wsdl/*.wsdl
 
 %files common
 %{python_sitelib}/sfa/__init__.py*
