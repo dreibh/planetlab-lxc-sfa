@@ -31,14 +31,14 @@ sfa/util/version.py: sfa/util/version.py.in force
 
 # postinstall steps - various cleanups and tweaks for a nicer rpm
 python-install:
-	python setup.py install --prefix=$(PREFIX) --root=$(DESTDIR)
+	python3 setup.py install --prefix=$(PREFIX) --root=$(DESTDIR)
 	chmod 444 $(DESTDIR)/etc/sfa/default_config.xml
 	rm -rf $(DESTDIR)/usr/lib*/python*/site-packages/*egg-info
 	rm -rf $(DESTDIR)/usr/lib*/python*/site-packages/sfa/storage/migrations
 	(cd $(DESTDIR)/usr/bin ; ln -s sfi.py sfi; ln -s sfascan.py sfascan; ln -s sfaadmin.py sfaadmin)
 
 python-clean: version-clean
-	python setup.py clean
+	python3 setup.py clean
 #	rm $(init)
 
 version-clean:
@@ -112,7 +112,7 @@ PYPI_TARBALL_TOPDIR=/build/sfa
 
 # this target is still helpful to produce the readme in html from README.md
 index.zip index.html: README.md
-	python readme.py
+	python3 readme.py
 
 # I need to run this on my mac as my pypi
 # run git pull first as this often comes afet a module-tag

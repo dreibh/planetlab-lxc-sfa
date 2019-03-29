@@ -3,8 +3,6 @@
 %define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
-%global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Name: %{name}
 Version: %{version}
@@ -143,17 +141,18 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/sfa/examples
 
 %files common
-%{python_sitelib}/sfa/__init__.py*
-%{python_sitelib}/sfa/trust
-%{python_sitelib}/sfa/storage
-%{python_sitelib}/sfa/util
-%{python_sitelib}/sfa/server
-%{python_sitelib}/sfa/methods
-%{python_sitelib}/sfa/generic
-%{python_sitelib}/sfa/managers
-%{python_sitelib}/sfa/importer
-%{python_sitelib}/sfa/rspecs
-%{python_sitelib}/sfa/client
+%{python3_sitelib}/sfa/__init__.py*
+%{python3_sitelib}/sfa/__pycache__/__init__*.pyc
+%{python3_sitelib}/sfa/trust
+%{python3_sitelib}/sfa/storage
+%{python3_sitelib}/sfa/util
+%{python3_sitelib}/sfa/server
+%{python3_sitelib}/sfa/methods
+%{python3_sitelib}/sfa/generic
+%{python3_sitelib}/sfa/managers
+%{python3_sitelib}/sfa/importer
+%{python3_sitelib}/sfa/rspecs
+%{python3_sitelib}/sfa/client
 
 %files client
 %config (noreplace) /etc/sfa/sfi_config
@@ -168,7 +167,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plc
 %defattr(-,root,root)
-%{python_sitelib}/sfa/planetlab
+%{python3_sitelib}/sfa/planetlab
 /etc/sfa/pl.rng
 /etc/sfa/credential.xsd
 /etc/sfa/top.xsd
@@ -178,15 +177,15 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sfa/topology
 
 %files iotlab
-%{python_sitelib}/sfa/iotlab
+%{python3_sitelib}/sfa/iotlab
 
 %files dummy
-%{python_sitelib}/sfa/dummy
+%{python3_sitelib}/sfa/dummy
 
 %files sfatables
 /etc/sfatables/*
 %{_bindir}/sfatables
-%{python_sitelib}/sfatables
+%{python3_sitelib}/sfatables
 
 %files tests
 %{_datadir}/sfa/tests

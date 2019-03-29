@@ -17,8 +17,8 @@ from distutils.core import setup
 
 # check for the correct version of python
 major, minor = sys.version_info [0:2]
-if (major, minor) != (2, 7):
-    print ("Sorry, the SFA package is currently available only with python-2.7")
+if major <= 2:
+    print ("Sorry, this version of SFA package requires python3")
     exit(1)
 
 
