@@ -1,6 +1,6 @@
 %define name sfa
-%define version 4.0
-%define taglevel 2
+%define version 5.0
+%define taglevel 0
 
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 %global python_sitearch	%( python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)" )
@@ -217,6 +217,9 @@ fi
 true
 
 %changelog
+* Fri Mar 29 2019 Thierry Parmentelat <thierry.parmentelat@inria.fr> - sfa-5.0-0
+- ported to python3 - no other change
+
 * Mon Jan 07 2019 Thierry <Parmentelat> - sfa-4.0-2
 - have shebangs mention python2 since it is what this version runs on
 - use rpm names in python2-something for expressing dependencies
