@@ -29,7 +29,7 @@ BuildRequires: make
 Requires: util-linux-ng
 # for the registry
 Requires: postgresql >= 8.2, postgresql-server >= 8.2
-Requires: postgresql3-python
+Requires: python3-pygresql
 Requires: python3-psycopg2
 Requires: python3-sqlalchemy
 Requires: python3-migrate
