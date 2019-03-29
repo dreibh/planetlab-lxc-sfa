@@ -2,10 +2,10 @@
 
 from datetime import datetime
 import time
-from sfa.util.py23 import xmlrpc_client
+import xmlrpc.client
 
 dummy_url = "http://localhost:8080"
-dummy_api = xmlrpc_client.ServerProxy(dummy_url)
+dummy_api = xmlrpc.client.ServerProxy(dummy_url)
 
 # Add a user:
 my_user_id = dummy_api.AddUser({'email': 'john.doe@test.net', 'user_name': 'john.doe', 'keys': [

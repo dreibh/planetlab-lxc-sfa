@@ -1,8 +1,5 @@
 from sfa.util.xrn import get_authority
 
-from sfa.util.py23 import StringType
-
-
 def get_peer(pldriver, hrn):
     # Because of myplc native federation,  we first need to determine if this
     # slice belongs to out local plc or a myplc peer. We will assume it
@@ -19,7 +16,7 @@ def get_peer(pldriver, hrn):
         {}, ['peer_id', 'peername', 'shortname', 'hrn_root'])
     for peer_record in peers:
         names = [name.lower() for name in list(peer_record.values())
-                 if isinstance(name, StringType)]
+                 if isinstance(name, str)]
         if site_authority in names:
             peer = peer_record['shortname']
 

@@ -57,8 +57,6 @@ import OpenSSL
 # M2Crypto is imported on the fly to minimize crashes
 # import M2Crypto
 
-from sfa.util.py23 import PY3
-
 from sfa.util.faults import (CertExpired, CertMissingParent,
                              CertNotSignedByParent)
 from sfa.util.sfalogging import logger
@@ -276,8 +274,7 @@ class Keypair:
     def get_m2_pubkey(self):
         import M2Crypto
         if not self.m2key:
-            self.m2key = M2Crypto.EVP.load_key_string(
-                self.as_pem().encode(encoding="utf-8"))
+            self.m2key = M2Crypto.EVP.load_key_string(self.as_pem())
         return self.m2key
 
     ##
@@ -475,7 +472,7 @@ class Certificate:
             return ""
         string = OpenSSL.crypto.dump_certificate(
             OpenSSL.crypto.FILETYPE_PEM, self.x509)
-        if PY3 and isinstance(string, bytes):
+        if isinstance(string, bytes):
             string = string.decode()
         if save_parents and self.parent:
             string = string + self.parent.save_to_string(save_parents)
@@ -492,7 +489,7 @@ class Certificate:
             f = filep
         else:
             f = open(filename, 'w')
-        if PY3 and isinstance(string, bytes):
+        if isinstance(string, bytes):
             string = string.decode()
         f.write(string)
         f.close()

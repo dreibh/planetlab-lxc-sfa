@@ -40,7 +40,7 @@ from sfa.trust.abac_credential import ABACCredential, ABACElement
 from sfa.trust.credential_factory import CredentialFactory
 from sfa.trust.gid import GID
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import StringIO
+from io import StringIO
 
 # Routine to validate that a speaks-for credential
 # says what it claims to say:

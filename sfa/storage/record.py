@@ -6,7 +6,6 @@ from sfa.util.xml import XML
 from sfa.trust.gid import GID
 
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import StringType
 
 
 class Record:
@@ -58,9 +57,9 @@ class Record:
     def load_from_dict(self, d):
         for (k, v) in d.items():
             # experimental
-            if isinstance(v, StringType) and v.lower() in ['true']:
+            if isinstance(v, str) and v.lower() in ['true']:
                 v = True
-            if isinstance(v, StringType) and v.lower() in ['false']:
+            if isinstance(v, str) and v.lower() in ['false']:
                 v = False
             setattr(self, k, v)
 

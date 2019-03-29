@@ -3,8 +3,7 @@ from lxml import etree
 from sfa.util.faults import InvalidXML
 from sfa.rspecs.elements.element import Element
 
-from sfa.util.py23 import StringType
-from sfa.util.py23 import StringIO
+from io import StringIO
 
 # helper functions to help build xpaths
 
@@ -174,7 +173,7 @@ class XML:
         self.namespaces = namespaces
         self.default_namespace = None
         self.schema = None
-        if isinstance(xml, StringType):
+        if isinstance(xml, str):
             self.parse_xml(xml)
         if isinstance(xml, XmlElement):
             self.root = xml
@@ -238,7 +237,7 @@ class XML:
                     if isinstance(val, dict):
                         child_element = etree.SubElement(element, key)
                         self.parse_dict(val, key, child_element)
-                    elif isinstance(val, StringType):
+                    elif isinstance(val, str):
                         child_element = etree.SubElement(
                             element, key).text = val
 
@@ -252,7 +251,7 @@ class XML:
         d = d.copy()
         # looks like iteritems won't stand side-effects
         for k in list(d.keys()):
-            if not isinstance(d[k], StringType):
+            if not isinstance(d[k], str):
                 del d[k]
 
         element.attrib.update(d)

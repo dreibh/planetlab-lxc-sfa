@@ -29,7 +29,6 @@ import calendar
 import re
 
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import StringType
 
 SFATIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -59,7 +58,7 @@ For safety this can also handle inputs that are either timestamps, or datetimes
 
     # prepare the input for the checks below by
     # casting strings ('1327098335') to ints
-    if isinstance(input, StringType):
+    if isinstance(input, str):
         try:
             input = int(input)
         except ValueError:
@@ -75,7 +74,7 @@ For safety this can also handle inputs that are either timestamps, or datetimes
     if isinstance(input, datetime.datetime):
         #logger.info ("argument to utcparse already a datetime - doing nothing")
         return input
-    elif isinstance(input, StringType):
+    elif isinstance(input, str):
         t = dateutil.parser.parse(input)
         if t.utcoffset() is not None:
             t = t.utcoffset() + t.replace(tzinfo=None)

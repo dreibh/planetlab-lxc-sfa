@@ -21,7 +21,7 @@ from sfa.util.config import Config
 from sfa.util.cache import Cache
 from sfa.trust.certificate import Certificate
 from sfa.trust.trustedroots import TrustedRoots
-from sfa.util.py23 import xmlrpc_client
+import xmlrpc.client
 
 # don't hard code an api class anymore here
 from sfa.generic import Generic
@@ -207,7 +207,7 @@ class SecureXMLRPCServer(http.server.HTTPServer, xmlrpc.server.SimpleXMLRPCDispa
             # can't use format_exc() as it is not available in jython yet
             # (even in trunk).
             type, value, tb = sys.exc_info()
-            raise xmlrpc_client.Fault(1, ''.join(
+            raise xmlrpc.client.Fault(1, ''.join(
                 traceback.format_exception(type, value, tb)))
 
     # override this one from the python 2.7 code

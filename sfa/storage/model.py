@@ -13,7 +13,6 @@ from sfa.storage.record import Record
 from sfa.util.sfalogging import logger
 from sfa.util.sfatime import utcparse, datetime_to_string
 from sfa.util.xml import XML
-from sfa.util.py23 import StringType
 
 from sfa.trust.gid import GID
 
@@ -105,7 +104,7 @@ class RegRecord(Base, AlchemyObj):
         if hrn:
             self.hrn = hrn
         if gid:
-            if isinstance(gid, StringType):
+            if isinstance(gid, str):
                 self.gid = gid
             else:
                 self.gid = gid.save_to_string(save_parents=True)
@@ -143,7 +142,7 @@ class RegRecord(Base, AlchemyObj):
     def validate_gid(self, key, gid):
         if gid is None:
             return
-        elif isinstance(gid, StringType):
+        elif isinstance(gid, str):
             return gid
         else:
             return gid.save_to_string(save_parents=True)

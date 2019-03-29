@@ -3,7 +3,7 @@ import socket
 from urllib.parse import urlparse
 
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import xmlrpc_client
+import xmlrpc.client
 
 
 class DummyShell:
@@ -21,7 +21,7 @@ class DummyShell:
 
     def __init__(self, config):
         url = config.SFA_DUMMY_URL
-        self.proxy = xmlrpc_client.ServerProxy(
+        self.proxy = xmlrpc.client.ServerProxy(
             url, verbose=False, allow_none=True)
 
     def __getattr__(self, name):

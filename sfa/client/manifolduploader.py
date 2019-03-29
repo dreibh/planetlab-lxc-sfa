@@ -34,7 +34,7 @@ except:
 
 import getpass
 
-from sfa.util.py23 import xmlrpc_client
+import xmlrpc.client
 
 
 class ManifoldUploader:
@@ -91,11 +91,11 @@ class ManifoldUploader:
         #        if not self._proxy:
         #            url=self.url()
         #            self.logger.info("Connecting manifold url %s"%url)
-        #            self._proxy = xmlrpc_client.ServerProxy(url, allow_none = True)
+        #            self._proxy = xmlrpc.client.ServerProxy(url, allow_none = True)
         #        return self._proxy
         url = self.url()
         self.logger.debug("Connecting manifold url %s" % url)
-        proxy = xmlrpc_client.ServerProxy(url, allow_none=True,
+        proxy = xmlrpc.client.ServerProxy(url, allow_none=True,
                                           **turn_off_server_verify)
 
         return proxy

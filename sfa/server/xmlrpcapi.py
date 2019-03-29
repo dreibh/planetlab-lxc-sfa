@@ -17,7 +17,7 @@ except ImportError:
 ####################
 from sfa.util.faults import SfaInvalidAPIMethod, SfaAPIError, SfaFault
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import xmlrpc_client
+import xmlrpc.client
 
 ####################
 # See "2.2 Characters" in the XML specification:
@@ -91,7 +91,7 @@ def xmlrpclib_dump(self, value, write):
 # You can't hide from me!
 # Note: not quite  sure if this will still cause
 # the expected behaviour under python3
-xmlrpc_client.Marshaller._Marshaller__dump = xmlrpclib_dump
+xmlrpc.client.Marshaller._Marshaller__dump = xmlrpclib_dump
 
 
 class XmlrpcApi:
@@ -145,9 +145,9 @@ class XmlrpcApi:
         """
         # Parse request into method name and arguments
         try:
-            interface = xmlrpc_client
+            interface = xmlrpc.client
             self.protocol = 'xmlrpc'
-            (args, method) = xmlrpc_client.loads(data)
+            (args, method) = xmlrpc.client.loads(data)
             if method in method_map:
                 method = method_map[method]
             methodresponse = True
@@ -185,7 +185,7 @@ class XmlrpcApi:
         if self.protocol == 'xmlrpc':
             if not isinstance(result, SfaFault):
                 result = (result,)
-            response = xmlrpc_client.dumps(
+            response = xmlrpc.client.dumps(
                 result, methodresponse=True, encoding=self.encoding, allow_none=1)
         elif self.protocol == 'soap':
             if isinstance(result, Exception):

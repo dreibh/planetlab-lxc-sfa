@@ -1,6 +1,6 @@
 import unittest
 from sfa.trust.certificate import Certificate, Keypair
-from sfa.util.py23 import xmlrpc_client
+import xmlrpc.client
 
 class TestCert(unittest.TestCase):
    def setUp(self):
@@ -42,7 +42,7 @@ class TestCert(unittest.TestCase):
       # try something a bit more complicated, like an xmlrpc encoding of
       # some parameters
       cert = Certificate(subject="test")
-      data = xmlrpc_client.dumps((1, "foo", ["a", "b"], {"c": "d", "e": "f"}, True))
+      data = xmlrpc.client.dumps((1, "foo", ["a", "b"], {"c": "d", "e": "f"}, True))
       cert.set_data(data)
       self.assertEqual(cert.get_data(), data)
 

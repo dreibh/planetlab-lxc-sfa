@@ -8,7 +8,6 @@ from types import IntType, LongType
 import textwrap
 
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import StringType
 from sfa.util.faults import SfaFault, SfaInvalidAPIMethod, SfaInvalidArgumentCount, SfaInvalidArgument
 
 from sfa.storage.parameter import Parameter, Mixed, python_type, xmlrpc_type
@@ -239,7 +238,7 @@ class Method:
 
         # Strings are a special case. Accept either unicode or str
         # types if a string is expected.
-        if issubclass(expected_type, StringType) and isinstance(value, StringType):
+        if issubclass(expected_type, str) and isinstance(value, str):
             pass
 
         # Integers and long integers are also special types. Accept
@@ -254,7 +253,7 @@ class Method:
                                      name)
 
         # If a minimum or maximum (length, value) has been specified
-        if issubclass(expected_type, StringType):
+        if issubclass(expected_type, str):
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
                 raise SfaInvalidArgument(

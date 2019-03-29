@@ -25,15 +25,15 @@
 #
 
 from sfa.util.genicode import GENICODE
-from sfa.util.py23 import xmlrpc_client
+import xmlrpc.client
 
 
-class SfaFault(xmlrpc_client.Fault):
+class SfaFault(xmlrpc.client.Fault):
 
     def __init__(self, faultCode, faultString, extra=None):
         if extra:
             faultString += ": " + str(extra)
-        xmlrpc_client.Fault.__init__(self, faultCode, faultString)
+        xmlrpc.client.Fault.__init__(self, faultCode, faultString)
 
 
 class Forbidden(SfaFault):
@@ -360,11 +360,11 @@ class SliverDoesNotExist(SfaFault):
         return repr(self.value)
 
 
-class BadRequestHash(xmlrpc_client.Fault):
+class BadRequestHash(xmlrpc.client.Fault):
 
     def __init__(self, hash=None, extra=None):
         faultString = "bad request hash: " + str(hash)
-        xmlrpc_client.Fault.__init__(self, GENICODE.ERROR, faultString)
+        xmlrpc.client.Fault.__init__(self, GENICODE.ERROR, faultString)
 
 
 class MissingTrustedRoots(SfaFault):

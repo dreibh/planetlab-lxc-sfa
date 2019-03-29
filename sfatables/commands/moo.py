@@ -1,6 +1,5 @@
 import os, time
 
-from sfa.util.py23 import StringType
 
 class Command:
     commandline_options = []
@@ -154,7 +153,7 @@ class Command:
 
         # Strings are a special case. Accept either unicode or str
         # types if a string is expected.
-        if issubclass(expected_type, StringType) and isinstance(value, StringType):
+        if issubclass(expected_type, str) and isinstance(value, str):
             pass
 
         # Integers and long integers are also special types. Accept
@@ -169,7 +168,7 @@ class Command:
                                      name)
 
         # If a minimum or maximum (length, value) has been specified
-        if issubclass(expected_type, StringType):
+        if issubclass(expected_type, str):
             if min is not None and \
                len(value.encode(self.api.encoding)) < min:
                 raise SfaInvalidArgument("%s must be at least %d bytes long" % (name, min))

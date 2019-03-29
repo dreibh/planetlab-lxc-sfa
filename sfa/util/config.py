@@ -8,7 +8,7 @@ import time
 #import tempfile
 from io import StringIO
 from sfa.util.xml import XML
-from sfa.util.py23 import ConfigParser
+import configparser
 
 default_config = \
     """
@@ -28,7 +28,7 @@ class Config:
     def __init__(self, config_file='/etc/sfa/sfa_config'):
         self._files = []
         self.config_path = os.path.dirname(config_file)
-        self.config = ConfigParser.ConfigParser()
+        self.config = configparser.ConfigParser()
         self.filename = config_file
         if not os.path.isfile(self.filename):
             self.create(self.filename)
@@ -56,7 +56,7 @@ DO NOT EDIT. This file was automatically generated at
         if filename:
             try:
                 self.config.read(filename)
-            except ConfigParser.MissingSectionHeaderError:
+            except configparser.MissingSectionHeaderError:
                 if filename.endswith('.xml'):
                     self.load_xml(filename)
                 else:
@@ -107,7 +107,7 @@ DO NOT EDIT. This file was automatically generated at
                 section_name = section.lower()
                 var_name = varname.replace(section_name, "")[1:]
         if strict and not self.config.has_option(section_name, var_name):
-            raise ConfigParser.NoOptionError(var_name, section_name)
+            raise configparser.NoOptionError(var_name, section_name)
         return (section_name, var_name)
 
     def set_attributes(self):
@@ -190,10 +190,10 @@ DO NOT EDIT. This file was automatically generated at
     @staticmethod
     def is_ini(config_file):
         try:
-            c = ConfigParser.ConfigParser()
+            c = configparser.ConfigParser()
             c.read(config_file)
             return True
-        except ConfigParser.MissingSectionHeaderError:
+        except configparser.MissingSectionHeaderError:
             return False
 
     def dump(self, sections=None):

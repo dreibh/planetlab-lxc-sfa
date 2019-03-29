@@ -29,7 +29,7 @@ from sfa.util.sfatime import SFATIME_FORMAT
 
 from xml.dom.minidom import Document, parseString
 
-from sfa.util.py23 import StringIO
+from io import StringIO
 
 HAVELXML = False
 try:

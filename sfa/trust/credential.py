@@ -36,7 +36,7 @@ import datetime
 from tempfile import mkstemp
 from xml.dom.minidom import Document, parseString
 
-from sfa.util.py23 import PY3, StringType, StringIO
+from io import StringIO
 
 from xml.parsers.expat import ExpatError
 
@@ -276,7 +276,7 @@ class Credential(object):
         self.version = None
 
         if cred:
-            if isinstance(cred, StringType):
+            if isinstance(cred, str):
                 string = cred
                 self.type = Credential.SFA_CREDENTIAL_TYPE
                 self.version = '3'
@@ -293,7 +293,7 @@ class Credential(object):
                     str = infile.read()
 
             # if this is a legacy credential, write error and bail out
-            if isinstance(str, StringType) and str.strip().startswith("-----"):
+            if isinstance(str, str) and str.strip().startswith("-----"):
                 logger.error(
                     "Legacy credentials not supported any more "
                     "- giving up with {}..."
@@ -639,7 +639,7 @@ class Credential(object):
             f = filep
         else:
             f = open(filename, "w")
-        if PY3 and isinstance(self.xml, bytes):
+        if isinstance(self.xml, bytes):
             self.xml = self.xml.decode()
         f.write(self.xml)
         f.close()
@@ -647,7 +647,7 @@ class Credential(object):
     def save_to_string(self, save_parents=True):
         if not self.xml:
             self.encode()
-        if PY3 and isinstance(self.xml, bytes):
+        if isinstance(self.xml, bytes):
             self.xml = self.xml.decode()
         return self.xml
 

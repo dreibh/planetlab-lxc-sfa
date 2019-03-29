@@ -7,8 +7,8 @@ try:
 except:
     turn_off_server_verify = {}
 
-from sfa.util.py23 import xmlrpc_client
-from sfa.util.py23 import http_client
+import xmlrpc.client
+import http.client
 
 try:
     from sfa.util.sfalogging import logger
@@ -27,12 +27,12 @@ class ServerException(Exception):
     pass
 
 
-class ExceptionUnmarshaller(xmlrpc_client.Unmarshaller):
+class ExceptionUnmarshaller(xmlrpc.client.Unmarshaller):
 
     def close(self):
         try:
-            return xmlrpc_client.Unmarshaller.close(self)
-        except xmlrpc_client.Fault as e:
+            return xmlrpc.client.Unmarshaller.close(self)
+        except xmlrpc.client.Fault as e:
             raise ServerException(e.faultString)
 
 ##
@@ -43,10 +43,10 @@ class ExceptionUnmarshaller(xmlrpc_client.Unmarshaller):
 # targetting only python-2.7 we can get rid of some older code
 
 
-class XMLRPCTransport(xmlrpc_client.Transport):
+class XMLRPCTransport(xmlrpc.client.Transport):
 
     def __init__(self, key_file=None, cert_file=None, timeout=None):
-        xmlrpc_client.Transport.__init__(self)
+        xmlrpc.client.Transport.__init__(self)
         self.timeout = timeout
         self.key_file = key_file
         self.cert_file = cert_file
@@ -55,7 +55,7 @@ class XMLRPCTransport(xmlrpc_client.Transport):
         # create a HTTPS connection object from a host descriptor
         # host may be a string, or a (host, x509-dict) tuple
         host, extra_headers, x509 = self.get_host_info(host)
-        conn = http_client.HTTPSConnection(host, None, key_file=self.key_file,
+        conn = http.client.HTTPSConnection(host, None, key_file=self.key_file,
                                            cert_file=self.cert_file,
                                            **turn_off_server_verify)
 
@@ -80,23 +80,23 @@ class XMLRPCTransport(xmlrpc_client.Transport):
 
     def getparser(self):
         unmarshaller = ExceptionUnmarshaller()
-        parser = xmlrpc_client.ExpatParser(unmarshaller)
+        parser = xmlrpc.client.ExpatParser(unmarshaller)
         return parser, unmarshaller
 
 
-class XMLRPCServerProxy(xmlrpc_client.ServerProxy):
+class XMLRPCServerProxy(xmlrpc.client.ServerProxy):
 
     def __init__(self, url, transport, allow_none=True, verbose=False):
         # remember url for GetVersion
         # xxx not sure this is still needed as SfaServerProxy has this too
         self.url = url
-        xmlrpc_client.ServerProxy.__init__(self, url, transport, allow_none=allow_none,
+        xmlrpc.client.ServerProxy.__init__(self, url, transport, allow_none=allow_none,
                                            verbose=verbose,
                                            **turn_off_server_verify)
 
     def __getattr__(self, attr):
         logger.debug("xml-rpc %s method:%s" % (self.url, attr))
-        return xmlrpc_client.ServerProxy.__getattr__(self, attr)
+        return xmlrpc.client.ServerProxy.__getattr__(self, attr)
 
 # the object on which we can send methods that get sent over xmlrpc
 
@@ -109,7 +109,7 @@ class SfaServerProxy:
         self.certfile = certfile
         self.verbose = verbose
         self.timeout = timeout
-        # an instance of xmlrpc_client.ServerProxy
+        # an instance of xmlrpc.client.ServerProxy
         transport = XMLRPCTransport(keyfile, certfile, timeout)
         self.serverproxy = XMLRPCServerProxy(
             url, transport, allow_none=True, verbose=verbose)

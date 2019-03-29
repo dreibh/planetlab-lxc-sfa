@@ -5,9 +5,6 @@ import os
 from optparse import OptionParser
 from pprint import pprint
 
-from sfa.util.py23 import StringType
-
-
 def create_parser():
     command = sys.argv[0]
     argv = sys.argv[1:]
@@ -37,7 +34,7 @@ def print_dict(rdict, options, counter=1):
     if not isinstance(rdict, dict):
         raise "%s not a dict" % rdict
     for (key, value) in rdict.items():
-        if isinstance(value, StringType):
+        if isinstance(value, str):
             if (attributes and key in attributes) or not attributes:
                 print(tab * counter + "%s: %s" % (key, value))
         elif isinstance(value, list):

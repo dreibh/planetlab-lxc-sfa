@@ -8,7 +8,6 @@ from sfa.util.faults import InsufficientRights, MissingCallerGID, \
     ConnectionKeyGIDMismatch, SfaPermissionDenied, CredentialNotVerifiable, \
     Forbidden, BadArgs
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import StringType
 from sfa.util.config import Config
 from sfa.util.xrn import Xrn, get_authority
 
@@ -70,7 +69,7 @@ class Auth:
         def log_invalid_cred(cred, exception):
             if isinstance(cred, dict) and 'geni_value' in cred:
                 cred = cred['geni_value']
-            if not isinstance(cred, StringType):
+            if not isinstance(cred, str):
                 logger.info(
                     "{}: cannot validate credential {}"
                     .format(exception, cred))

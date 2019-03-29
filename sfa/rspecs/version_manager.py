@@ -4,7 +4,6 @@ import os
 from sfa.util.faults import InvalidRSpec, UnsupportedRSpecVersion
 from sfa.rspecs.version import RSpecVersion
 from sfa.util.sfalogging import logger
-from sfa.util.py23 import StringType
 
 
 class VersionManager:
@@ -55,7 +54,7 @@ class VersionManager:
         if isinstance(version, dict):
             retval = self._get_version(version.get('type'), version.get(
                 'version'), version.get('content_type'))
-        elif isinstance(version, StringType):
+        elif isinstance(version, str):
             version_parts = version.split(' ')
             num_parts = len(version_parts)
             type = version_parts[0]

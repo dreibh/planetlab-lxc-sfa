@@ -35,7 +35,7 @@ from sfa.util.config import Config
 from sfa.util.version import version_core
 from sfa.util.cache import Cache
 from sfa.util.printable import printable
-from sfa.util.py23 import StringIO
+from io import StringIO
 
 from sfa.storage.record import Record
 
