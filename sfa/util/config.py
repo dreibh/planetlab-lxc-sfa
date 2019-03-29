@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+
+# pylint: disable=c0111, c0103, r0904, r1705, r0201
+
 import sys
 import os
 import time
-import tempfile
-import codecs
+#import tempfile
+from io import StringIO
 from sfa.util.xml import XML
-from sfa.util.py23 import StringIO
 from sfa.util.py23 import ConfigParser
 
 default_config = \
@@ -13,8 +15,8 @@ default_config = \
 """
 
 
-def isbool(v):
-    return v.lower() in ("true", "false")
+def isbool(val):
+    return val.lower() in ("true", "false")
 
 
 def str2bool(v):
@@ -171,16 +173,16 @@ DO NOT EDIT. This file was automatically generated at
             variables[section] = (category, variable_list)
         return variables
 
-    def verify(self, config1, config2, validate_method):
+    def verify(self, _config1, _config2, _validate_method):
         return True
 
-    def validate_type(self, var_type, value):
+    def validate_type(self, _var_type, _value):
         return True
 
     @staticmethod
     def is_xml(config_file):
         try:
-            x = Xml(config_file)
+            _x = Xml(config_file)
             return True
         except:
             return False
@@ -197,10 +199,10 @@ DO NOT EDIT. This file was automatically generated at
     def dump(self, sections=None):
         if sections is None:
             sections = []
-        sys.stdout.write(output_python())
+        sys.stdout.write(self.output_python())
 
-    def output_python(self, encoding="utf-8"):
-        buf = codecs.lookup(encoding)[3](StringIO())
+    def output_python(self):
+        buf = StringIO()
         buf.writelines(["# " + line + os.linesep for line in self._header()])
 
         for section in self.sections():
@@ -210,12 +212,12 @@ DO NOT EDIT. This file was automatically generated at
             buf.write(os.linesep)
         return buf.getvalue()
 
-    def output_shell(self, show_comments=True, encoding="utf-8"):
+    def output_shell(self):
         """
         Return variables as a shell script.
         """
 
-        buf = codecs.lookup(encoding)[3](StringIO())
+        buf = StringIO()
         buf.writelines(["# " + line + os.linesep for line in self._header()])
 
         for section in self.sections():
@@ -230,12 +232,12 @@ DO NOT EDIT. This file was automatically generated at
                     buf.write(option + "=" + value + os.linesep)
         return buf.getvalue()
 
-    def output_php(selfi, encoding="utf-8"):
+    def output_php(selfi):
         """
         Return variables as a PHP script.
         """
 
-        buf = codecs.lookup(encoding)[3](StringIO())
+        buf = StringIO()
         buf.write("<?php" + os.linesep)
         buf.writelines(["// " + line + os.linesep for line in self._header()])
 
@@ -252,22 +254,21 @@ DO NOT EDIT. This file was automatically generated at
 
         return buf.getvalue()
 
-    def output_xml(self, encoding="utf-8"):
+    def output_xml(self):
         pass
 
-    def output_variables(self, encoding="utf-8"):
+    def output_variables(self):
         """
         Return list of all variable names.
         """
 
-        buf = codecs.lookup(encoding)[3](StringIO())
+        buf = StringIO()
         for section in self.sections():
-            for (name, value) in self.items(section):
+            for (name, _value) in self.items(section):
                 option = "%s_%s" % (section, name)
                 buf.write(option + os.linesep)
 
         return buf.getvalue()
-        pass
 
     def write(self, filename=None):
         if not filename:
@@ -283,17 +284,17 @@ DO NOT EDIT. This file was automatically generated at
 
     def get_openflow_aggrMgr_info(self):
         aggr_mgr_ip = 'localhost'
-        if (hasattr(self, 'openflow_aggregate_manager_ip')):
+        if hasattr(self, 'openflow_aggregate_manager_ip'):
             aggr_mgr_ip = self.OPENFLOW_AGGREGATE_MANAGER_IP
 
         aggr_mgr_port = 2603
-        if (hasattr(self, 'openflow_aggregate_manager_port')):
+        if hasattr(self, 'openflow_aggregate_manager_port'):
             aggr_mgr_port = self.OPENFLOW_AGGREGATE_MANAGER_PORT
 
         return (aggr_mgr_ip, aggr_mgr_port)
 
     def get_interface_hrn(self):
-        if (hasattr(self, 'sfa_interface_hrn')):
+        if hasattr(self, 'sfa_interface_hrn'):
             return self.SFA_INTERFACE_HRN
         else:
             return "plc"
@@ -302,10 +303,12 @@ DO NOT EDIT. This file was automatically generated at
         return getattr(self.config, attr)
 
 if __name__ == '__main__':
-    filename = None
-    if len(sys.argv) > 1:
-        filename = sys.argv[1]
-        config = Config(filename)
-    else:
-        config = Config()
-    config.dump()
+    def main():
+        filename = None
+        if len(sys.argv) > 1:
+            filename = sys.argv[1]
+            config = Config(filename)
+        else:
+            config = Config()
+        config.dump()
+    main()
