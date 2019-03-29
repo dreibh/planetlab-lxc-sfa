@@ -1,4 +1,4 @@
-#!/usr/bin/env python2 
+#!/usr/bin/env python3
 
 # This file parses an sfatables command and generates XML files that parameterize
 # matches and targets. Each such XML file defines a rule. Rules are dropped in directories
@@ -42,7 +42,7 @@ def create_parser(command_dict):
     parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
                              description='See "man sfatables" for more detail.')
     
-    for k in command_dict.keys():
+    for k in list(command_dict.keys()):
         command = command_dict[k]
         for (short_option,long_option) in command.options:
             parser.add_option(short_option,long_option,dest=command.type,action=command.action,const=k,help=command.help,metavar="CHAIN")
@@ -53,7 +53,7 @@ def create_parser_xml_ext(ext_dict):
     parser = OptionParser(usage="sfatables [command] [chain] [match] [target]",
                              description='See "man sfatables" for more detail.')
     
-    for k in ext_dict.keys():
+    for k in list(ext_dict.keys()):
         command = ext_dict[k]
         for arg in command.arguments:
             parser.add_option('',"--"+arg['name'],dest=arg['name'],help=arg['help'],metavar=arg['target'])
@@ -91,16 +91,16 @@ def main():
             raise Exception("Must specify match for this command")
         match_dict = load_xml_extensions("sfatables.matches",match_dir)
         match_parser = create_parser_xml_ext(match_dict)
-        matches_str = ",".join(match_dict.keys())
+        matches_str = ",".join(list(match_dict.keys()))
         match_parser.add_option('-m','--match',dest='name',help='Match name (one of %s)'%matches_str, metavar = 'MATCH')
         match_parser.add_option('-n','--negate',dest='negate',help='Negate result',action='store_true')
         (match_options, args) = match_parser.parse_args(pargs[1])
         try:
             name = match_options.name
         except Exception:
-            print "Must specify match name with -m"
+            print("Must specify match name with -m")
 
-        if (match_dict.has_key(name)):
+        if (name in match_dict):
             setattr(match_options, 'arguments', match_dict[name].arguments)
         else:
             raise Exception('Match %s not found'%name)
@@ -113,16 +113,16 @@ def main():
             raise Exception("Must specify a target for this command")
         target_dict = load_xml_extensions("sfatables.targets",target_dir)
         target_parser = create_parser_xml_ext(target_dict)
-        targets_str = ",".join(target_dict.keys())
+        targets_str = ",".join(list(target_dict.keys()))
         target_parser.add_option('-j','--jump',dest='name',help='Target name (one of %s)'%targets_str, metavar = 'TARGET')
         target_parser.add_option('-e','--element',dest='element',help='Element name', metavar = 'ELEMENT')
         (target_options, args) = target_parser.parse_args(pargs[2])
         try:
             name = target_options.name
         except Exception:
-            print "Must specify target name with -j"
+            print("Must specify target name with -j")
 
-        if (target_dict.has_key(name)):
+        if (name in target_dict):
             setattr(target_options, 'arguments', target_dict[name].arguments)
         else:
             raise Exception('Target %s not found'%name)
