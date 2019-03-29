@@ -182,7 +182,7 @@ class Keypair:
     # @param filename name of file to store the keypair in
 
     def save_to_file(self, filename):
-        with open(filename, 'w') as output:
+        with open(filename, 'wb') as output:
             output.write(self.as_pem())
         self.filename = filename
 
@@ -191,6 +191,7 @@ class Keypair:
     # public key.
 
     def load_from_file(self, filename):
+        logger.info(f"opening {filename} from certficate.load_from_file")
         self.filename = filename
         buffer = open(filename, 'r').read()
         self.load_from_string(buffer)
@@ -677,6 +678,11 @@ class Certificate:
 #        elif oldExtVal:
 #            raise "Cannot add extension {} which had val {} with new val {}"\
 #                  .format(name, oldExtVal, value)
+
+        if isinstance(name, str):
+            name = name.encode()
+        if isinstance(value, str):
+            value = value.encode()
 
         ext = OpenSSL.crypto.X509Extension(name, critical, value)
         self.x509.add_extensions([ext])
