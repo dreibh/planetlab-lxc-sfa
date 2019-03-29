@@ -3,11 +3,11 @@
 import os
 import sys
 import re
-import time
+#import time
 import traceback
-import types
+#import types
 import readline
-from StringIO import StringIO
+#from io import StringIO
 from optparse import OptionParser
 
 from sfa.util.version import version_tag
@@ -157,12 +157,12 @@ def get_name_comments(config, cid, vid):
 def print_name_comments(config, cid, vid):
     name, comments = get_name_comments(config, cid, vid)
     if name:
-        print "### %s" % name
+        print("### %s" % name)
     if comments:
         for line in comments:
-            print "# %s" % line
+            print("# %s" % line)
     else:
-        print "!!! No comment associated to %s_%s" % (cid, vid)
+        print("!!! No comment associated to %s_%s" % (cid, vid))
 
 ####################
 
@@ -175,9 +175,9 @@ def list_categories(config):
 
 
 def print_categories(config):
-    print "Known categories"
+    print("Known categories")
     for cid in list_categories(config):
-        print "%s" % (cid.upper())
+        print("%s" % (cid.upper()))
 
 ####################
 
@@ -196,11 +196,11 @@ def print_category(config, cid, show_comments=True):
     CID = cid.upper()
     vids = list_category(config, cid)
     if (len(vids) == 0):
-        print "%s : no such category" % CID
+        print("%s : no such category" % CID)
     else:
-        print "Category %s contains" % (CID)
+        print("Category %s contains" % (CID))
         for vid in vids:
-            print vid.upper()
+            print(vid.upper())
 
 ####################
 
@@ -211,16 +211,16 @@ def consolidate(default_config, site_config, consolidated_config):
         conso = Config(default_config)
         conso.load(site_config)
         conso.save(consolidated_config)
-    except Exception, inst:
-        print "Could not consolidate, %s" % (str(inst))
+    except Exception as inst:
+        print("Could not consolidate, %s" % (str(inst)))
         return
-    print("Merged\n\t%s\nand\t%s\ninto\t%s" % (default_config, site_config,
-                                               consolidated_config))
+    print(("Merged\n\t%s\nand\t%s\ninto\t%s" % (default_config, site_config,
+                                               consolidated_config)))
 
 
 def reload_service():
     reload = "sfa-setup.sh reload"
-    print("Running: {}".format(reload))
+    print(("Running: {}".format(reload)))
     os.system(reload)
 
 ####################
@@ -254,11 +254,11 @@ def prompt_variable(cdef, cread, cwrite, category, variable,
             print_name_comments(cdef, category_id, variable_id)
         prompt = "== %s : [%s] " % (varname, current_value)
         try:
-            answer = raw_input(prompt).strip()
+            answer = input(prompt).strip()
         except EOFError:
             raise Exception('BailOut')
         except KeyboardInterrupt:
-            print "\n"
+            print("\n")
             raise Exception('BailOut')
 
         # no change
@@ -269,42 +269,42 @@ def prompt_variable(cdef, cread, cwrite, category, variable,
         elif (answer == "#"):
             print_name_comments(cread, category_id, variable_id)
         elif (answer == "?"):
-            print variable_usage.strip()
+            print(variable_usage.strip())
         elif (answer == "="):
-            print("%s defaults to %s" % (varname, default_value))
+            print(("%s defaults to %s" % (varname, default_value)))
         # revert to default : remove from cwrite (i.e. site-config)
         elif (answer == "/"):
             cwrite.delete(category_id, variable_id)
-            print("%s reverted to %s" % (varname, default_value))
+            print(("%s reverted to %s" % (varname, default_value)))
             return
         elif (answer == ">"):
             if support_next:
                 raise Exception('NextCategory')
             else:
-                print "No support for next category"
+                print("No support for next category")
         else:
             if cdef.validate_type(variable_type, answer):
                 cwrite.set(category_id, variable_id, answer)
                 return
             else:
-                print "Not a valid value"
+                print("Not a valid value")
 
 
 def prompt_variables_all(cdef, cread, cwrite, show_comments):
     try:
-        for (category_id, (category, variables)) in cread.variables().iteritems():
-            print("========== Category = %s" % category_id.upper())
-            for variable in variables.values():
+        for (category_id, (category, variables)) in cread.variables().items():
+            print(("========== Category = %s" % category_id.upper()))
+            for variable in list(variables.values()):
                 try:
                     newvar = prompt_variable(cdef, cread, cwrite, category, variable,
                                              show_comments, True)
-                except Exception, inst:
+                except Exception as inst:
                     if (str(inst) == 'NextCategory'):
                         break
                     else:
                         raise
 
-    except Exception, inst:
+    except Exception as inst:
         if (str(inst) == 'BailOut'):
             return
         else:
@@ -315,12 +315,12 @@ def prompt_variables_category(cdef, cread, cwrite, cid, show_comments):
     cid = cid.lower()
     CID = cid.upper()
     try:
-        print("========== Category = %s" % CID)
+        print(("========== Category = %s" % CID))
         for vid in list_category(cdef, cid):
             (category, variable) = cdef.locate_varname(vid.upper())
             newvar = prompt_variable(cdef, cread, cwrite, category, variable,
                                      show_comments, False)
-    except Exception, inst:
+    except Exception as inst:
         if (str(inst) == 'BailOut'):
             return
         else:
@@ -331,8 +331,8 @@ def prompt_variables_category(cdef, cread, cwrite, cid, show_comments):
 
 def show_variable(cdef, cread, cwrite,
                   category, variable, show_value, show_comments):
-    assert category.has_key('id')
-    assert variable.has_key('id')
+    assert 'id' in category
+    assert 'id' in variable
 
     category_id = category['id']
     variable_id = variable['id']
@@ -343,15 +343,15 @@ def show_variable(cdef, cread, cwrite,
     if show_comments:
         print_name_comments(cdef, category_id, variable_id)
     if show_value:
-        print "%s = %s" % (varname, current_value)
+        print("%s = %s" % (varname, current_value))
     else:
-        print "%s" % (varname)
+        print("%s" % (varname))
 
 
 def show_variables_all(cdef, cread, cwrite, show_value, show_comments):
-    for (category_id, (category, variables)) in cread.variables().iteritems():
-        print("========== Category = %s" % category_id.upper())
-        for variable in variables.values():
+    for (category_id, (category, variables)) in cread.variables().items():
+        print(("========== Category = %s" % category_id.upper()))
+        for variable in list(variables.values()):
             show_variable(cdef, cread, cwrite,
                           category, variable, show_value, show_comments)
 
@@ -359,7 +359,7 @@ def show_variables_all(cdef, cread, cwrite, show_value, show_comments):
 def show_variables_category(cdef, cread, cwrite, cid, show_value, show_comments):
     cid = cid.lower()
     CID = cid.upper()
-    print("========== Category = %s" % CID)
+    print(("========== Category = %s" % CID))
     for vid in list_category(cdef, cid):
         (category, variable) = cdef.locate_varname(vid.upper())
         show_variable(cdef, cread, cwrite, category, variable,
@@ -376,16 +376,16 @@ def mainloop(cdef, cread, cwrite, default_config, site_config, consolidated_conf
     global service
     while True:
         try:
-            answer = raw_input(
+            answer = input(
                 "Enter command (u for usual changes, w to save, ? for help) ").strip()
         except EOFError:
             answer = ""
         except KeyboardInterrupt:
-            print "\nBye"
+            print("\nBye")
             sys.exit()
 
         if (answer == "") or (answer in "?hH"):
-            print mainloop_usage
+            print(mainloop_usage)
             continue
         groups_parse = matcher_mainloop_0arg.match(answer)
         command = None
@@ -398,7 +398,7 @@ def mainloop(cdef, cread, cwrite, default_config, site_config, consolidated_conf
                 command = groups_parse.group('command')
                 arg = groups_parse.group('arg')
         if not command:
-            print("Unknown command >%s< -- use h for help" % answer)
+            print(("Unknown command >%s< -- use h for help" % answer))
             continue
 
         show_comments = command.isupper()
@@ -419,7 +419,7 @@ def mainloop(cdef, cread, cwrite, default_config, site_config, consolidated_conf
                 # category/variable as output by locate_varname
                 mode = 'VARIABLE'
             if not mode:
-                print "%s: no such category or variable" % arg
+                print("%s: no such category or variable" % arg)
                 continue
 
         if command in "qQ":
@@ -436,14 +436,14 @@ def mainloop(cdef, cread, cwrite, default_config, site_config, consolidated_conf
                 validator(validated_variables)
                 cwrite.save(site_config)
             except:
-                print "Save failed due to a configuration exception:"
-                print traceback.print_exc()
-                print("Could not save -- fix write access on %s" % site_config)
+                print("Save failed due to a configuration exception:")
+                print(traceback.print_exc())
+                print(("Could not save -- fix write access on %s" % site_config))
                 break
-            print("Wrote %s" % site_config)
+            print(("Wrote %s" % site_config))
             consolidate(default_config, site_config, consolidated_config)
-            print("You might want to type 'r' (restart %s), 'R' (reload %s) or 'q' (quit)" %
-                  (service, service))
+            print(("You might want to type 'r' (restart %s), 'R' (reload %s) or 'q' (quit)" %
+                  (service, service)))
         elif command in "uU":
             global usual_variables
             global flavour_xml_section_hash
@@ -465,7 +465,7 @@ def mainloop(cdef, cread, cwrite, default_config, site_config, consolidated_conf
                                             category, variable, False)
                         break
 
-            except Exception, inst:
+            except Exception as inst:
                 if (str(inst) != 'BailOut'):
                     raise
         elif command == "r":
@@ -484,7 +484,7 @@ def mainloop(cdef, cread, cwrite, default_config, site_config, consolidated_conf
                 try:
                     prompt_variable(cdef, cread, cwrite, category, variable,
                                     show_comments, False)
-                except Exception, inst:
+                except Exception as inst:
                     if str(inst) != 'BailOut':
                         raise
         elif command in "vVsSlL":
@@ -501,7 +501,7 @@ def mainloop(cdef, cread, cwrite, default_config, site_config, consolidated_conf
                 show_variable(c1, c2, c3, category, variable,
                               show_value, show_comments)
         else:
-            print("Unknown command >%s< -- use h for help" % answer)
+            print(("Unknown command >%s< -- use h for help" % answer))
 
 
 ####################
@@ -510,16 +510,16 @@ def check_dir(config_file):
     dirname = os.path.dirname(config_file)
     if (not os.path.exists(dirname)):
         try:
-            os.makedirs(dirname, 0755)
-        except OSError, e:
-            print "Cannot create dir %s due to %s - exiting" % (dirname, e)
+            os.makedirs(dirname, 0o755)
+        except OSError as e:
+            print("Cannot create dir %s due to %s - exiting" % (dirname, e))
             sys.exit(1)
 
         if (not os.path.exists(dirname)):
-            print "Cannot create dir %s - exiting" % dirname
+            print("Cannot create dir %s - exiting" % dirname)
             sys.exit(1)
         else:
-            print "Created directory %s" % dirname
+            print("Created directory %s" % dirname)
 
 ####################
 
@@ -577,9 +577,9 @@ def main(command, argv, configuration):
         # in effect : default settings + local settings - read only
         cread = Config(default_config)
     except:
-        print traceback.print_exc()
-        print("default config files %s not found, is myplc installed ?" %
-              default_config)
+        print(traceback.print_exc())
+        print(("default config files %s not found, is myplc installed ?" %
+              default_config))
         return 1
 
     # local settings only, will be modified & saved
