@@ -60,6 +60,4 @@ class SfaServer(threading.Thread):
     # Execute the server, serving requests forever.
 
     def run(self):
-        print("IN")
         self.server.serve_forever()
-        print("OUT")
