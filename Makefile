@@ -176,8 +176,7 @@ RSYNC			:= rsync -ai $(RSYNC_COND_DRY_RUN) --no-owner $(RSYNC_EXCLUDES)
 CLIENTS = $(shell ls clientbin/*.py)
 
 BINS =	./config/sfa-config-tty ./systemd/sfa-setup.sh \
-	./sfa/server/sfa-start.py \
-	./clientbin/sfaadmin.py \
+	./sfa/server/sfa-start.py ./clientbin/sfaadmin.py keyconvert/keyconvert.py \
 	$(CLIENTS)
 
 synclib: synccheck
