@@ -117,7 +117,7 @@ def convert_public_key(key):
 
     (ssh_f, ssh_fn) = tempfile.mkstemp()
     ssl_fn = tempfile.mktemp()
-    os.write(ssh_f, key)
+    os.write(ssh_f, key.encode())
     os.close(ssh_f)
 
     cmd = keyconvert_path + " " + ssh_fn + " " + ssl_fn
