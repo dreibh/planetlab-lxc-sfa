@@ -35,7 +35,7 @@ def decode_key(fname):
             continue
         elif in_key:
             return base64.b64decode(f)
-        
+
     return None
 
 
@@ -43,8 +43,8 @@ def decode_key(fname):
 #
 # a section:
 # length = 4 bytes (32-bit big-endian integer)
-# data = length bytes of string 
-# 
+# data = length bytes of string
+#
 # sections of the key ( for RSA )
 # [key-type (in ASCII)] [public exponent (bignum)] [primes (bignum)]
 #
@@ -53,12 +53,12 @@ def decode_key(fname):
 #
 # - baris
 def read_key(key):
-    
+
     def read_length(key):
         length = key[0:4]
         length = struct.unpack(">l", length)[0]
         return length, key
-        
+
     def read_values(key, count):
         v = []
         for i in range(count):
@@ -73,13 +73,13 @@ def read_key(key):
     key_type = key[:length]
     key = key[length:]
 
-    if key_type == "ssh-rsa":
+    if key_type == b"ssh-rsa":
         # prepare parameters for RSA.new_pub_key
         v = read_values(key, 2)
         e, n = v[0], v[1]
         return key_type, e, n
 
-    elif key_type == "ssh-dss":
+    elif key_type == b"ssh-dss":
         # prepare parameters for DSA.set_params
         v = read_values(key, 4)
         p, q, g, y = v[0], v[1], v[2], v[3]
@@ -91,12 +91,12 @@ def convert(fin, fout):
     ret = read_key(key)
     key_type = ret[0]
 
-    if key_type == "ssh-rsa":
+    if key_type == b"ssh-rsa":
         e, n = ret[1:]
         rsa = rsa_new_pub_key((e, n))
         rsa.save_pem(fout)
 
-    elif key_type == "ssh-dss":
+    elif key_type == b"ssh-dss":
         p, q, g, y = ret[1:]
         dsa = DSA.set_params(p, q, g)
         dsa.gen_key()
