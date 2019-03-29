@@ -1,11 +1,6 @@
 # XMLRPC-specific code for SFA Client
 
-# starting with 2.7.9 we need to turn off server verification
-import ssl
-try:
-    turn_off_server_verify = {'context': ssl._create_unverified_context()}
-except:
-    turn_off_server_verify = {}
+from sfa.util.ssl import simple_ssl_context
 
 import xmlrpc.client
 import http.client
@@ -55,9 +50,9 @@ class XMLRPCTransport(xmlrpc.client.Transport):
         # create a HTTPS connection object from a host descriptor
         # host may be a string, or a (host, x509-dict) tuple
         host, extra_headers, x509 = self.get_host_info(host)
-        conn = http.client.HTTPSConnection(host, None, key_file=self.key_file,
-                                           cert_file=self.cert_file,
-                                           **turn_off_server_verify)
+        conn = http.client.HTTPSConnection(
+            host, None, key_file=self.key_file,
+            cert_file=self.cert_file, context=simple_ssl_context())
 
         # Some logic to deal with timeouts. It appears that some (or all) versions
         # of python don't set the timeout after the socket is created. We'll do it
@@ -90,9 +85,9 @@ class XMLRPCServerProxy(xmlrpc.client.ServerProxy):
         # remember url for GetVersion
         # xxx not sure this is still needed as SfaServerProxy has this too
         self.url = url
-        xmlrpc.client.ServerProxy.__init__(self, url, transport, allow_none=allow_none,
-                                           verbose=verbose,
-                                           **turn_off_server_verify)
+        xmlrpc.client.ServerProxy.__init__(
+            self, url, transport, allow_none=allow_none,
+            context=simple_ssl_context(), verbose=verbose)
 
     def __getattr__(self, attr):
         logger.debug("xml-rpc %s method:%s" % (self.url, attr))

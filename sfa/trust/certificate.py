@@ -189,7 +189,6 @@ class Keypair:
     # public key.
 
     def load_from_file(self, filename):
-        logger.info(f"opening {filename} from certficate.load_from_file")
         self.filename = filename
         buffer = open(filename, 'r').read()
         self.load_from_string(buffer)
@@ -358,8 +357,8 @@ class Certificate:
     # @param create If create==True, then also create a blank X509 certificate.
     # @param subject If subject!=None, then create a blank certificate and set
     #     it's subject name.
-    # @param string If string!=None, load the certficate from the string.
-    # @param filename If filename!=None, load the certficiate from the file.
+    # @param string If string!=None, load the certificate from the string.
+    # @param filename If filename!=None, load the certificate from the file.
     # @param isCA If !=None, set whether this cert is for a CA
 
     def __init__(self, lifeDays=1825, create=False, subject=None, string=None,
@@ -804,7 +803,7 @@ class Certificate:
         return result
 
     ##
-    # Set the parent certficiate.
+    # Set the parent certificate.
     #
     # @param p certificate object.
 

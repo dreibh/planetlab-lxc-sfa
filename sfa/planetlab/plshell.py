@@ -4,7 +4,7 @@ import socket
 from urllib.parse import urlparse
 
 from sfa.util.sfalogging import logger
-
+from sfa.util.ssl import simple_ssl_context
 
 class PlShell:
     """
@@ -89,12 +89,9 @@ class PlShell:
                 'Username':   str(config.SFA_PLC_USER),
                 'AuthString': str(config.SFA_PLC_PASSWORD),
             }
-            # minimal verification for backwards compat
-            import ssl
-            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-            ssl_context.verify_mode = ssl.CERT_NONE
             self.proxy = xmlrpc.client.ServerProxy(
-                url, verbose=False, allow_none=True, context=ssl_context)
+                url, verbose=False, allow_none=True,
+                context=simple_ssl_context())
 
     def __getattr__(self, name):
         def func(*args, **kwds):

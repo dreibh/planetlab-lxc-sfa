@@ -22,19 +22,14 @@
 # so the defaults below are of no real importance
 # this for now points at demo.myslice.info, but sounds like a
 # better default for the long run
-DEFAULT_URL = "http://myslice.onelab.eu:7080"
-DEFAULT_PLATFORM = 'ple'
-
-# starting with 2.7.9 we need to turn off server verification
-import ssl
-try:
-    turn_off_server_verify = {'context': ssl._create_unverified_context()}
-except:
-    turn_off_server_verify = {}
-
 import getpass
 
 import xmlrpc.client
+
+from sfa.util.ssl import simple_ssl_context
+
+DEFAULT_URL = "http://myslice.onelab.eu:7080"
+DEFAULT_PLATFORM = 'ple'
 
 
 class ManifoldUploader:
@@ -88,17 +83,10 @@ class ManifoldUploader:
     # won't be happy with several calls issued in the same session
     # so we do not cache this one
     def proxy(self):
-        #        if not self._proxy:
-        #            url=self.url()
-        #            self.logger.info("Connecting manifold url %s"%url)
-        #            self._proxy = xmlrpc.client.ServerProxy(url, allow_none = True)
-        #        return self._proxy
         url = self.url()
         self.logger.debug("Connecting manifold url %s" % url)
-        proxy = xmlrpc.client.ServerProxy(url, allow_none=True,
-                                          **turn_off_server_verify)
-
-        return proxy
+        return xmlrpc.client.ServerProxy(url, allow_none=True,
+                                         context=simple_ssl_context())
 
     # does the job for one credential
     # expects the credential (string) and an optional message (e.g. hrn) for reporting
