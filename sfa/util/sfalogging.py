@@ -121,8 +121,9 @@ logging.setLoggerClass(SfaLogger)
 # have the same set of keys
 def logging_config(context):
     if context == 'server':
-        handlername = 'file'
-        filename = '/var/log/sfa.log'
+        # use stdout and let journalctl do the heavy lifting
+        handlername = 'stdout'
+        #filename = '/var/log/sfa.log'
         level = 'DEBUG'
     elif context == 'import':
         handlername = 'file'
@@ -134,7 +135,7 @@ def logging_config(context):
         level = 'DEBUG'
     elif context == 'console':
         handlername = 'stdout'
-        filename = 'ignored'
+        #filename = 'ignored'
         level = 'INFO'
     else:
         print("Cannot configure logging - exiting")
