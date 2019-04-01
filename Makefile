@@ -196,6 +196,7 @@ syncrestart: synccheck
 	-$(SSHCOMMAND) systemctl --system daemon-reload
 	$(SSHCOMMAND) systemctl restart sfa-db
 	$(SSHCOMMAND) systemctl restart sfa-aggregate
+	$(SSHCOMMAND) systemctl restart sfa-registry
 
 syncmig:
 	+$(RSYNC) ./sfa/storage/migrations $(SSHURL)/usr/share/sfa/
