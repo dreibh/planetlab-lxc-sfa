@@ -43,7 +43,8 @@ def verify_callback(conn, x509, err, depth, preverify):
     # and ignore them
 
     # XXX SMBAKER: I don't know what this error is, but it's being returned
-    # xxx thierry: this most likely means the cert has a validity range in the future
+    # xxx thierry: this most likely means the cert
+    #     has a validity range in the future
     # by newer pl nodes.
     if err == 9:
         # print "  X509_V_ERR_CERT_NOT_YET_VALID"
@@ -87,9 +88,11 @@ def verify_callback(conn, x509, err, depth, preverify):
 
 
 class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
-    """Secure XML-RPC request handler class.
+    """
+    Secure XML-RPC request handler class.
 
-    It it very similar to SimpleXMLRPCRequestHandler but it uses HTTPS for transporting XML data.
+    It it very similar to SimpleXMLRPCRequestHandler
+    but it uses HTTPS for transporting XML data.
     """
 
     def setup(self):
@@ -98,9 +101,10 @@ class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
 
     def do_POST(self):
-        """Handles the HTTPS POST request.
+        """
+        Handles the HTTPS POST request.
 
-        It was copied out from SimpleXMLRPCServer.py and modified to shutdown 
+        It was copied out from SimpleXMLRPCServer.py and modified to shutdown
         the socket cleanly.
         """
         try:
@@ -151,16 +155,20 @@ class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
 # Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
 
 
-class SecureXMLRPCServer(http.server.HTTPServer, xmlrpc.server.SimpleXMLRPCDispatcher):
+class SecureXMLRPCServer(http.server.HTTPServer,
+                         xmlrpc.server.SimpleXMLRPCDispatcher):
 
-    def __init__(self, server_address, HandlerClass, key_file, cert_file, logRequests=True):
+    def __init__(self, server_address, HandlerClass,
+                 key_file, cert_file, logRequests=True):
         """
         Secure XML-RPC server.
 
-        It it very similar to SimpleXMLRPCServer but it uses HTTPS for transporting XML data.
+        It it very similar to SimpleXMLRPCServer
+         but it uses HTTPS for transporting XML data.
         """
-        logger.debug("SecureXMLRPCServer.__init__, server_address=%s, "
-                     "cert_file=%s, key_file=%s" % (server_address, cert_file, key_file))
+        logger.debug(
+            f"SecureXMLRPCServer.__init__, server_address={server_address}, "
+            f"cert_file={cert_file}, key_file={key_file}")
         self.logRequests = logRequests
         self.interface = None
         self.key_file = key_file
@@ -178,7 +186,8 @@ class SecureXMLRPCServer(http.server.HTTPServer, xmlrpc.server.SimpleXMLRPCDispa
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         ctx.use_privatekey_file(key_file)
         ctx.use_certificate_file(cert_file)
-        # If you wanted to verify certs against known CAs.. this is how you would do it
+        # If you wanted to verify certs against known CAs..
+        # this is how you would do it
         # ctx.load_verify_locations('/etc/sfa/trusted_roots/plc.gpo.gid')
         config = Config()
         trusted_cert_files = TrustedRoots(
@@ -202,7 +211,8 @@ class SecureXMLRPCServer(http.server.HTTPServer, xmlrpc.server.SimpleXMLRPCDispa
     def _dispatch(self, method, params):
         logger.debug("SecureXMLRPCServer._dispatch, method=%s" % method)
         try:
-            return xmlrpc.server.SimpleXMLRPCDispatcher._dispatch(self, method, params)
+            return xmlrpc.server.SimpleXMLRPCDispatcher._dispatch(
+                self, method, params)
         except:
             # can't use format_exc() as it is not available in jython yet
             # (even in trunk).
@@ -213,11 +223,15 @@ class SecureXMLRPCServer(http.server.HTTPServer, xmlrpc.server.SimpleXMLRPCDispa
     # override this one from the python 2.7 code
     # originally defined in class TCPServer
     def shutdown_request(self, request):
-        """Called to shutdown and close an individual request."""
+        """
+        Called to shutdown and close an individual request.
+        """
         # ----------
-        # the std python 2.7 code just attempts a request.shutdown(socket.SHUT_WR)
+        # the std python 2.7 code just attempts a
+        # request.shutdown(socket.SHUT_WR)
         # this works fine with regular sockets
-        # However we are dealing with an instance of OpenSSL.SSL.Connection instead
+        # However we are dealing with an instance of
+        # OpenSSL.SSL.Connection instead
         # This one only supports shutdown(), and in addition this does not
         # always perform as expected
         # ---------- std python 2.7 code
@@ -261,10 +275,10 @@ class ThreadPoolMixIn(socketserver.ThreadingMixIn):
         # set up the threadpool
         self.requests = Queue()
 
-        for x in range(self.numThreads):
-            t = threading.Thread(target=self.process_request_thread)
-            t.setDaemon(1)
-            t.start()
+        for _ in range(self.numThreads):
+            thread = threading.Thread(target=self.process_request_thread)
+            thread.setDaemon(1)
+            thread.start()
 
         # server main loop
         while True:
