@@ -31,6 +31,8 @@ Requires: python3-PyGreSQL
 Requires: python3-psycopg2
 Requires: python3-sqlalchemy
 Requires: python3-migrate
+Requires: python3-tempita
+Requires: python3-decorator
 # and of course the bulk of it
 Requires: sfa-common
 
