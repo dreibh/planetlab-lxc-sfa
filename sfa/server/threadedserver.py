@@ -36,7 +36,7 @@ def verify_callback(conn, x509, err, depth, preverify):
     # if the cert has been preverified, then it is ok
     if preverify:
         # print "  preverified"
-        return 1
+        return True
 
     # the certificate verification done by openssl checks a number of things
     # that we aren't interested in, so we look out for those error messages
@@ -48,45 +48,46 @@ def verify_callback(conn, x509, err, depth, preverify):
     # by newer pl nodes.
     if err == 9:
         # print "  X509_V_ERR_CERT_NOT_YET_VALID"
-        return 1
+        return True
 
     # allow self-signed certificates
     if err == 18:
         # print "  X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT"
-        return 1
+        return False
 
     # allow certs that don't have an issuer
     if err == 20:
         # print "  X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY"
-        return 1
+        return False
 
     # allow chained certs with self-signed roots
     if err == 19:
-        return 1
+        return False
 
     # allow certs that are untrusted
     if err == 21:
         # print "  X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE"
-        return 1
+        return False
 
     # allow certs that are untrusted
     if err == 27:
         # print "  X509_V_ERR_CERT_UNTRUSTED"
-        return 1
+        return False
 
     # ignore X509_V_ERR_CERT_SIGNATURE_FAILURE
     if err == 7:
-        return 1
+        return False
 
-    logger.debug("  error %s in verify_callback" % err)
+    logger.debug("  unhandled error %s in verify_callback" % err)
 
-    return 0
+    return False
 
 ##
 # taken from the web (XXX find reference). Implements HTTPS xmlrpc request
 # handler
 
-
+# python-2.7 http://code.activestate.com/recipes/442473-simple-http-server-supporting-ssl-secure-communica/
+# python-3.3 https://gist.github.com/ubershmekel/6194556
 class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
     """
     Secure XML-RPC request handler class.
@@ -99,6 +100,10 @@ class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
+# porting to python3
+# xmlrpc.server.SimpleXMLRPCRequestHandler inherits
+# http.server.BaseHTTPRequestHandler, that already has
+# the rfile and wfile attributes
 
     def do_POST(self):
         """
