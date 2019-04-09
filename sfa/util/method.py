@@ -4,7 +4,6 @@
 #
 
 import time
-from types import IntType, LongType
 import textwrap
 
 from sfa.util.sfalogging import logger
@@ -243,7 +242,7 @@ class Method:
 
         # Integers and long integers are also special types. Accept
         # either int or long types if an int or long is expected.
-        elif expected_type in (IntType, LongType) and isinstance(value, (IntType, LongType)):
+        elif expected_type is int and isinstance(value, int):
             pass
 
         elif not isinstance(value, expected_type):

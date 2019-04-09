@@ -5,7 +5,7 @@
 # Copyright (C) 2006 The Trustees of Princeton University
 #
 
-from types import NoneType, IntType, LongType, FloatType, DictType, TupleType, ListType
+#from types import NoneType, IntType, LongType, FloatType, DictType, TupleType, ListType
 from sfa.util.faults import SfaAPIError
 
 
@@ -86,17 +86,17 @@ def xmlrpc_type(arg):
 
     if arg_type == NoneType:
         return "nil"
-    elif arg_type == IntType or arg_type == LongType:
+    elif arg_type == int:
         return "int"
     elif arg_type == bool:
         return "boolean"
-    elif arg_type == FloatType:
+    elif arg_type == float:
         return "double"
-    elif issubclass(arg_type, str):
+    elif arg_type == str:
         return "string"
-    elif arg_type == ListType or arg_type == TupleType:
+    elif arg_type in (list, tuple):
         return "array"
-    elif arg_type == DictType:
+    elif arg_type == dict:
         return "struct"
     elif arg_type == Mixed:
         # Not really an XML-RPC type but return "mixed" for
