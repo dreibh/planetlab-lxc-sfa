@@ -12,16 +12,16 @@ import traceback
 import threading
 from queue import Queue
 import socketserver
+import ssl
 import http.server
 import xmlrpc.server
-from OpenSSL import SSL
+import xmlrpc.client
 
 from sfa.util.sfalogging import logger
 from sfa.util.config import Config
 from sfa.util.cache import Cache
 from sfa.trust.certificate import Certificate
 from sfa.trust.trustedroots import TrustedRoots
-import xmlrpc.client
 
 # don't hard code an api class anymore here
 from sfa.generic import Generic
@@ -96,14 +96,8 @@ class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
     but it uses HTTPS for transporting XML data.
     """
 
-    def setup(self):
-        self.connection = self.request
-        self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
-        self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
-# porting to python3
-# xmlrpc.server.SimpleXMLRPCRequestHandler inherits
-# http.server.BaseHTTPRequestHandler, that already has
-# the rfile and wfile attributes
+    # porting to python3
+    # setup() no longer needed
 
     def do_POST(self):
         """
@@ -115,7 +109,7 @@ class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
         try:
             peer_cert = Certificate()
             peer_cert.load_from_pyopenssl_x509(
-                self.connection.get_peer_certificate())
+                self.connection.getpeercert())
             generic = Generic.the_flavour()
             self.api = generic.make_api(peer_cert=peer_cert,
                                         interface=self.server.interface,
@@ -149,12 +143,12 @@ class SecureXMLRpcRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
             self.send_header("Content-type", "text/xml")
             self.send_header("Content-length", str(len(response)))
             self.end_headers()
-            self.wfile.write(response)
+            self.wfile.write(response.encode())
             self.wfile.flush()
             # close db connection
             self.api.close_dbsession()
             # shut down the connection
-            self.connection.shutdown()  # Modified here!
+            self.connection.shutdown(socket.SHUT_RDWR)  # Modified here!
 
 ##
 # Taken from the web (XXX find reference). Implements an HTTPS xmlrpc server
@@ -169,7 +163,7 @@ class SecureXMLRPCServer(http.server.HTTPServer,
         Secure XML-RPC server.
 
         It it very similar to SimpleXMLRPCServer
-         but it uses HTTPS for transporting XML data.
+        but it uses HTTPS for transporting XML data.
         """
         logger.debug(
             f"SecureXMLRPCServer.__init__, server_address={server_address}, "
@@ -181,30 +175,30 @@ class SecureXMLRPCServer(http.server.HTTPServer,
         self.method_map = {}
         # add cache to the request handler
         HandlerClass.cache = Cache()
-        # for compatibility with python 2.4 (centos53)
-        if sys.version_info < (2, 5):
-            xmlrpc.server.SimpleXMLRPCDispatcher.__init__(self)
-        else:
-            xmlrpc.server.SimpleXMLRPCDispatcher.__init__(
-                self, True, None)
+        xmlrpc.server.SimpleXMLRPCDispatcher.__init__(self, True, None)
         socketserver.BaseServer.__init__(self, server_address, HandlerClass)
-        ctx = SSL.Context(SSL.SSLv23_METHOD)
-        ctx.use_privatekey_file(key_file)
-        ctx.use_certificate_file(cert_file)
+        ssl_context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
+        ssl_context.load_cert_chain(cert_file, key_file)
         # If you wanted to verify certs against known CAs..
         # this is how you would do it
-        # ctx.load_verify_locations('/etc/sfa/trusted_roots/plc.gpo.gid')
+        # ssl_context.load_verify_locations('/etc/sfa/trusted_roots/plc.gpo.gid')
         config = Config()
         trusted_cert_files = TrustedRoots(
             config.get_trustedroots_dir()).get_file_list()
+        cadata = ""
         for cert_file in trusted_cert_files:
-            ctx.load_verify_locations(cert_file)
-        ctx.set_verify(SSL.VERIFY_PEER |
-                       SSL.VERIFY_FAIL_IF_NO_PEER_CERT, verify_callback)
-        ctx.set_verify_depth(5)
-        ctx.set_app_data(self)
-        self.socket = SSL.Connection(ctx, socket.socket(self.address_family,
-                                                        self.socket_type))
+            with open(cert_file) as cafile:
+                cadata += cafile.read()
+        ssl_context.load_verify_locations(cadata=cadata)
+#        ctx.set_verify(SSL.VERIFY_PEER |
+#                       SSL.VERIFY_FAIL_IF_NO_PEER_CERT, verify_callback)
+#        ctx.set_verify_depth(5)
+#        ctx.set_app_data(self)
+        # with python3 we use standard library SSLContext.wrap_socket()
+        # instead of an OpenSSL.SSL.Connection object
+        self.socket = ssl_context.wrap_socket(
+            socket.socket(self.address_family, self.socket_type),
+            server_side=True)
         self.server_bind()
         self.server_activate()
 
@@ -225,43 +219,14 @@ class SecureXMLRPCServer(http.server.HTTPServer,
             raise xmlrpc.client.Fault(1, ''.join(
                 traceback.format_exception(type, value, tb)))
 
-    # override this one from the python 2.7 code
-    # originally defined in class TCPServer
-    def shutdown_request(self, request):
-        """
-        Called to shutdown and close an individual request.
-        """
-        # ----------
-        # the std python 2.7 code just attempts a
-        # request.shutdown(socket.SHUT_WR)
-        # this works fine with regular sockets
-        # However we are dealing with an instance of
-        # OpenSSL.SSL.Connection instead
-        # This one only supports shutdown(), and in addition this does not
-        # always perform as expected
-        # ---------- std python 2.7 code
-        try:
-            # explicitly shutdown.  socket.close() merely releases
-            # the socket and waits for GC to perform the actual close.
-            request.shutdown(socket.SHUT_WR)
-        except socket.error:
-            pass  # some platforms may raise ENOTCONN here
-        # ----------
-        except TypeError:
-            # we are dealing with an OpenSSL.Connection object,
-            # try to shut it down but never mind if that fails
-            try:
-                request.shutdown()
-            except:
-                pass
-        # ----------
-        self.close_request(request)
+    # porting to python3
+    # shutdown_request() no longer needed
+
 
 # From Active State code: http://code.activestate.com/recipes/574454/
 # This is intended as a drop-in replacement for the ThreadingMixIn class in
 # module SocketServer of the standard lib. Instead of spawning a new thread
 # for each request, requests are processed by of pool of reusable threads.
-
 
 class ThreadPoolMixIn(socketserver.ThreadingMixIn):
     """
