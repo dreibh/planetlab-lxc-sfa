@@ -286,21 +286,19 @@ class Credential(object):
                 self.version = cred['geni_version']
 
         if string or filename:
-            if string:
-                str = string
-            elif filename:
+            if not string:
                 with open(filename) as infile:
-                    str = infile.read()
+                    string = infile.read()
 
             # if this is a legacy credential, write error and bail out
-            if isinstance(str, str) and str.strip().startswith("-----"):
+            if isinstance(string, str) and string.strip().startswith("-----"):
                 logger.error(
                     "Legacy credentials not supported any more "
                     "- giving up with {}..."
                     .format(str[:10]))
                 return
             else:
-                self.xml = str
+                self.xml = string
                 self.decode()
         # not strictly necessary but won't hurt either
         self.get_xmlsec1_path()
