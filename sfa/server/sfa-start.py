@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3 -u
+# now that logs are managed through stdout and journalctl,
+# it is important to run with -u so that they show up quickly
+# and don't get buffered
 #
 # PlanetLab SFA implementation
 #
