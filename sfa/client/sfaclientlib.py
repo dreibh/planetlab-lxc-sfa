@@ -28,7 +28,7 @@ from sfa.trust.certificate import Keypair, Certificate
 from sfa.trust.credential import Credential
 from sfa.trust.gid import GID
 ##########
-# a helper class to implement the bootstrapping of cryptoa. material
+# a helper class to implement the bootstrapping of crypto. material
 # assuming we are starting from scratch on the client side
 # what's needed to complete a full slice creation cycle
 # (**) prerequisites:
@@ -38,7 +38,7 @@ from sfa.trust.gid import GID
 #      default filename is <hrn>.sscert
 # (**) step2: a user credential
 #      obtained at the registry with GetSelfCredential
-#      using the self-signed certificate as the SSL cert
+#      using the self-signed certificate as the ssl cert
 #      default filename is <hrn>.user.cred
 # (**) step3: a registry-provided certificate (i.e. a GID)
 #      obtained at the registry using Resolve
@@ -258,14 +258,16 @@ class SfaClientBootstrap:
     # always use my gid
     def server_proxy(self, url):
         self.assert_my_gid()
-        return SfaServerProxy(url, self.private_key_filename(), self.my_gid_filename(),
-                              verbose=self.verbose, timeout=self.timeout)
+        return SfaServerProxy(
+            url, self.private_key_filename(), self.my_gid_filename(),
+            verbose=self.verbose, timeout=self.timeout)
 
     # now in some cases the self-signed is enough
     def server_proxy_simple(self, url):
         self.assert_self_signed_cert()
-        return SfaServerProxy(url, self.private_key_filename(), self.self_signed_cert_filename(),
-                              verbose=self.verbose, timeout=self.timeout)
+        return SfaServerProxy(
+            url, self.private_key_filename(), self.self_signed_cert_filename(),
+            verbose=self.verbose, timeout=self.timeout)
 
     # this method can optionnally be invoked to ensure proper
     # installation of the private key that belongs to this user
@@ -278,8 +280,9 @@ class SfaClientBootstrap:
             key = self.plain_read(user_private_key)
             self.plain_write(private_key_filename, key)
             os.chmod(private_key_filename, os.stat(user_private_key).st_mode)
-            self.logger.debug("SfaClientBootstrap: Copied private key from {} into {}"
-                              .format(user_private_key, private_key_filename))
+            self.logger.debug(
+                "SfaClientBootstrap: Copied private key from {} into {}"
+                .format(user_private_key, private_key_filename))
 
     # private details
     # stupid stuff
@@ -342,10 +345,12 @@ class SfaClientBootstrap:
         return self.assert_filename(self.private_key_filename(), "private key")
 
     def assert_self_signed_cert(self):
-        return self.assert_filename(self.self_signed_cert_filename(), "self-signed certificate")
+        return self.assert_filename(self.self_signed_cert_filename(),
+                                    "self-signed certificate")
 
     def assert_my_credential(self):
-        return self.assert_filename(self.my_credential_filename(), "user's credential")
+        return self.assert_filename(self.my_credential_filename(),
+                                    "user's credential")
 
     def assert_my_gid(self):
         return self.assert_filename(self.my_gid_filename(), "user's GID")
